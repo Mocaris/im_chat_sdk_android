@@ -10,6 +10,7 @@ import com.lbe.imsdk.manager.ConversationManager
 import com.lbe.imsdk.manager.LbeIMSDKManager
 import com.lbe.imsdk.manager.SocketEventCallback
 import com.lbe.imsdk.repository.db.entry.IMMessageEntry
+import com.lbe.imsdk.repository.local.LbeImDataRepository
 import com.lbe.imsdk.repository.local.upsert
 import com.lbe.imsdk.repository.remote.model.CreateSessionResModel
 import com.lbe.imsdk.repository.remote.model.TimeOutConfigModel
@@ -18,7 +19,6 @@ import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgReadStatus
 import com.lbe.imsdk.service.NetworkMonitor
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -37,7 +37,7 @@ open class ConversationBaseVM(val sessionData: CreateSessionResModel.SessionData
 
     val msgCount: Int get() = msgList.size
 
-    val timeOutConfig = mutableStateOf< TimeOutConfigModel.TimeOutConfigData?>(null)
+    val timeOutConfig = mutableStateOf<TimeOutConfigModel.TimeOutConfigData?>(null)
 
     val toBottomEventAnim = mutableIntStateOf(0)
     val toBottomEventNoAnim = mutableIntStateOf(0)
@@ -75,7 +75,7 @@ open class ConversationBaseVM(val sessionData: CreateSessionResModel.SessionData
         }
     }
 
-    fun launchTimeOutJob() {
+    fun launchTimeOutJob(msgSeq: Long) {
         val config = timeOutConfig.value
         if (null == config) {
             return
@@ -87,7 +87,11 @@ open class ConversationBaseVM(val sessionData: CreateSessionResModel.SessionData
         timeOutReplyJob = viewModelScope.launch {
             timeOutReply.value = false
             delay(config.timeout.toDuration(DurationUnit.MINUTES))
-            timeOutReply.value = true
+            msgList.maxByOrNull { it.msgSeq }?.let {
+                if (it.msgSeq <= msgSeq) {
+                    timeOutReply.value = true
+                }
+            }
         }
 
     }
@@ -175,7 +179,7 @@ open class ConversationBaseVM(val sessionData: CreateSessionResModel.SessionData
     override fun onReceiveMessage(message: IMMessageEntry) {
         msgList.add(message)
         newMessageCount.intValue += 1
-        launchTimeOutJob()
+        launchTimeOutJob(message.msgSeq)
     }
 
     override fun onReadMessage(

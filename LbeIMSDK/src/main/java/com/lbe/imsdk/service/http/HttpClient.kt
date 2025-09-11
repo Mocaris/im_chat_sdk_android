@@ -28,7 +28,7 @@ object HttpClient {
     val contentType_stream = "application/octet-stream".toMediaType()
 
     val logInterceptor = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY
+        level = HttpLoggingInterceptor.Level.HEADERS
     }
 
 
@@ -40,6 +40,7 @@ object HttpClient {
             .connectTimeout(30, TimeUnit.SECONDS)
             .addInterceptor(SignInterceptor())
 //            .addInterceptor(LoopHostInterceptor())
+            .connectionPool(ConnectionPool(5, 5, TimeUnit.MINUTES))
             .addInterceptor(logInterceptor)
             .build()
     }

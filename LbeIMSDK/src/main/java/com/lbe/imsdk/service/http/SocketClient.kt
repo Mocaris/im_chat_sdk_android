@@ -67,7 +67,7 @@ private class SocketClientImpl(
 ) : SocketClient, WebSocketListener() {
     companion object {
         const val PING_WHAT = 0X01
-        private const val RETRY_WHAT = 0X02
+//        private const val RETRY_WHAT = 0X02
     }
 
     private val okHttpClient = OkHttpClient
@@ -93,16 +93,16 @@ private class SocketClientImpl(
                     this.sendEmptyMessageDelayed(PING_WHAT, pingInterval)
                 }
 
-                RETRY_WHAT -> {
-                    if (reTry) {
-                        connect()
-                    }
-                }
+//                RETRY_WHAT -> {
+//                    if (reTry) {
+//                        connect()
+//                    }
+//                }
             }
         }
     }
 
-    private var reTry = true
+//    private var reTry = true
 
     private fun changeState(state: SocketClient.ConnectState) {
         this.state = state
@@ -117,7 +117,7 @@ private class SocketClientImpl(
         if (state.isConnecting || state.isConnected) {
             return
         }
-        reTry = true
+//        reTry = true
         release()
         changeState(SocketClient.ConnectState.CONNECTING)
         okSocket = okHttpClient.newWebSocket(
@@ -138,7 +138,7 @@ private class SocketClientImpl(
     }
 
     private fun release() {
-        reTry = false
+//        reTry = false
         okSocket?.cancel()
         handler.removeCallbacksAndMessages(null)
     }
@@ -171,9 +171,9 @@ private class SocketClientImpl(
     ) {
         changeState(SocketClient.ConnectState.ERROR)
         t.printStackTrace()
-        if (reTry) {
-            handler.sendEmptyMessageDelayed(RETRY_WHAT, 5000)
-        }
+//        if (reTry) {
+//            handler.sendEmptyMessageDelayed(RETRY_WHAT, 5000)
+//        }
     }
 
     override fun onMessage(webSocket: WebSocket, text: String) {

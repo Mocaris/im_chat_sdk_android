@@ -14,4 +14,9 @@ class LbeMainViewModel : ViewModel() {
     fun initSdk(sdkInitConfig: SDKInitConfig) {
         LbeIMSDKManager.startInit(sdkInitConfig)
     }
+
+    override fun onCleared() {
+        LbeIMSDKManager.close()
+        super.onCleared()
+    }
 }

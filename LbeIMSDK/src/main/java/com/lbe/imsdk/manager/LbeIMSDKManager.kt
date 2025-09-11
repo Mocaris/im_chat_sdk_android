@@ -125,6 +125,8 @@ object LbeIMSDKManager : Closeable {
     }
 
     override fun close() {
+        socketManager?.close()
+        socketManager = null
         scope.cancel()
     }
 

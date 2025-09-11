@@ -7,6 +7,7 @@ import androidx.activity.compose.*
 import androidx.activity.result.*
 import androidx.activity.result.contract.*
 import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.*
@@ -18,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.*
 import androidx.compose.ui.res.*
 import androidx.compose.ui.text.TextStyle
@@ -38,6 +40,7 @@ import com.lbe.imsdk.provider.rememberKeyboardState
 import com.lbe.imsdk.repository.remote.model.CreateSessionResModel
 import com.lbe.imsdk.widgets.IMRefresh
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 /**
  * 会话页面
@@ -71,6 +74,8 @@ fun ConversationPage(
 @Composable
 private fun ConversationPageBody(conversationVM: ConversationVM, padding: PaddingValues) {
     val listState = rememberLazyListState()
+
+    val userScrolling = remember { mutableStateOf(false) }
     suspend fun scrollToBottom(anim: Boolean = true) {
         if (!listState.canScrollForward) {
             return
@@ -95,11 +100,17 @@ private fun ConversationPageBody(conversationVM: ConversationVM, padding: Paddin
         }
     }
     // 有新消息时
-    LaunchedEffect(conversationVM.msgList) {
-        if (keyboardState.isOpened()) {
-            conversationVM.scrollToBottom(anim = true)
-        }
+    LaunchedEffect(conversationVM.newMessageCount) {
+        snapshotFlow { conversationVM.newMessageCount.intValue }
+            .distinctUntilChanged()
+            .collect { size ->
+                if (size > 0 && !userScrolling.value) {
+                    delay(200)
+                    conversationVM.scrollToBottom(anim = true)
+                }
+            }
     }
+
     LaunchedEffect(listState) {
         snapshotFlow {
             listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
@@ -119,7 +130,7 @@ private fun ConversationPageBody(conversationVM: ConversationVM, padding: Paddin
     LaunchedEffect(eventNoAnimValue) {
         scrollToBottom(anim = false)
     }
-    val receiveMessageEvent = conversationVM.newMessageCount.intValue
+
     val requestPhotoLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { it ->
@@ -177,9 +188,24 @@ private fun ConversationPageBody(conversationVM: ConversationVM, padding: Paddin
                 }) {
                 LazyColumn(
                     state = listState,
-                    modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(15.dp),
-                    verticalArrangement = Arrangement.spacedBy(15.dp)
+                    verticalArrangement = Arrangement.spacedBy(15.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .pointerInput(Unit) {
+                            detectVerticalDragGestures(
+                                onDragStart = {
+                                    userScrolling.value = true
+                                },
+                                onDragEnd = {
+                                    userScrolling.value = false
+                                },
+                                onDragCancel = {
+                                    userScrolling.value = false
+                                },
+                                onVerticalDrag = { _, _ -> },
+                            )
+                        },
                 ) {
                     itemsIndexed(items = conversationVM.msgList) { index, msg ->
                         val preMsg = if (index > 0) conversationVM.msgList[index - 1] else null

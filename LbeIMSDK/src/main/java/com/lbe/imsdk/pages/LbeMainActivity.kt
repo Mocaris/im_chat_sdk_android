@@ -8,6 +8,7 @@ import androidx.activity.*
 import androidx.activity.compose.*
 import androidx.compose.runtime.*
 import androidx.core.view.*
+import com.lbe.imsdk.manager.LbeIMSDKManager
 import com.lbe.imsdk.pages.navigation.LbeNavBackStackPage
 import com.lbe.imsdk.pages.vm.LbeMainViewModel
 import com.lbe.imsdk.provider.LocalMainViewModel
@@ -56,7 +57,6 @@ class LbeMainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.enableEdgeToEdge(window)
         super.onCreate(savedInstanceState)
-
         viewModel.initSdk(sdkInitConfig)
         setContent {
             LbeIMTheme {
