@@ -292,14 +292,12 @@ class ConversationVM(sessionData: CreateSessionResModel.SessionData) :
     }
 
     @UnstableApi
-    fun previewMedia(content: IMMessageEntry) {
+    fun previewMedia(content: IMMessageEntry, dialogManager: DialogManager) {
         if (!content.isVideoType() && !content.isImageType()) {
             return
         }
-        DialogManager.show(
-            onDismissRequest = {
-                DialogManager.dismiss()
-            }, properties = DialogProperties(
+        dialogManager.show(
+            onDismissRequest = { it() }, properties = DialogProperties(
                 usePlatformDefaultWidth = false
             )
         ) {

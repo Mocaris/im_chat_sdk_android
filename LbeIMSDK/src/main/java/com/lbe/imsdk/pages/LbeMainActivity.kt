@@ -8,9 +8,11 @@ import androidx.activity.*
 import androidx.activity.compose.*
 import androidx.compose.runtime.*
 import androidx.core.view.*
+import com.lbe.imsdk.components.DialogManager
 import com.lbe.imsdk.manager.LbeIMSDKManager
 import com.lbe.imsdk.pages.navigation.LbeNavBackStackPage
 import com.lbe.imsdk.pages.vm.LbeMainViewModel
+import com.lbe.imsdk.provider.LocalDialogManager
 import com.lbe.imsdk.provider.LocalMainViewModel
 import com.lbe.imsdk.provider.LocalSDKInitConfig
 import com.lbe.imsdk.repository.model.SDKInitConfig
@@ -61,7 +63,9 @@ class LbeMainActivity : ComponentActivity() {
         setContent {
             LbeIMTheme {
                 CompositionLocalProvider(
+                    LocalActivity provides this@LbeMainActivity,
                     LocalMainViewModel provides viewModel,
+                    LocalDialogManager provides viewModel.dialogManager,
                     LocalSDKInitConfig provides sdkInitConfig
                 ) {
                     LbeNavBackStackPage()

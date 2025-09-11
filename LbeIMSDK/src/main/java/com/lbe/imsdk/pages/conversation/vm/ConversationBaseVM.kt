@@ -1,7 +1,24 @@
 package com.lbe.imsdk.pages.conversation.vm
 
+import androidx.activity.compose.*
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.*
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.res.*
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.*
 import androidx.lifecycle.*
+import com.lbe.imsdk.R
+import com.lbe.imsdk.components.DialogAction
+import com.lbe.imsdk.components.DialogManager
+import com.lbe.imsdk.components.IMCupertinoDialogContent
 import com.lbe.imsdk.extension.appContext
 import com.lbe.imsdk.extension.catchException
 import com.lbe.imsdk.extension.launchIO
@@ -10,7 +27,6 @@ import com.lbe.imsdk.manager.ConversationManager
 import com.lbe.imsdk.manager.LbeIMSDKManager
 import com.lbe.imsdk.manager.SocketEventCallback
 import com.lbe.imsdk.repository.db.entry.IMMessageEntry
-import com.lbe.imsdk.repository.local.LbeImDataRepository
 import com.lbe.imsdk.repository.local.upsert
 import com.lbe.imsdk.repository.remote.model.CreateSessionResModel
 import com.lbe.imsdk.repository.remote.model.TimeOutConfigModel
@@ -19,8 +35,7 @@ import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgReadStatus
 import com.lbe.imsdk.service.NetworkMonitor
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlin.time.DurationUnit
-import kotlin.time.toDuration
+import kotlin.time.*
 
 /**
  *
@@ -47,6 +62,8 @@ open class ConversationBaseVM(val sessionData: CreateSessionResModel.SessionData
     val newMessageCount = mutableIntStateOf(0)
 
     val timeOutReply = mutableStateOf(false)
+
+    val kickOffLine = mutableStateOf(false)
 
     var timeOutReplyJob: Job? = null
 
@@ -153,7 +170,7 @@ open class ConversationBaseVM(val sessionData: CreateSessionResModel.SessionData
         }
     }
 
-    fun serviceSupport() {
+    fun serviceSupport(dialogManager: DialogManager) {
         viewModelScope.launchIO {
             try {
                 manager.serviceSupport()
@@ -200,7 +217,33 @@ open class ConversationBaseVM(val sessionData: CreateSessionResModel.SessionData
     }
 
     override fun onKickOffLine() {
+        kickOffLine.value = true
+    }
 
+    fun showKickOfflineDialog(dialogManager: DialogManager) {
+        dialogManager.show(onDismissRequest = { }) {
+            val activity = LocalActivity.current
+            IMCupertinoDialogContent(
+                content = {
+                    Text(
+                        text = stringResource(R.string.chat_session_status_8),
+                    )
+                },
+                actions = {
+                    DialogAction(onClick = {
+                        activity?.finish()
+                    }) {
+                        Text(
+                            text = stringResource(android.R.string.ok),
+                            style = TextStyle(
+                                color = Color.Blue,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        )
+                    }
+                }
+            )
+        }
     }
 
     override fun onEndSession(sessionId: String) {

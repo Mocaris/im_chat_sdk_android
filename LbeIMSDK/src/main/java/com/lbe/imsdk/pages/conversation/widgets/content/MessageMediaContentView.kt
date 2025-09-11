@@ -10,6 +10,7 @@ import androidx.compose.ui.res.*
 import androidx.compose.ui.unit.*
 import androidx.media3.common.util.*
 import com.lbe.imsdk.R
+import com.lbe.imsdk.provider.LocalDialogManager
 import com.lbe.imsdk.provider.LocalIMMessageEntry
 import com.lbe.imsdk.provider.LocalSessionViewModel
 import com.lbe.imsdk.repository.db.entry.isSelfSender
@@ -30,6 +31,7 @@ fun MessageImageContentView(content: MediaMessageContent, localTemp: MediaMessag
         modifier = Modifier.wrapContentSize(),
         contentAlignment = Alignment.Center
     ) {
+        val dialogManager = LocalDialogManager.current
         IMImageView(
             key = content.thumbnail.key.ifEmpty { localTemp?.thumbnail?.key },
             url = content.thumbnail.url.ifEmpty { localTemp?.thumbnail?.url ?: "" },
@@ -45,7 +47,7 @@ fun MessageImageContentView(content: MediaMessageContent, localTemp: MediaMessag
                 .aspectRatio(ratio)
                 .background(Color.Gray.copy(alpha = 0.1f))
                 .clickable(onClick = {
-                    conversationVM.previewMedia(iMMessageEntry)
+                    conversationVM.previewMedia(iMMessageEntry,dialogManager)
                 }),
         )
         LocalIMMessageEntry.current.let {

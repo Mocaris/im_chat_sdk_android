@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.Color
 val primaryColor = Color(0xFFDAE6FF)
 val backgroundColor = Color(0xFFF3F4F6)
 val colorEBEBEB = Color(0xffEBEBEB)
+val colorTip = Color(0xFF979797)
 
 
 class ThemeColors {

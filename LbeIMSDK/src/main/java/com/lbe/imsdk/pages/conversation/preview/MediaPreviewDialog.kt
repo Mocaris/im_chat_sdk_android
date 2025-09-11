@@ -26,6 +26,7 @@ import com.lbe.imsdk.extension.showToast
 import com.lbe.imsdk.manager.DownloadManager
 import com.lbe.imsdk.media.player.IMPlayer
 import com.lbe.imsdk.media.player.IMPlayerManager
+import com.lbe.imsdk.provider.LocalDialogManager
 import com.lbe.imsdk.provider.LocalThemeColors
 import com.lbe.imsdk.repository.db.entry.IMMessageEntry
 import com.lbe.imsdk.repository.db.entry.isVideoType
@@ -104,6 +105,7 @@ fun MediaPreviewDialog(
 private fun PreviewContent(preInfo: MediaPreviewInfo) {
     val saveProgress = remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope(getContext = { Dispatchers.IO })
+    val dialogManager = LocalDialogManager.current
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -174,7 +176,7 @@ private fun PreviewContent(preInfo: MediaPreviewInfo) {
                     .clip(CircleShape)
                     .background(LocalThemeColors.current.conversationSystemTextColor)
                     .clickable(onClick = {
-                        DialogManager.requestDismiss()
+                        dialogManager.dismiss()
                     }),
                 contentAlignment = Alignment.Center
             ) {

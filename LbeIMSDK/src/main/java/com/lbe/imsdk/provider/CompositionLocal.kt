@@ -1,6 +1,7 @@
 package com.lbe.imsdk.provider
 
 import androidx.compose.runtime.*
+import com.lbe.imsdk.components.DialogManager
 import com.lbe.imsdk.pages.conversation.vm.ConversationVM
 import com.lbe.imsdk.pages.navigation.NavigationBackStack
 import com.lbe.imsdk.pages.vm.*
@@ -19,6 +20,9 @@ val LocalSDKInitConfig = compositionLocalOf<SDKInitConfig> {
     error("CompositionLocal SDKConfig not present")
 }
 
+internal val LocalDialogManager = compositionLocalOf<DialogManager> {
+    error("CompositionLocal DialogManager not present")
+}
 internal val LocalMainViewModel = compositionLocalOf<LbeMainViewModel> {
     error("CompositionLocal ActivityViewModel not present")
 }

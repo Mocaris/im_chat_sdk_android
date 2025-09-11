@@ -23,16 +23,21 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.*
 import androidx.compose.ui.res.*
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import androidx.lifecycle.viewmodel.compose.*
 import com.lbe.imsdk.R
+import com.lbe.imsdk.components.DialogAction
+import com.lbe.imsdk.components.DialogManager
+import com.lbe.imsdk.components.IMCupertinoDialogContent
 import com.lbe.imsdk.extension.pop
 import com.lbe.imsdk.pages.conversation.vm.ConversationVM
 import com.lbe.imsdk.pages.conversation.widgets.ConversationMessageItem
 import com.lbe.imsdk.pages.conversation.widgets.KeyboardInputBox
 import com.lbe.imsdk.pages.conversation.widgets.NetWorkStateView
 import com.lbe.imsdk.pages.navigation.PageRoute
+import com.lbe.imsdk.provider.LocalDialogManager
 import com.lbe.imsdk.provider.LocalSessionViewModel
 import com.lbe.imsdk.provider.LocalSession
 import com.lbe.imsdk.provider.LocalThemeColors
@@ -91,7 +96,17 @@ private fun ConversationPageBody(conversationVM: ConversationVM, padding: Paddin
     }
 
     val keyboardState = rememberKeyboardState()
+    val dialogManager = LocalDialogManager.current
     //键盘弹起时
+    LaunchedEffect(conversationVM) {
+        snapshotFlow { conversationVM.kickOffLine.value }
+            .distinctUntilChanged()
+            .collect {
+                if (it) {
+                    conversationVM.showKickOfflineDialog(dialogManager)
+                }
+            }
+    }
 
     LaunchedEffect(keyboardState) {
         if (keyboardState.isOpened()) {
@@ -324,8 +339,9 @@ private fun IMAppBar() {
                 )
             }
         }, actions = {
+            val dialogManager = LocalDialogManager.current
             IconButton(onClick = {
-                conversationVM.serviceSupport()
+                conversationVM.serviceSupport(dialogManager)
             }) {
                 Image(
                     painter = painterResource(R.drawable.ic_cs),

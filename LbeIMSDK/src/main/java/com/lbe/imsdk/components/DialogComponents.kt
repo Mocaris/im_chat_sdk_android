@@ -2,6 +2,7 @@ package com.lbe.imsdk.components
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.window.*
+import com.lbe.imsdk.provider.LocalDialogManager
 
 /**
  *
@@ -9,19 +10,21 @@ import androidx.compose.ui.window.*
  * @Date 2025-09-05
  */
 
+typealias OnDismissRequest = (dismiss: () -> Unit) -> Unit
+
 internal data class DialogComponent(
     val key: String?,
-    val onDismissRequest: () -> Unit,
+    val onDismissRequest: OnDismissRequest,
     val properties: DialogProperties,
     val content: @Composable () -> Unit
 )
 
-object DialogManager {
+class DialogManager {
     internal val dialogQueue = mutableStateListOf<DialogComponent>()
 
     fun show(
         key: String? = null,
-        onDismissRequest: () -> Unit,
+        onDismissRequest: OnDismissRequest,
         properties: DialogProperties = DialogProperties(),
         content: @Composable () -> Unit
     ) {
@@ -29,31 +32,44 @@ object DialogManager {
         dialogQueue.add(dialog)
     }
 
-    fun requestDismiss(key: String? = null) {
-        if (null != key) {
-            dialogQueue.filter { it.key == key }.forEach {
-                it.onDismissRequest()
-            }
-        } else {
-            dialogQueue.firstOrNull()?.onDismissRequest()
-        }
-    }
-
     fun dismiss(key: String? = null) {
         if (key == null) {
-            dialogQueue.removeFirstOrNull()
+            dialogQueue.firstOrNull()?.let {
+                it.onDismissRequest {
+                    dialogQueue.remove(it)
+                }
+            }
         } else {
-            dialogQueue.removeAll { it.key == key }
+            for (dialog in dialogQueue.filter { it.key == key }) {
+                dialog.onDismissRequest {
+                    dialogQueue.remove(dialog)
+                }
+            }
         }
     }
 
+    fun dismissAll() {
+        for (dialog in dialogQueue) {
+            dialog.onDismissRequest {
+                dialogQueue.remove(dialog)
+            }
+        }
+    }
 }
 
 @Composable
 fun DialogHost(content: @Composable () -> Unit) {
     content()
-    if (DialogManager.dialogQueue.isNotEmpty()) {
-        val dialog = DialogManager.dialogQueue.first()
-        Dialog(dialog.onDismissRequest, dialog.properties, content = dialog.content)
+    val dialogManager = LocalDialogManager.current
+    dialogManager.dialogQueue.firstOrNull()?.let {
+        Dialog(
+            onDismissRequest = {
+                it.onDismissRequest({
+                    dialogManager.dialogQueue.remove(it)
+                })
+            },
+            properties = it.properties,
+            content = it.content
+        )
     }
 }
