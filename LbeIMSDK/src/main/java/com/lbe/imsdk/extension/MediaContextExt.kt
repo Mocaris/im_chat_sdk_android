@@ -32,7 +32,7 @@ data class UriFileInfo(
     val duration: Long?
 ) {
 
-    private val cacheFile by lazy { File(cacheImageDir, name) }
+    private val cacheFile by lazy { File(cacheDir, name) }
 
     private var thumbnail: ThumbnailInfo? = null
 
@@ -63,25 +63,27 @@ data class UriFileInfo(
      * 缓存到 app cache
      */
     suspend fun cacheSourceFile(): File? = withIOContext {
-        if (cacheFile.exists() && cacheFile.length() == size) {
-            return@withIOContext cacheFile
-        }
-        if (!exists()) {
-            throw FileNotFoundException("media file not found")
-        }
-        val source = getInputStream()?.source()?.buffer()
-        if (null == source) {
-            throw IOException("media file can not read")
-        }
-        cacheFile.delete()
-        cacheFile.createNewFile()
-        source.use {
-            cacheFile.sink().buffer().use {
-                it.writeAll(source)
-                it.flush()
+        try {
+            if (cacheFile.exists() && cacheFile.length() == size) {
+                return@withIOContext cacheFile
             }
+            if (!exists()) {
+                throw FileNotFoundException("media file not found")
+            }
+            val source =
+                getInputStream()?.source()?.buffer() ?: throw IOException("media file can not read")
+            cacheFile.delete()
+            cacheFile.createNewFile()
+            source.use {
+                cacheFile.sink().buffer().use {
+                    it.writeAll(source)
+                    it.flush()
+                }
+            }
+            return@withIOContext cacheFile
+        } catch (e: Exception) {
+            return@withIOContext null
         }
-        return@withIOContext cacheFile
     }
 
 

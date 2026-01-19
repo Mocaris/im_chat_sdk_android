@@ -1,5 +1,6 @@
 package com.lbe.imsdk.manager
 
+import androidx.compose.runtime.mutableStateOf
 import com.lbe.imsdk.extension.*
 import com.lbe.imsdk.pages.navigation.*
 import com.lbe.imsdk.repository.model.*
@@ -10,7 +11,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.serialization.json.Json
 import java.io.*
-import kotlin.collections.first
 
 /**
  *
@@ -20,7 +20,9 @@ import kotlin.collections.first
 object LbeIMSDKManager : Closeable {
     var sdkInitConfig: SDKInitConfig? = null
         private set
-    val sdkInitLoading = MutableStateFlow(false)
+    val sdkInitLoading = mutableStateOf(false)
+
+    val sdkInitException = mutableStateOf<Exception?>(null)
 
     private val scope by lazy { CoroutineScope(Dispatchers.Default) }
 
@@ -50,19 +52,26 @@ object LbeIMSDKManager : Closeable {
 
 
     private fun initInternal() = scope.launch(Dispatchers.IO) {
-        sdkInitLoading.value = false
+        sdkInitLoading.value = true
+        var initCount = 0
         do {
+            initCount += 1
             try {
                 realInit()
+                sdkInitException.value = null
             } catch (e: Exception) {
                 e.printStackTrace()
+                sdkInitException.value = e
             }
             if (initSuccessful) {
                 break
             }
             delay(3000)
-        } while (!initSuccessful)
-        sdkInitLoading.value = true
+        } while (!initSuccessful && initCount < 3)
+        sdkInitLoading.value = false
+        if (!initSuccessful) {
+            sdkInitException.value?.message?.showToast()
+        }
     }
 
     private suspend fun realInit() {
@@ -79,6 +88,7 @@ object LbeIMSDKManager : Closeable {
                     saveHostConfig(sdkInitConfig.domain, data)
                 } catch (e: Exception) {
                     e.printStackTrace()
+                    e.catchException()
                 }
             }
         }

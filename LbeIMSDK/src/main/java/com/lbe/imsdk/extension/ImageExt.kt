@@ -88,10 +88,7 @@ suspend fun File.generateVideoThumbnail(
     val metadataRetriever = MediaMetadataRetriever()
     metadataRetriever.setDataSource(absolutePath)
     metadataRetriever.embeddedPicture
-    val bitmap = metadataRetriever.frameAtTime
-    if (null == bitmap) {
-        return@withIOContext null
-    }
+    val bitmap = metadataRetriever.frameAtTime ?: return@withIOContext null
     val width: Int
     val height: Int
     if (originSize == null) {

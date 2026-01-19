@@ -13,7 +13,7 @@ import okio.IOException
 
 fun Exception.catchException(
     block: (Pair<Int, String>) -> Unit = {
-        Toast.makeText(appContext, this.message, Toast.LENGTH_SHORT).show()
+        this.message?.showToast()
     }
 ) {
     block(
@@ -31,4 +31,38 @@ fun Exception.catchException(
             }
         }
     )
+}
+
+suspend fun <T> tryCatchCoroutine(
+    catch: ((Pair<Int, String>) -> Unit)? = null,
+    block: suspend () -> T
+): T? {
+    try {
+        return block()
+    } catch (e: Exception) {
+        e.printStackTrace()
+        if (null != catch) {
+            e.catchException(catch)
+        } else {
+            e.catchException()
+        }
+    }
+    return null
+}
+
+fun <T> tryCatch(
+    catch: ((Pair<Int, String>) -> Unit)? = null,
+    block: () -> T
+): T? {
+    try {
+        return block()
+    } catch (e: Exception) {
+        e.printStackTrace()
+        if (null != catch) {
+            e.catchException(catch)
+        } else {
+            e.catchException()
+        }
+    }
+    return null
 }

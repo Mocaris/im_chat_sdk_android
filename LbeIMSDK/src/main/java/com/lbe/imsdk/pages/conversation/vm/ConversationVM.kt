@@ -1,14 +1,22 @@
 package com.lbe.imsdk.pages.conversation.vm
 
 import android.net.*
+import androidx.activity.compose.LocalActivity
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.focus.*
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.window.*
 import androidx.lifecycle.*
 import androidx.media3.common.util.*
 import com.lbe.imsdk.R
+import com.lbe.imsdk.components.DialogAction
 import com.lbe.imsdk.components.DialogManager
+import com.lbe.imsdk.components.IMCupertinoDialogContent
 import com.lbe.imsdk.extension.*
 import com.lbe.imsdk.manager.*
 import com.lbe.imsdk.pages.conversation.preview.MediaMessagePreViewDialog
@@ -28,7 +36,10 @@ import java.io.File
  *
  * @Date 2025-08-19
  */
-class ConversationVM(sessionData: CreateSessionResModel.SessionData) :
+class ConversationVM(
+    sessionData: CreateSessionResModel.SessionData,
+    val dialogManager: DialogManager
+) :
     ConversationBaseVM(sessionData) {
 
     /*    val frameClock = object : MonotonicFrameClock {
@@ -56,8 +67,16 @@ class ConversationVM(sessionData: CreateSessionResModel.SessionData) :
 
     val textFieldValue = mutableStateOf(TextFieldValue())
 
+    val scrollToBottomEvent = MutableSharedFlow<Boolean>()
+
     init {
         initConversation()
+    }
+
+    fun scrollToBottom(anim: Boolean = true) {
+        viewModelScope.launch {
+            scrollToBottomEvent.emit(anim)
+        }
     }
 
     fun initConversation() {
@@ -74,7 +93,7 @@ class ConversationVM(sessionData: CreateSessionResModel.SessionData) :
                 e.printStackTrace()
             }
             delay(100)
-            scrollToBottom(anim = false)
+            scrollToBottom()
         }
     }
 
@@ -125,41 +144,44 @@ class ConversationVM(sessionData: CreateSessionResModel.SessionData) :
             throw Exception("insert message error")
         }
         msgList.add(messageEntry)
+        delay(100)
         scrollToBottom()
     }
 
-    val uploadProgress = hashMapOf<String, Float>()
-
     fun sendMediaMessage(picUri: Uri) {
         viewModelScope.launchIO {
-            val uriFile = picUri.toUriFile() ?: return@launchIO
-            val thumbnail = uriFile.thumbnailImage() ?: return@launchIO
-            val sourceFile = uriFile.cacheSourceFile() ?: return@launchIO
-            val messageBody = SendMessageBody.createMediaMessage(
-                MediaMessageContent(
-                    width = uriFile.width,
-                    height = uriFile.height,
-                    thumbnail = SourceUrl(key = "", url = ""),
-                    resource = SourceUrl(key = "", url = ""),
-                ),
-                uriFile.isVideo()
-            )
-            val localMsg = createLocalMessage(messageBody).also {
-                it.localTempSource = MediaMessageContent(
-                    width = uriFile.width,
-                    height = uriFile.height,
-                    thumbnail = SourceUrl(key = "", url = thumbnail.path),
-                    resource = SourceUrl(key = "", url = sourceFile.path),
+            try {
+                val uriFile = picUri.toUriFile() ?: throw Exception("uriFile is null")
+                val thumbnail = uriFile.thumbnailImage() ?: throw Exception("thumbnail is null")
+                val sourceFile = uriFile.cacheSourceFile() ?: throw Exception("sourceFile is null")
+                val messageBody = SendMessageBody.createMediaMessage(
+                    MediaMessageContent(
+                        width = uriFile.width,
+                        height = uriFile.height,
+                        thumbnail = SourceUrl(key = "", url = ""),
+                        resource = SourceUrl(key = "", url = ""),
+                    ),
+                    uriFile.isVideo()
                 )
-                it.uploadTask = IMUploadTask(
-                    width = uriFile.width,
-                    height = uriFile.height,
-                    thumbnail = thumbnail.path,
-                    filePath = uriFile.path,
-                )
+                val localMsg = createLocalMessage(messageBody).also {
+                    it.localTempSource = MediaMessageContent(
+                        width = uriFile.width,
+                        height = uriFile.height,
+                        thumbnail = SourceUrl(key = "", url = thumbnail.path),
+                        resource = SourceUrl(key = "", url = sourceFile.path),
+                    )
+                    it.uploadTask = IMUploadTask(
+                        width = uriFile.width,
+                        height = uriFile.height,
+                        thumbnail = thumbnail.path,
+                        filePath = uriFile.path,
+                    )
+                }
+                saveMessageEntry(localMsg)
+                sendMessageInternal(localMsg)
+            } catch (e: Exception) {
+                appContext.getString(R.string.content_description_send_fail).showToast()
             }
-            saveMessageEntry(localMsg)
-            sendMessageInternal(localMsg)
         }
     }
 
@@ -197,10 +219,7 @@ class ConversationVM(sessionData: CreateSessionResModel.SessionData) :
         }
         val ossApiRepository =
             LbeIMSDKManager.ossApiRepository ?: throw Exception("api repository is null")
-        val localTempSource = localMsg.localTempSource
-        if (null == localTempSource) {
-            throw Exception("source is null")
-        }
+        val localTempSource = localMsg.localTempSource ?: throw Exception("source is null")
         val thumbFile = File(localTempSource.thumbnail.url)
         val sourceFile = File(localTempSource.resource.url)
         //先上传 缩略图
@@ -328,6 +347,37 @@ class ConversationVM(sessionData: CreateSessionResModel.SessionData) :
             } catch (e: Exception) {
                 appContext.getString(R.string.save_fail).showToast()
             }
+        }
+    }
+
+    //被踢下线
+    override fun onKickOffLine() {
+        showKickOfflineDialog()
+    }
+
+    fun showKickOfflineDialog() {
+        dialogManager.show(onDismissRequest = { }) {
+            val activity = LocalActivity.current
+            IMCupertinoDialogContent(
+                content = {
+                    Text(
+                        text = stringResource(R.string.chat_session_status_8),
+                    )
+                },
+                actions = {
+                    DialogAction(onClick = {
+                        activity?.finish()
+                    }) {
+                        Text(
+                            text = stringResource(android.R.string.ok),
+                            style = TextStyle(
+                                color = Color.Blue,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        )
+                    }
+                }
+            )
         }
     }
 

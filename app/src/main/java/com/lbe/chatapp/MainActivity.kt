@@ -1,6 +1,5 @@
 package com.lbe.chatapp
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -40,22 +39,21 @@ class MainActivity : ComponentActivity() {
                     ) {
 
                         val lbeSign =
-//                            remember { mutableStateOf("0x4f227352cf96fab9e67064e08219a86cd398fdbb067aa53fc7ad49deb882a0ad49b1d073ae0b3f74d39d288f3cf3feab6f102c1993532e1239e2f48e4afb534b1c") }
-                            remember { mutableStateOf("0x9da959d63e2f35332fc8336b2f78dc4fdae3637f6b9502a6278a06794f649f21330c2b50c494b60d1723c67d6240d63a46c27e3c22ee028cfb116218ca5526921b") }
+                            remember { mutableStateOf("0x49ca5e1d651d4fbff606d0efb2800822699e17ef972708ccaf95f5c41eb4ce1b39d02d467fa3db27bd129dad648cbfe8cc5f34f4cf54fe933b78205d19b0a17a1c") }
 
                         val lbeIdentity =
-                            remember { mutableStateOf("4fmphnfgc4zq") }
+                            remember { mutableStateOf("4jlfe1imqsee") }
 
                         val headerIcon =
 //                            remember { mutableStateOf("http://10.40.92.203:9910/openimttt/lbe_65f8d397953b979b4be0d098e8d4f5.jpg") }
                             remember { mutableStateOf("{\"url\":\"https://abpay-pub.s3.ap-northeast-1.amazonaws.com/1078_1724306513153.png\",\"key\":\"\"}") }
 
                         val groupId =
-                            remember { mutableStateOf("1002") }
+                            remember { mutableStateOf("1003") }
 
                         val nickId =
 //                            remember { mutableStateOf("112233445566778899") }
-                            remember { mutableStateOf("2710512892936192") }
+                            remember { mutableStateOf("2710512892936195") }
 //                            remember { mutableStateOf("android001") }
 
                         val nickName =
@@ -150,7 +148,7 @@ class MainActivity : ComponentActivity() {
                                     device = "",
                                     headerIcon = headerIcon.value,
                                     groupID = groupId.value,
-                                    domain = "",
+                                    domain = "https://4jlfe1imqsee.imsz.online",
                                     source = "",
                                     nickId = nickId.value,
                                     nickName = nickName.value,

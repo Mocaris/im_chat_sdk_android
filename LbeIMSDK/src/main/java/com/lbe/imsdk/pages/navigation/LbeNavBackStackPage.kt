@@ -1,21 +1,20 @@
 package com.lbe.imsdk.pages.navigation
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.*
-import androidx.compose.ui.text.style.*
-import androidx.compose.ui.unit.*
-import androidx.navigation3.runtime.*
-import androidx.navigation3.ui.*
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.IntOffset
+import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
+import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
 import com.lbe.imsdk.components.DialogHost
 import com.lbe.imsdk.pages.TestPage
-import com.lbe.imsdk.pages.conversation.*
-import com.lbe.imsdk.pages.init.*
+import com.lbe.imsdk.pages.conversation.ConversationPage
+import com.lbe.imsdk.pages.init.InitSdkPage
 import com.lbe.imsdk.pages.unknown.UnknownPage
-import java.util.Map.entry
 
 /**
  * 导航页面

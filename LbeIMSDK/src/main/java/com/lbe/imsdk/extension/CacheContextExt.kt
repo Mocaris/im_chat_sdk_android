@@ -8,7 +8,7 @@ import java.io.File
  */
 
 
-val cacheDir by lazy {
+val cacheDir: String by lazy {
     File(appContext.cacheDir.path).also {
         if (!it.exists()) {
             it.mkdirs()
@@ -16,7 +16,7 @@ val cacheDir by lazy {
     }.path
 }
 
-val coilImageDir by lazy {
+val coilImageDir: String by lazy {
     File("${cacheDir}/coil").also {
         if (!it.exists()) {
             it.mkdirs()
@@ -24,7 +24,7 @@ val coilImageDir by lazy {
     }.path
 }
 
-val cacheImageDir by lazy {
+val cacheImageDir: String by lazy {
     File("${cacheDir}/images").also {
         if (!it.exists()) {
             it.mkdirs()
@@ -32,7 +32,7 @@ val cacheImageDir by lazy {
     }.path
 }
 
-val cacheVideoDir by lazy {
+val cacheVideoDir: String by lazy {
     File("${cacheDir}/video").also {
         if (!it.exists()) {
             it.mkdirs()
@@ -40,7 +40,7 @@ val cacheVideoDir by lazy {
     }.path
 }
 
-val cacheTempDir by lazy {
+val cacheTempDir: String by lazy {
     File("${cacheDir}/temp").also {
         if (!it.exists()) {
             it.mkdirs()

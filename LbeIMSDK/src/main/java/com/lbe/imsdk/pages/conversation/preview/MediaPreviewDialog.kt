@@ -148,7 +148,7 @@ private fun PreviewContent(preInfo: MediaPreviewInfo) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (saveProgress.intValue > 0 && saveProgress.intValue < 100) {
+            if (saveProgress.intValue in 1..<100) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(20.dp),
                     progress = {

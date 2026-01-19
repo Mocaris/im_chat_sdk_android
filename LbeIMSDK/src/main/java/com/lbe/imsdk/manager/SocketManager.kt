@@ -2,6 +2,7 @@ package com.lbe.imsdk.manager
 
 import android.util.Log
 import coil3.util.Logger
+import com.lbe.imsdk.extension.appContext
 import com.lbe.imsdk.extension.launchAsync
 import com.lbe.imsdk.extension.launchMain
 import com.lbe.imsdk.repository.db.entry.*
@@ -9,9 +10,12 @@ import com.lbe.imsdk.repository.local.LbeImDataRepository
 import com.lbe.imsdk.repository.local.insert
 import com.lbe.imsdk.repository.model.proto.*
 import com.lbe.imsdk.repository.remote.model.*
+import com.lbe.imsdk.service.NetworkMonitor
 import com.lbe.imsdk.service.http.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.io.*
@@ -25,6 +29,7 @@ class SocketManager(
     private val hostUrl: String,
     session: CreateSessionResModel.SessionData
 ) : Closeable, SocketClient.SocketCallback {
+    private val networkMonitor = NetworkMonitor(appContext)
 
     private val scope = CoroutineScope(Dispatchers.IO)
 
@@ -44,8 +49,27 @@ class SocketManager(
     private val pingMsg = IMMsg.MsgEntityToServer.newBuilder().setMsgType(IMMsg.MsgType.TextMsgType)
         .setMsgBody(IMMsg.MsgBody.newBuilder().setMsgBody("ping").build()).build()
 
+    private var listenJob: Job? = null
+
     init {
-        socket.connect()
+        connect()
+        networkMonitor.startMonitoring()
+    }
+
+    private fun listenNet() {
+        if (listenJob?.isActive == true) {
+            return
+        }
+        listenJob = scope.launch {
+            networkMonitor.isConnected.collect {
+                if (it
+                    && connectState.value != SocketClient.ConnectState.OPENED
+                    && socket.connectState() != SocketClient.ConnectState.CONNECTING
+                ) {
+                    connect()
+                }
+            }
+        }
     }
 
     fun addSocketEventCallback(callback: SocketEventCallback) {
@@ -58,6 +82,7 @@ class SocketManager(
 
     fun connect() {
         socket.connect()
+        listenNet()
     }
 
     fun disconnect() {
@@ -158,7 +183,9 @@ class SocketManager(
     }
 
     override fun close() {
+        listenJob?.cancel()
         socket.close()
+        scope.cancel()
     }
 
 }

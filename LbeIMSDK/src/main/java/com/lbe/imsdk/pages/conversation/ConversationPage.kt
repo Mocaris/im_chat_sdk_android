@@ -9,43 +9,37 @@ import androidx.activity.result.contract.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.*
 import androidx.compose.ui.res.*
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import androidx.lifecycle.viewmodel.compose.*
 import com.lbe.imsdk.R
-import com.lbe.imsdk.components.DialogAction
 import com.lbe.imsdk.components.DialogManager
-import com.lbe.imsdk.components.IMCupertinoDialogContent
+import com.lbe.imsdk.extension.launchAsync
 import com.lbe.imsdk.extension.pop
 import com.lbe.imsdk.pages.conversation.vm.ConversationVM
 import com.lbe.imsdk.pages.conversation.widgets.ConversationMessageItem
 import com.lbe.imsdk.pages.conversation.widgets.KeyboardInputBox
 import com.lbe.imsdk.pages.conversation.widgets.NetWorkStateView
 import com.lbe.imsdk.pages.navigation.PageRoute
-import com.lbe.imsdk.provider.LocalDialogManager
-import com.lbe.imsdk.provider.LocalSessionViewModel
-import com.lbe.imsdk.provider.LocalSession
-import com.lbe.imsdk.provider.LocalThemeColors
-import com.lbe.imsdk.provider.rememberKeyboardState
+import com.lbe.imsdk.provider.*
 import com.lbe.imsdk.repository.remote.model.CreateSessionResModel
 import com.lbe.imsdk.widgets.IMRefresh
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 
 /**
  * 会话页面
@@ -55,9 +49,12 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConversationPage(
-    sessionData: CreateSessionResModel.SessionData, conversationVM: ConversationVM = viewModel(
-        key = sessionData.sessionId, initializer = {
-            ConversationVM(sessionData)
+    sessionData: CreateSessionResModel.SessionData,
+    dialogManager: DialogManager = LocalDialogManager.current,
+    conversationVM: ConversationVM = viewModel(
+        key = sessionData.sessionId,
+        initializer = {
+            ConversationVM(sessionData, dialogManager)
         })
 ) {
     CompositionLocalProvider(
@@ -78,40 +75,58 @@ fun ConversationPage(
 
 @Composable
 private fun ConversationPageBody(conversationVM: ConversationVM, padding: PaddingValues) {
-    val listState = rememberLazyListState()
-
-    val userScrolling = remember { mutableStateOf(false) }
-    suspend fun scrollToBottom(anim: Boolean = true) {
-        if (!listState.canScrollForward) {
-            return
-        }
-        if (conversationVM.msgList.isEmpty()) {
-            return
-        }
-        if (anim) {
-            listState.animateScrollToItem(conversationVM.msgCount - 1)
-        } else {
-            listState.scrollToItem(conversationVM.msgCount - 1)
-        }
-    }
-
-    val keyboardState = rememberKeyboardState()
-    val dialogManager = LocalDialogManager.current
-    //键盘弹起时
-    LaunchedEffect(conversationVM) {
-        snapshotFlow { conversationVM.kickOffLine.value }
-            .distinctUntilChanged()
-            .collect {
-                if (it) {
-                    conversationVM.showKickOfflineDialog(dialogManager)
-                }
+    val requestPhotoLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = {
+            if (null != it) {
+                conversationVM.sendMediaMessage(it)
             }
+        },
+    )
+    val requestPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+        onResult = {
+            if (it.any { t -> !t.value }) {
+                return@rememberLauncherForActivityResult
+            }
+            requestPhotoLauncher.launch(
+                PickVisualMediaRequest(
+                    mediaType = ActivityResultContracts.PickVisualMedia.ImageAndVideo,
+                )
+            )
+        },
+    )
+
+    val scope = rememberCoroutineScope()
+    val listState = rememberLazyListState()
+    val userScrolling = remember { mutableStateOf(false) }
+    val keyboardState = rememberKeyboardState()
+
+    fun scrollToBottom(anim: Boolean = true) {
+        if (!listState.canScrollForward || listState.isScrollInProgress) {
+            return
+        }
+        scope.launch {
+            val itemsCount = listState.layoutInfo.totalItemsCount
+            if (anim) {
+                listState.animateScrollToItem(itemsCount - 1)
+            } else {
+                listState.scrollToItem(itemsCount - 1)
+            }
+            conversationVM.onScrollToBottom()
+        }
+    }
+    LaunchedEffect(listState) {
+        conversationVM.scrollToBottomEvent.collect {
+            scrollToBottom(it)
+        }
     }
 
+    //键盘弹起时
     LaunchedEffect(keyboardState) {
         if (keyboardState.isOpened()) {
             delay(100)
-            conversationVM.scrollToBottom(anim = true)
+            conversationVM.scrollToBottom()
         }
     }
     // 有新消息时
@@ -121,11 +136,10 @@ private fun ConversationPageBody(conversationVM: ConversationVM, padding: Paddin
             .collect { size ->
                 if (size > 0 && !userScrolling.value) {
                     delay(200)
-                    conversationVM.scrollToBottom(anim = true)
+                    conversationVM.scrollToBottom()
                 }
             }
     }
-
     LaunchedEffect(listState) {
         snapshotFlow {
             listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
@@ -136,37 +150,6 @@ private fun ConversationPageBody(conversationVM: ConversationVM, padding: Paddin
         }
     }
 
-    val eventAnimValue = conversationVM.toBottomEventAnim.intValue
-    LaunchedEffect(eventAnimValue) {
-        scrollToBottom()
-    }
-
-    val eventNoAnimValue = conversationVM.toBottomEventNoAnim.intValue
-    LaunchedEffect(eventNoAnimValue) {
-        scrollToBottom(anim = false)
-    }
-
-    val requestPhotoLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { it ->
-            if (null != it) {
-                conversationVM.sendMediaMessage(it)
-            }
-        },
-    )
-    val requestPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions(),
-        onResult = { it ->
-            if (it.any { !it.value }) {
-                return@rememberLauncherForActivityResult
-            }
-            requestPhotoLauncher.launch(
-                PickVisualMediaRequest(
-                    mediaType = ActivityResultContracts.PickVisualMedia.ImageAndVideo,
-                )
-            )
-        },
-    )
     val timeoutReply = conversationVM.timeOutReply.value
 
     fun pickPhoto() {
@@ -218,7 +201,7 @@ private fun ConversationPageBody(conversationVM: ConversationVM, padding: Paddin
                                 onDragCancel = {
                                     userScrolling.value = false
                                 },
-                                onVerticalDrag = { _, _ -> },
+                                onVerticalDrag = { _, _ -> userScrolling.value = true },
                             )
                         },
                 ) {
@@ -281,7 +264,7 @@ private fun BoxScope.ConversationFloatTip() {
             .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.8f))
             .align(BiasAlignment(horizontalBias = 0.9f, verticalBias = 0.7f))
             .clickable(onClick = {
-                conversationVM.scrollToBottom(anim = true)
+                conversationVM.scrollToBottom()
             })
             .padding(vertical = 10.dp, horizontal = 15.dp),
         horizontalArrangement = Arrangement.spacedBy(
@@ -339,9 +322,8 @@ private fun IMAppBar() {
                 )
             }
         }, actions = {
-            val dialogManager = LocalDialogManager.current
             IconButton(onClick = {
-                conversationVM.serviceSupport(dialogManager)
+                conversationVM.serviceSupport()
             }) {
                 Image(
                     painter = painterResource(R.drawable.ic_cs),

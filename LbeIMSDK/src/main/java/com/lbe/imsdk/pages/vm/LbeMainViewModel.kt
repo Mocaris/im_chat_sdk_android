@@ -1,6 +1,6 @@
 package com.lbe.imsdk.pages.vm
 
-import androidx.lifecycle.*
+import androidx.lifecycle.ViewModel
 import com.lbe.imsdk.components.DialogManager
 import com.lbe.imsdk.manager.LbeIMSDKManager
 import com.lbe.imsdk.repository.model.SDKInitConfig
@@ -18,9 +18,11 @@ class LbeMainViewModel : ViewModel() {
         LbeIMSDKManager.startInit(sdkInitConfig)
     }
 
+
     override fun onCleared() {
         LbeIMSDKManager.close()
         dialogManager.dismissAll()
         super.onCleared()
+
     }
 }
