@@ -3,32 +3,32 @@ package com.lbe.imsdk.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.lbe.imsdk.theme.colorTip
 
 /**
  *
  * @Author mocaris
  * @Date 2025-09-11
  */
+
+data class DialogAction(
+    val onClick: (() -> Unit),
+    val content: @Composable RowScope.() -> Unit,
+)
+
 @Composable
 fun IMCupertinoDialogContent(
     title: (@Composable () -> Unit)? = null,
     content: (@Composable () -> Unit)? = null,
-    actions: @Composable RowScope.() -> Unit,
+    actions: List<DialogAction>? = null,
 ) {
     Column(
         modifier = Modifier
@@ -38,47 +38,64 @@ fun IMCupertinoDialogContent(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Column(
-            modifier = Modifier.padding(15.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(15.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             if (null != title) {
                 CompositionLocalProvider(
-                    LocalTextStyle provides TextStyle(
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold
-                    ), title
+                    LocalTextStyle provides MaterialTheme
+                        .typography
+                        .bodyLarge
+                        .copy(fontWeight = FontWeight.SemiBold),
+                    title
                 )
             }
             if (null != content) {
                 CompositionLocalProvider(
-                    LocalTextStyle provides TextStyle(
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Normal,
-                        color = colorTip
-                    ), content
+                    LocalTextStyle provides MaterialTheme.typography.bodyMedium,
+                    content
                 )
             }
         }
-        HorizontalDivider(thickness = 0.5.dp)
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(45.dp),
-            content = actions
-        )
+        if (null != actions) {
+            HorizontalDivider(thickness = 0.5.dp)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(45.dp),
+                horizontalArrangement = Arrangement.spacedBy(0.5.dp),
+                content = {
+                    actions.forEachIndexed { index, action ->
+                        DialogsAction(
+                            onClick = action.onClick,
+                            content = action.content
+                        )
+                        if (index < actions.lastIndex) {
+                            VerticalDivider(
+                                modifier = Modifier.fillMaxHeight(),
+                                thickness = 0.5.dp
+                            )
+                        }
+                    }
+                }
+            )
+        }
     }
 }
 
 @Composable
-fun RowScope.DialogAction(
-    onClick: () -> Unit,
-    content: @Composable RowScope.() -> Unit
+private fun RowScope.DialogsAction(
+    onClick: () -> Unit, content: @Composable RowScope.() -> Unit
 ) {
     TextButton(
         modifier = Modifier
             .weight(1f)
             .fillMaxHeight(),
         onClick = onClick,
-        content = content
+        shape = RoundedCornerShape(0.dp),
+        content = content,
     )
 }

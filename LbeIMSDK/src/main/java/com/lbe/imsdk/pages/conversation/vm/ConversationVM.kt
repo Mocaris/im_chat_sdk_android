@@ -361,7 +361,7 @@ class ConversationVM(
                         text = stringResource(R.string.chat_session_status_8),
                     )
                 },
-                actions = {
+                actions = listOf(
                     DialogAction(onClick = {
                         activity?.finish()
                     }) {
@@ -369,7 +369,7 @@ class ConversationVM(
                             text = stringResource(android.R.string.ok),
                         )
                     }
-                }
+                )
             )
         }
     }
