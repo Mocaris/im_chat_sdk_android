@@ -370,10 +370,6 @@ class ConversationVM(
                     }) {
                         Text(
                             text = stringResource(android.R.string.ok),
-                            style = TextStyle(
-                                color = Color.Blue,
-                                fontWeight = FontWeight.SemiBold
-                            )
                         )
                     }
                 }

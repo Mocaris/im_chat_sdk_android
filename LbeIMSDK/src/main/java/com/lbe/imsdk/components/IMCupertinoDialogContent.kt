@@ -63,7 +63,7 @@ fun IMCupertinoDialogContent(
                 CompositionLocalProvider(
                     LocalTextStyle provides TextStyle(
                         fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
+                        fontWeight = FontWeight.Normal,
                         color = colorTip
                     )
                 ) { content() }
