@@ -1,0 +1,184 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "5fa2f3d1ddc2c615910de991251cb3bf",
+    "entities": [
+      {
+        "tableName": "tb_msg",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`client_msg_id` TEXT NOT NULL, `msg_seq` INTEGER NOT NULL, `create_time` INTEGER NOT NULL, `msg_body` TEXT NOT NULL, `msg_type` INTEGER NOT NULL, `receiver_uid` TEXT NOT NULL, `send_time` TEXT NOT NULL, `sender_face_url` TEXT NOT NULL, `sender_nickname` TEXT NOT NULL, `sender_uid` TEXT NOT NULL, `server_msg_id` TEXT NOT NULL, `session_id` TEXT NOT NULL, `status` INTEGER NOT NULL, `title` TEXT NOT NULL, `send_status` INTEGER NOT NULL, `temp_source` TEXT, `upload_task` TEXT, PRIMARY KEY(`client_msg_id`))",
+        "fields": [
+          {
+            "fieldPath": "clientMsgID",
+            "columnName": "client_msg_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "msgSeq",
+            "columnName": "msg_seq",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createTime",
+            "columnName": "create_time",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "msgBody",
+            "columnName": "msg_body",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "msgType",
+            "columnName": "msg_type",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "receiverUid",
+            "columnName": "receiver_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sendTime",
+            "columnName": "send_time",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "senderFaceURL",
+            "columnName": "sender_face_url",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "senderNickname",
+            "columnName": "sender_nickname",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "senderUid",
+            "columnName": "sender_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "serverMsgID",
+            "columnName": "server_msg_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sessionId",
+            "columnName": "session_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sendStatus",
+            "columnName": "send_status",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "localTempSource",
+            "columnName": "temp_source",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "uploadTask",
+            "columnName": "upload_task",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "client_msg_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_tb_msg_session_id",
+            "unique": false,
+            "columnNames": [
+              "session_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_tb_msg_session_id` ON `${TABLE_NAME}` (`session_id`)"
+          },
+          {
+            "name": "index_tb_msg_client_msg_id",
+            "unique": false,
+            "columnNames": [
+              "client_msg_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_tb_msg_client_msg_id` ON `${TABLE_NAME}` (`client_msg_id`)"
+          },
+          {
+            "name": "index_tb_msg_server_msg_id",
+            "unique": false,
+            "columnNames": [
+              "server_msg_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_tb_msg_server_msg_id` ON `${TABLE_NAME}` (`server_msg_id`)"
+          },
+          {
+            "name": "index_tb_msg_session_id_msg_seq",
+            "unique": false,
+            "columnNames": [
+              "session_id",
+              "msg_seq"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_tb_msg_session_id_msg_seq` ON `${TABLE_NAME}` (`session_id`, `msg_seq`)"
+          },
+          {
+            "name": "index_tb_msg_session_id_client_msg_id",
+            "unique": false,
+            "columnNames": [
+              "session_id",
+              "client_msg_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_tb_msg_session_id_client_msg_id` ON `${TABLE_NAME}` (`session_id`, `client_msg_id`)"
+          },
+          {
+            "name": "index_tb_msg_session_id_server_msg_id",
+            "unique": false,
+            "columnNames": [
+              "session_id",
+              "server_msg_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_tb_msg_session_id_server_msg_id` ON `${TABLE_NAME}` (`session_id`, `server_msg_id`)"
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5fa2f3d1ddc2c615910de991251cb3bf')"
+    ]
+  }
+}
