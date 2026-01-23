@@ -1,5 +1,6 @@
 package com.lbe.imsdk.extension
 
+import android.R.attr.path
 import android.annotation.*
 import android.content.*
 import android.graphics.*
@@ -10,6 +11,8 @@ import android.provider.*
 import android.util.*
 import androidx.activity.result.contract.*
 import androidx.core.database.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.*
 import okio.buffer
 import okio.sink
@@ -23,7 +26,7 @@ import java.io.*
  */
 data class UriFileInfo(
     val uri: Uri,
-    val path: String,
+//    val path: String,
     val name: String,
     val size: Long,
     val width: Int,
@@ -46,13 +49,9 @@ data class UriFileInfo(
 
     private fun thumbnailName(): String {
         if (isImage()) {
-            return "thumbnail_$name";
+            return "thumbnail_$name"
         }
-        return "thumbnail_${name}.jpg";
-    }
-
-    fun exists(): Boolean {
-        return File(path).exists()
+        return "thumbnail_${name}.jpg"
     }
 
     fun getInputStream(): InputStream? {
@@ -66,9 +65,6 @@ data class UriFileInfo(
         try {
             if (cacheFile.exists() && cacheFile.length() == size) {
                 return@withIOContext cacheFile
-            }
-            if (!exists()) {
-                throw FileNotFoundException("media file not found")
             }
             val source =
                 getInputStream()?.source()?.buffer() ?: throw IOException("media file can not read")
@@ -89,32 +85,31 @@ data class UriFileInfo(
 
     fun clearCache() {
         cacheFile.delete()
-        val dir = File(cacheDir)
-        if (dir.isDirectory) {
-            dir.list()
-        }
-        val listFiles = dir.listFiles { it.name.endsWith("_$name") }
-        for (file in listFiles!!) {
-            file.delete()
-        }
+        val thumbnailFile = File(cacheDir, thumbnailName())
+        thumbnailFile.deleteOnExit()
+        thumbnail = null
     }
 
     suspend fun thumbnailImage(maxSize: Int = 500): ThumbnailInfo? = withIOContext {
         if (null == thumbnail) {
-            val file = File(path)
-            if (isImage()) {
-                val thumbnailFile = File(cacheDir, thumbnailName())
-                thumbnail = file.generateImageThumbnail(
-                    originSize = Size(width, height),
-                    thumbnailFile = thumbnailFile,
-                    maxSize = maxSize
-                )
-            } else if (isVideo()) {
-                val thumbnailFile = File(cacheDir, thumbnailName())
-                thumbnail = file.generateVideoThumbnail(
-                    thumbnailFile = thumbnailFile,
-                    maxSize = maxSize
-                )
+            try {
+                val file = cacheSourceFile() ?: return@withIOContext null
+                if (isImage()) {
+                    val thumbnailFile = File(cacheDir, thumbnailName())
+                    thumbnail = file.generateImageThumbnail(
+                        originSize = Size(width, height),
+                        thumbnailFile = thumbnailFile,
+                        maxSize = maxSize
+                    )
+                } else if (isVideo()) {
+                    val thumbnailFile = File(cacheDir, thumbnailName())
+                    thumbnail = file.generateVideoThumbnail(
+                        thumbnailFile = thumbnailFile,
+                        maxSize = maxSize
+                    )
+                }
+            } catch (e: Exception) {
+                return@withIOContext null
             }
         }
         return@withIOContext thumbnail
@@ -122,12 +117,27 @@ data class UriFileInfo(
 }
 
 @SuppressLint("Range")
-fun Uri.toUriFile(): UriFileInfo? {
+suspend fun Uri.toUriFile(): UriFileInfo? {
+//    suspend fun copyToCache(
+//        uri: Uri,
+//        fName: String
+//    ): String = withContext(
+//        Dispatchers.IO
+//    ) {
+//        val inputStream =
+//            appContext.contentResolver.openInputStream(uri)
+//                ?: throw Exception("inputStream is null")
+//        val tempFile = File(appContext.cacheDir, fName)
+//
+//        tempFile.outputStream().use { output ->
+//            inputStream.copyTo(output)
+//        }
+//        return@withContext tempFile.absolutePath
+//    }
     return appContext.contentResolver?.let { resolver ->
         resolver.query(this, null, null, null, null)?.use {
             if (it.moveToFirst()) {
                 val name = it.getString(it.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME))
-                val path = it.getString(it.getColumnIndex(MediaStore.MediaColumns.DATA))
                 val size = it.getLong(it.getColumnIndex(MediaStore.MediaColumns.SIZE))
                 val width = it.getInt(it.getColumnIndex(MediaStore.MediaColumns.WIDTH))
                 val height = it.getInt(it.getColumnIndex(MediaStore.MediaColumns.HEIGHT))
@@ -136,9 +146,16 @@ fun Uri.toUriFile(): UriFileInfo? {
                 val duration =
                     it.getLongOrNull(it.getColumnIndex(MediaStore.MediaColumns.DURATION))
                 val land = orientation == 90 || orientation == 270
+
+//                val path: String = try {
+//                    it.getString(it.getColumnIndex(MediaStore.MediaColumns.DATA))
+//                } catch (e: Exception) {
+//                    copyToCache(this, name)
+//                } ?: return null
+
                 return@use UriFileInfo(
                     this,
-                    path,
+//                    path,
                     name,
                     size,
                     if (land) height else width,
