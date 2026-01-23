@@ -52,12 +52,13 @@ class LbeMainActivity : ComponentActivity() {
     }
 
     val viewModel by viewModels<LbeMainViewModel>()
-    override fun attachBaseContext(newBase: Context) {
-        super.attachBaseContext(checkUpdateLanguage(newBase, sdkInitConfig.supportLanguage))
-    }
+//    override fun attachBaseContext(newBase: Context) {
+//        super.attachBaseContext(checkUpdateLanguage(newBase, sdkInitConfig.supportLanguage))
+//    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.enableEdgeToEdge(window)
+        checkUpdateLanguage(this, sdkInitConfig.supportLanguage)
         super.onCreate(savedInstanceState)
         viewModel.initSdk(sdkInitConfig)
         setContent {
@@ -86,7 +87,10 @@ class LbeMainActivity : ComponentActivity() {
         val config = context.resources.configuration.also {
             it.setLocale(locale)
         }
-        return context.createConfigurationContext(config)
+        val configurationContext = context.createConfigurationContext(config)
+        resources.updateConfiguration(config, resources.displayMetrics);
+        baseContext.resources.updateConfiguration(config, baseContext.resources.displayMetrics)
+        return configurationContext;
     }
 
 
