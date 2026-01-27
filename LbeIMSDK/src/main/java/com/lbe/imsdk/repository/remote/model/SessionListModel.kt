@@ -1,9 +1,8 @@
 package com.lbe.imsdk.repository.remote.model
 
-import androidx.room.ColumnInfo
 import androidx.room.Entity
-import com.lbe.imsdk.service.http.model.*
-import kotlinx.serialization.*
+import com.lbe.imsdk.service.http.model.NetResponseData
+import kotlinx.serialization.Serializable
 
 /**
  * 会话列表
@@ -18,6 +17,8 @@ data class SessionListResModel(
 
     @Serializable
     data class SessionListDataModel(
+        ///trans/session-list 为 0
+        val total: Long = 0,
         val sessionList: List<SessionListModel> = emptyList()
     )
 }
@@ -58,4 +59,4 @@ data class SessionListModel(
     val uid: String = "",
     val unreadCount: Int = 0,
 
-)
+    )

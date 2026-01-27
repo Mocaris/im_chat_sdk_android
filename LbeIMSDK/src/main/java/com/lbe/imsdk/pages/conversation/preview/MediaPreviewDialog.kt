@@ -31,6 +31,7 @@ import com.lbe.imsdk.provider.LocalThemeColors
 import com.lbe.imsdk.repository.db.entry.IMMessageEntry
 import com.lbe.imsdk.repository.db.entry.isVideoType
 import com.lbe.imsdk.repository.remote.model.SourceUrl
+import com.lbe.imsdk.service.http.interceptor.SignInterceptor
 import com.lbe.imsdk.widgets.IMImageView
 import kotlinx.coroutines.*
 
@@ -102,7 +103,7 @@ fun MediaPreviewDialog(
 
 @UnstableApi
 @Composable
-private fun PreviewContent(preInfo: MediaPreviewInfo) {
+private fun PreviewContent(preInfo: MediaPreviewInfo, ) {
     val saveProgress = remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope(getContext = { Dispatchers.IO })
     val dialogManager = LocalDialogManager.current

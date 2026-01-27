@@ -38,7 +38,7 @@ fun TestPage() {
             println("------------------->> $it")
             scope.launch {
                 val uriFile = it?.toUriFile()
-                val file = uriFile?.path
+                val file = uriFile?.cacheSourceFile()?.path
                 thumbnail.value = uriFile?.thumbnailImage()?.let { File(it.path) }
                 println("------------------->> ${file}")
             }

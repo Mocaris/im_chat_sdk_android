@@ -1,6 +1,5 @@
 package com.lbe.imsdk.extension
 
-import android.R.attr.path
 import android.annotation.*
 import android.content.*
 import android.graphics.*
@@ -11,12 +10,8 @@ import android.provider.*
 import android.util.*
 import androidx.activity.result.contract.*
 import androidx.core.database.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import com.lbe.imsdk.service.file.CompatUriFile
 import okhttp3.*
-import okio.buffer
-import okio.sink
-import okio.source
 import java.io.*
 
 /**
@@ -24,100 +19,9 @@ import java.io.*
  * @Author mocaris
  * @Date 2025-08-25
  */
-data class UriFileInfo(
-    val uri: Uri,
-//    val path: String,
-    val name: String,
-    val size: Long,
-    val width: Int,
-    val height: Int,
-    val mimeType: String?,
-    val duration: Long?
-) {
-
-    private val cacheFile by lazy { File(cacheDir, name) }
-
-    private var thumbnail: ThumbnailInfo? = null
-
-    fun isImage(): Boolean {
-        return mimeType?.startsWith("image") == true
-    }
-
-    fun isVideo(): Boolean {
-        return mimeType?.startsWith("video") == true
-    }
-
-    private fun thumbnailName(): String {
-        if (isImage()) {
-            return "thumbnail_$name"
-        }
-        return "thumbnail_${name}.jpg"
-    }
-
-    fun getInputStream(): InputStream? {
-        return appContext.contentResolver.openInputStream(uri)
-    }
-
-    /**
-     * 缓存到 app cache
-     */
-    suspend fun cacheSourceFile(): File? = withIOContext {
-        try {
-            if (cacheFile.exists() && cacheFile.length() == size) {
-                return@withIOContext cacheFile
-            }
-            val source =
-                getInputStream()?.source()?.buffer() ?: throw IOException("media file can not read")
-            cacheFile.delete()
-            cacheFile.createNewFile()
-            source.use {
-                cacheFile.sink().buffer().use {
-                    it.writeAll(source)
-                    it.flush()
-                }
-            }
-            return@withIOContext cacheFile
-        } catch (e: Exception) {
-            return@withIOContext null
-        }
-    }
-
-
-    fun clearCache() {
-        cacheFile.delete()
-        val thumbnailFile = File(cacheDir, thumbnailName())
-        thumbnailFile.deleteOnExit()
-        thumbnail = null
-    }
-
-    suspend fun thumbnailImage(maxSize: Int = 500): ThumbnailInfo? = withIOContext {
-        if (null == thumbnail) {
-            try {
-                val file = cacheSourceFile() ?: return@withIOContext null
-                if (isImage()) {
-                    val thumbnailFile = File(cacheDir, thumbnailName())
-                    thumbnail = file.generateImageThumbnail(
-                        originSize = Size(width, height),
-                        thumbnailFile = thumbnailFile,
-                        maxSize = maxSize
-                    )
-                } else if (isVideo()) {
-                    val thumbnailFile = File(cacheDir, thumbnailName())
-                    thumbnail = file.generateVideoThumbnail(
-                        thumbnailFile = thumbnailFile,
-                        maxSize = maxSize
-                    )
-                }
-            } catch (e: Exception) {
-                return@withIOContext null
-            }
-        }
-        return@withIOContext thumbnail
-    }
-}
 
 @SuppressLint("Range")
-suspend fun Uri.toUriFile(): UriFileInfo? {
+suspend fun Uri.toUriFile(): CompatUriFile? {
 //    suspend fun copyToCache(
 //        uri: Uri,
 //        fName: String
@@ -153,7 +57,7 @@ suspend fun Uri.toUriFile(): UriFileInfo? {
 //                    copyToCache(this, name)
 //                } ?: return null
 
-                return@use UriFileInfo(
+                return@use CompatUriFile(
                     this,
 //                    path,
                     name,

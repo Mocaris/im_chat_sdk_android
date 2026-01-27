@@ -37,4 +37,7 @@
     <string name="content_description_read">Read</string>
     <string name="content_description_close">Close</string>
     <string name="save_fail">Save Failed</string>
+    <string name="not_support_msg_type">Unsupported message types</string>
+    <string name="content_expand">Expand</string>
+    <string name="content_collapse">Collapse</string>
 </resources>

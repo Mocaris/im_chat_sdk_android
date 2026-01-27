@@ -12,7 +12,7 @@ import androidx.media3.common.util.*
 import com.lbe.imsdk.R
 import com.lbe.imsdk.provider.LocalDialogManager
 import com.lbe.imsdk.provider.LocalIMMessageEntry
-import com.lbe.imsdk.provider.LocalSessionViewModel
+import com.lbe.imsdk.provider.LocalCurrentConversationViewModel
 import com.lbe.imsdk.repository.db.entry.isSelfSender
 import com.lbe.imsdk.repository.remote.model.MediaMessageContent
 import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgSendStatus
@@ -25,7 +25,7 @@ import com.lbe.imsdk.widgets.IMUploadIndicator
 @Composable
 fun MessageImageContentView(content: MediaMessageContent, localTemp: MediaMessageContent? = null) {
     val ratio = content.width.toFloat() / content.height.toFloat()
-    val conversationVM = LocalSessionViewModel.current
+    val conversationVM = LocalCurrentConversationViewModel.current
     val iMMessageEntry = LocalIMMessageEntry.current
     Box(
         modifier = Modifier.wrapContentSize(),
@@ -50,7 +50,7 @@ fun MessageImageContentView(content: MediaMessageContent, localTemp: MediaMessag
                     conversationVM.previewMedia(iMMessageEntry,dialogManager)
                 }),
         )
-        LocalIMMessageEntry.current.let {
+        iMMessageEntry.let {
             val sendState = it.sendMutableState.intValue
             if (it.isSelfSender()) {
                 when (sendState) {

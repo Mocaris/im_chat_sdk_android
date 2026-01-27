@@ -67,6 +67,25 @@ class LbeImApiRepository(private val imBaseUrl: String) {
     }
 
     /**
+     * 获取历史会话列表
+     * @param  page 页码
+     * @param size 页大小
+     * @param sessionType 会话类型 1 历史，2 全部
+     */
+    suspend fun getHistorySessionList(page: Int, size: Int, sessionType: Int) =
+        withContext(Dispatchers.IO) {
+            apiService.getHistorySessionList(
+                body = mutableMapOf(
+                    "sessionType" to sessionType,
+                    "pagination" to mutableMapOf(
+                        "pageNumber" to page,
+                        "showNumber" to size
+                    )
+                ).asJsonBody
+            ).accept()
+        }
+
+    /**
      * 获取当前支持的会话列表
      */
     suspend fun getSupportSessionList(sessionIds: List<String>) = withContext(Dispatchers.IO) {

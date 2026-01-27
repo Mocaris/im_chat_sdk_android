@@ -23,7 +23,10 @@ import com.lbe.imsdk.R
 import com.lbe.imsdk.extension.coilDiskCache
 import com.lbe.imsdk.extension.md5Str
 import com.lbe.imsdk.manager.LbeIMSDKManager
+import com.lbe.imsdk.pages.conversation.vm.ConversationSateHolderVM
+import com.lbe.imsdk.provider.LocalCurrentConversationViewModel
 import com.lbe.imsdk.service.http.interceptor.HttpProgressInterceptor
+import com.lbe.imsdk.service.http.interceptor.SignInterceptor
 import kotlinx.coroutines.*
 import okhttp3.*
 import okio.buffer
@@ -81,7 +84,7 @@ fun IMImageView(
                     .listener(listener)
                     .httpHeaders(
                         NetworkHeaders.Builder()
-                            .add("lbeToken", LbeIMSDKManager.lbeToken ?: "")
+                            .add("lbeToken", SignInterceptor.lbeToken ?: "")
                             .build()
                     )
                     .also {
@@ -112,7 +115,7 @@ fun IMImageView(
 //            }
 //            .build(),
         )
-        if (progress.intValue > 0 && progress.intValue < 100) {
+        if (progress.intValue in 1..<100) {
 //            IMLoadingIndicator(
 //                modifier = Modifier
 //                    .align(Alignment.Center)

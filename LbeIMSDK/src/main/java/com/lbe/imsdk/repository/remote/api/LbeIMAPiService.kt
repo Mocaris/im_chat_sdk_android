@@ -48,6 +48,21 @@ interface LbeIMAPiService {
         @Body body: JsonBody
     ): SessionListResModel
 
+    /**
+     * 历史会话列表
+     * {
+     *   "sessionType": 2 //1 历史，2 全部
+     *   "pagination": {
+     *     "pageNumber": 1,
+     *     "showNumber": 1000,
+     *   }
+     * }
+     */
+    @POST("/miner-api/trans/session-list")
+    suspend fun getHistorySessionList(
+        @Body body: JsonBody
+    ): SessionListResModel
+
 
     /**
      * 获取当前支持的会话列表

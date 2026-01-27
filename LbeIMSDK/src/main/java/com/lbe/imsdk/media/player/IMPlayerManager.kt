@@ -1,16 +1,21 @@
 package com.lbe.imsdk.media.player
 
-import android.content.*
-import androidx.annotation.*
-import androidx.media3.common.*
-import androidx.media3.common.Player.*
-import androidx.media3.common.util.*
-import androidx.media3.datasource.*
-import androidx.media3.exoplayer.*
-import androidx.media3.exoplayer.source.*
-import com.lbe.imsdk.manager.LbeIMSDKManager
+import android.content.Context
+import androidx.annotation.FloatRange
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.common.Player.COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM
+import androidx.media3.common.Player.Commands
+import androidx.media3.common.Player.Listener
+import androidx.media3.common.VideoSize
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DefaultDataSource
+import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import com.lbe.imsdk.service.http.interceptor.SignInterceptor
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.io.Closeable
 
 /**
@@ -20,7 +25,12 @@ import java.io.Closeable
  */
 
 @UnstableApi
-class IMPlayerManager(private val context: Context, private val url: String) : Listener, Closeable {
+class IMPlayerManager(
+    private val context: Context,
+    private val url: String,
+    val lbeToken: String = SignInterceptor.lbeToken ?: ""
+) :
+    Listener, Closeable {
     private val scope = CoroutineScope(Dispatchers.Main)
 
     private val mediaSourceFactory: DefaultMediaSourceFactory by lazy {
@@ -29,7 +39,7 @@ class IMPlayerManager(private val context: Context, private val url: String) : L
                 context,
                 DefaultHttpDataSource.Factory().setDefaultRequestProperties(
                     mapOf(
-                        "lbeToken" to (LbeIMSDKManager.lbeToken ?: "")
+                        "lbeToken" to lbeToken
                     )
                 )
             )

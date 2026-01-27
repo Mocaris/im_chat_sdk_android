@@ -20,9 +20,7 @@ class LbeMainViewModel : ViewModel() {
 
 
     override fun onCleared() {
-        LbeIMSDKManager.close()
         dialogManager.dismissAll()
         super.onCleared()
-
     }
 }

@@ -2,9 +2,7 @@ package com.lbe.imsdk.repository
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.lbe.imsdk.manager.ConversationManager
 import com.lbe.imsdk.repository.remote.model.IMMsgModel
-import com.lbe.imsdk.repository.remote.model.SessionMsgListResModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -13,7 +11,7 @@ import kotlinx.coroutines.withContext
  *
  * @Date 2025-08-19
  */
-class MessagePagingSource(private val manager: ConversationManager) : PagingSource<Int, IMMsgModel>() {
+class MessagePagingSource() : PagingSource<Int, IMMsgModel>() {
     override fun getRefreshKey(state: PagingState<Int, IMMsgModel>): Int? {
 
         return null

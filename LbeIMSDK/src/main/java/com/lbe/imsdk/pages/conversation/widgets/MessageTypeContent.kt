@@ -6,6 +6,9 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.lbe.imsdk.R
+import com.lbe.imsdk.pages.conversation.widgets.TextContent
 import com.lbe.imsdk.pages.conversation.widgets.content.MessageAnswerContentView
 import com.lbe.imsdk.pages.conversation.widgets.content.MessageFaqContentView
 import com.lbe.imsdk.pages.conversation.widgets.content.MessageImageContentView
@@ -34,14 +37,14 @@ fun MessageTypeContent(imMsg: IMMessageEntry) {
                 }
 
                 IMMsgContentType.ImgContentType -> {
-                    val content = imMsg.mediaBodyContent.value
+                    val content = imMsg.localTempSource ?: imMsg.mediaBodyContent.value
                     if (null != content) {
                         MessageImageContentView(content, imMsg.localTempSource)
                     }
                 }
 
                 IMMsgContentType.VideoContentType -> {
-                    val content = imMsg.mediaBodyContent.value
+                    val content = imMsg.localTempSource ?: imMsg.mediaBodyContent.value
                     if (null != content) {
                         MessageVideoContentView(content, imMsg.localTempSource)
                     }
@@ -69,7 +72,7 @@ fun MessageTypeContent(imMsg: IMMessageEntry) {
                 }
 
                 IMMsgContentType.InvalidContentType -> {
-//                Text(text = "不支持的消息类型")
+                    TextContent("[${stringResource(R.string.not_support_msg_type)}]")
                 }
 
 //            IMMsgContentType.CreateSessionContentType

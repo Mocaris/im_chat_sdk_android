@@ -8,7 +8,6 @@ import androidx.compose.ui.*
 import androidx.compose.ui.graphics.*
 import androidx.lifecycle.viewmodel.compose.*
 import com.lbe.imsdk.pages.conversation.vm.ConversationListVM
-import com.lbe.imsdk.pages.conversation.vm.ConversationVM
 
 /**
  * 会话列表页面

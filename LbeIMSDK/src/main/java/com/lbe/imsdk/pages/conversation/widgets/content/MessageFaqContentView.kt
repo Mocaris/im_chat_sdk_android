@@ -19,11 +19,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.lbe.imsdk.provider.LocalSessionViewModel
+import com.lbe.imsdk.R
+import com.lbe.imsdk.provider.LocalConversationStateViewModel
+import com.lbe.imsdk.provider.LocalCurrentConversationViewModel
 import com.lbe.imsdk.repository.remote.model.FaqMessageContent
 import com.lbe.imsdk.repository.remote.model.enumeration.FaqType
 import com.lbe.imsdk.widgets.IMImageView
@@ -39,7 +42,9 @@ fun MessageFaqContentView(content: FaqMessageContent) {
         modifier = Modifier.wrapContentSize(),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Text(text = content.knowledgeBaseTitle, style = TextStyle(fontSize = 14.sp))
+        Text(text = content.knowledgeBaseTitle.ifEmpty {
+            stringResource(R.string.faq_default_greeting)
+        }, style = TextStyle(fontSize = 14.sp))
         FlowRow(
             verticalArrangement = Arrangement.spacedBy(5.dp),
             horizontalArrangement = Arrangement.spacedBy(5.dp)
@@ -53,7 +58,7 @@ fun MessageFaqContentView(content: FaqMessageContent) {
 
 @Composable
 private fun FaqItem(item: FaqMessageContent.KnowledgeList) {
-    val conversationVM = LocalSessionViewModel.current
+    val conversationVM = LocalCurrentConversationViewModel.current
     Column(
         modifier = Modifier
             .fillMaxWidth(0.3f)

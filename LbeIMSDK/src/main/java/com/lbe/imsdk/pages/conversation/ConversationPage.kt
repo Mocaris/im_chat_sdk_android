@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -25,19 +26,17 @@ import androidx.compose.ui.unit.*
 import androidx.lifecycle.viewmodel.compose.*
 import com.lbe.imsdk.R
 import com.lbe.imsdk.components.DialogManager
-import com.lbe.imsdk.extension.launchAsync
 import com.lbe.imsdk.extension.pop
-import com.lbe.imsdk.pages.conversation.vm.ConversationVM
+import com.lbe.imsdk.manager.LbeIMSDKManager
+import com.lbe.imsdk.pages.conversation.vm.ConversationSateHolderVM
+import com.lbe.imsdk.pages.conversation.vm.CurrentConversationVM
 import com.lbe.imsdk.pages.conversation.widgets.ConversationMessageItem
 import com.lbe.imsdk.pages.conversation.widgets.KeyboardInputBox
 import com.lbe.imsdk.pages.conversation.widgets.NetWorkStateView
 import com.lbe.imsdk.pages.navigation.PageRoute
 import com.lbe.imsdk.provider.*
-import com.lbe.imsdk.repository.remote.model.CreateSessionResModel
+import com.lbe.imsdk.repository.model.SDKInitConfig
 import com.lbe.imsdk.widgets.IMRefresh
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
@@ -49,32 +48,56 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConversationPage(
-    sessionData: CreateSessionResModel.SessionData,
     dialogManager: DialogManager = LocalDialogManager.current,
-    conversationVM: ConversationVM = viewModel(
-        key = sessionData.sessionId,
+    sdkInitConfig: SDKInitConfig = LocalSDKInitConfig.current,
+//    conversationVM: ConversationVM = viewModel(
+//        initializer = {
+//            ConversationVM(dialogManager)
+//        }),
+    conversationStateVM: ConversationSateHolderVM = viewModel(
         initializer = {
-            ConversationVM(sessionData, dialogManager)
+            ConversationSateHolderVM(sdkInitConfig, dialogManager)
         })
 ) {
     CompositionLocalProvider(
-        LocalSession provides sessionData,
-        LocalSessionViewModel provides conversationVM,
+        LocalConversationStateViewModel provides conversationStateVM,
     ) {
-        Scaffold(
-            modifier = Modifier
-                .fillMaxSize()
-                .imePadding(),
-            topBar = {
-                IMAppBar()
-            }) {
-            ConversationPageBody(conversationVM, it)
+        val currentSession = conversationStateVM.currentSession
+        if (null != currentSession) {
+            val currentConversationVM = viewModel(key = currentSession.sessionId) {
+                CurrentConversationVM(conversationStateVM, currentSession)
+            }
+            CompositionLocalProvider(
+                LocalSession provides currentSession,
+                LocalCurrentConversationViewModel provides currentConversationVM,
+            ) {
+                Scaffold(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .imePadding(), topBar = {
+                        IMAppBar()
+                    }) {
+                    ConversationPageBody(currentConversationVM, it)
+                }
+            }
+        } else {
+            Scaffold {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(it),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun ConversationPageBody(conversationVM: ConversationVM, padding: PaddingValues) {
+private fun ConversationPageBody(conversationVM: CurrentConversationVM, padding: PaddingValues) {
+    val holderVM = LocalConversationStateViewModel.current
     val requestPhotoLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = {
@@ -102,50 +125,67 @@ private fun ConversationPageBody(conversationVM: ConversationVM, padding: Paddin
     val userScrolling = remember { mutableStateOf(false) }
     val keyboardState = rememberKeyboardState()
 
-    fun scrollToBottom(anim: Boolean = true) {
-        if (!listState.canScrollForward || listState.isScrollInProgress) {
-            return
-        }
+    val firstVisibleItemIndex = remember { mutableIntStateOf(0) }
+    val totalItemsCount = remember { mutableIntStateOf(0) }
+
+    fun scrollToBottom() {
         scope.launch {
-            val itemsCount = listState.layoutInfo.totalItemsCount
-            if (anim) {
-                listState.animateScrollToItem(itemsCount - 1)
-            } else {
-                listState.scrollToItem(itemsCount - 1)
+            if (firstVisibleItemIndex.intValue >= totalItemsCount.intValue - 1
+                || !listState.canScrollForward
+                || listState.isScrollInProgress
+            ) {
+                return@launch
             }
-            conversationVM.onScrollToBottom()
+            val endOffset = listState.layoutInfo.viewportEndOffset
+            if (firstVisibleItemIndex.intValue == 0) {
+                listState.scrollToItem(totalItemsCount.intValue - 1, endOffset);
+            } else {
+                listState.animateScrollToItem(totalItemsCount.intValue - 1, endOffset)
+            }
+//            holderVM.onScrollToBottom()
         }
     }
     LaunchedEffect(listState) {
-        conversationVM.scrollToBottomEvent.collect {
-            scrollToBottom(it)
+        snapshotFlow {
+            listState.firstVisibleItemIndex
+        }.distinctUntilChanged().collect {
+            firstVisibleItemIndex.intValue = it
+        }
+    }
+    LaunchedEffect(listState) {
+        snapshotFlow {
+            listState.layoutInfo.totalItemsCount
+        }.distinctUntilChanged().collect {
+            totalItemsCount.intValue = it
+        }
+    }
+
+    LaunchedEffect(listState) {
+        holderVM.scrollToBottomEvent.collect {
+            scrollToBottom()
         }
     }
 
     //键盘弹起时
     LaunchedEffect(keyboardState) {
         if (keyboardState.isOpened()) {
-            delay(100)
-            conversationVM.scrollToBottom()
+            holderVM.scrollToBottom()
         }
     }
     // 有新消息时
-    LaunchedEffect(conversationVM.newMessageCount) {
-        snapshotFlow { conversationVM.newMessageCount.intValue }
-            .distinctUntilChanged()
-            .collect { size ->
-                if (size > 0 && !userScrolling.value) {
-                    delay(200)
-                    conversationVM.scrollToBottom()
-                }
+    LaunchedEffect(holderVM.newMessageCount) {
+        snapshotFlow { holderVM.newMessageCount.intValue }.distinctUntilChanged().collect { size ->
+            if (size > 0 && !userScrolling.value) {
+                holderVM.scrollToBottom()
             }
+        }
     }
     LaunchedEffect(listState) {
         snapshotFlow {
             listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
         }.collect {
             it?.let {
-                conversationVM.lastVisibleIndex(it)
+                holderVM.lastVisibleIndex(it)
             }
         }
     }
@@ -181,9 +221,8 @@ private fun ConversationPageBody(conversationVM: ConversationVM, padding: Paddin
             IMRefresh(
                 modifier = Modifier.fillMaxSize(),
                 refreshing = conversationVM.isRefreshing.value,
-                onRefresh = {
-                    conversationVM.loadHistory()
-                }) {
+                onRefresh = conversationVM::loadHistory
+            ) {
                 LazyColumn(
                     state = listState,
                     contentPadding = PaddingValues(15.dp),
@@ -205,13 +244,17 @@ private fun ConversationPageBody(conversationVM: ConversationVM, padding: Paddin
                             )
                         },
                 ) {
-                    itemsIndexed(items = conversationVM.msgList) { index, msg ->
-                        val preMsg = if (index > 0) conversationVM.msgList[index - 1] else null
+                    itemsIndexed(
+                        items = holderVM.msgList,
+                        key = { _, item -> "${item.serverMsgID}-${item.clientMsgID}" },
+                        contentType = { _, item -> item.msgType }
+                    ) { index, msg ->
+                        val preMsg = if (index > 0) holderVM.msgList[index - 1] else null
                         ConversationMessageItem(preMsg = preMsg, imMsg = msg)
                     }
                 }
             }
-            if (listState.canScrollForward) {
+            if (firstVisibleItemIndex.intValue < totalItemsCount.intValue - 1 && listState.canScrollForward) {
                 ConversationFloatTip()
             }
         }
@@ -219,13 +262,11 @@ private fun ConversationPageBody(conversationVM: ConversationVM, padding: Paddin
         if (timeoutReply) {
             Text(
                 text = stringResource(
-                    R.string.chat_session_status_3,
-                    conversationVM.timeOutConfig.value?.timeout ?: 5
+                    R.string.chat_session_status_3, conversationVM.timeOutConfig.value?.timeout ?: 5
                 ),
                 textAlign = TextAlign.Center,
                 style = TextStyle(
-                    fontSize = 12.sp,
-                    color = LocalThemeColors.current.conversationSystemTextColor
+                    fontSize = 12.sp, color = LocalThemeColors.current.conversationSystemTextColor
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -234,6 +275,7 @@ private fun ConversationPageBody(conversationVM: ConversationVM, padding: Paddin
             )
         }
         KeyboardInputBox(
+            maxLength = LbeIMSDKManager.TEXT_CONTENT_LENGTH,
             focusRequester = conversationVM.editFocusRequester,
             value = conversationVM.textFieldValue.value,
             onValueChange = { v ->
@@ -255,8 +297,8 @@ private fun ConversationPageBody(conversationVM: ConversationVM, padding: Paddin
 
 @Composable
 private fun BoxScope.ConversationFloatTip() {
-    val conversationVM = LocalSessionViewModel.current
-    val receiveMessageEvent = conversationVM.newMessageCount.intValue
+    val holderVM = LocalConversationStateViewModel.current
+    val receiveMessageEvent = holderVM.newMessageCount.intValue
     Row(
         modifier = Modifier
             .wrapContentSize()
@@ -264,24 +306,19 @@ private fun BoxScope.ConversationFloatTip() {
             .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.8f))
             .align(BiasAlignment(horizontalBias = 0.9f, verticalBias = 0.7f))
             .clickable(onClick = {
-                conversationVM.scrollToBottom()
+                holderVM.scrollToBottom()
             })
             .padding(vertical = 10.dp, horizontal = 15.dp),
         horizontalArrangement = Arrangement.spacedBy(
-            5.dp,
-            Alignment.CenterHorizontally
+            5.dp, Alignment.CenterHorizontally
         ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text =
-                if (receiveMessageEvent > 0)
-                    stringResource(
-                        R.string.chat_session_status_11,
-                        receiveMessageEvent
-                    )
-                else
-                    stringResource(R.string.chat_session_status_10)
+            text = if (receiveMessageEvent > 0) stringResource(
+                R.string.chat_session_status_11, receiveMessageEvent
+            )
+            else stringResource(R.string.chat_session_status_10)
         )
         Image(
             painterResource(R.drawable.ic_to_bottom),
@@ -295,18 +332,16 @@ private fun BoxScope.ConversationFloatTip() {
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun IMAppBar() {
-    val conversationVM = LocalSessionViewModel.current
+    val conversationVM = LocalCurrentConversationViewModel.current
     CenterAlignedTopAppBar(
         title = {
             Text(stringResource(R.string.chat_session_status_1))
-        },
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors().copy(
+        }, colors = TopAppBarDefaults.centerAlignedTopAppBarColors().copy(
             containerColor = Color.White,
             titleContentColor = Color.Black,
             actionIconContentColor = Color.Black,
             navigationIconContentColor = Color.Black
-        ),
-        navigationIcon = {
+        ), navigationIcon = {
             val context = LocalContext.current
             IconButton(onClick = {
                 if (PageRoute.routes.size > 1) {
@@ -327,8 +362,7 @@ private fun IMAppBar() {
             }) {
                 Image(
                     painter = painterResource(R.drawable.ic_cs),
-                    modifier = Modifier
-                        .size(24.dp),
+                    modifier = Modifier.size(24.dp),
                     contentDescription = "人工客服",
                 )
             }

@@ -58,8 +58,8 @@ class DialogManager {
 }
 
 @Composable
-fun DialogHost(content: @Composable () -> Unit) {
-    content()
+fun DialogHost(hostContent: @Composable () -> Unit) {
+    hostContent()
     val dialogManager = LocalDialogManager.current
     dialogManager.dialogQueue.firstOrNull()?.let {
         Dialog(

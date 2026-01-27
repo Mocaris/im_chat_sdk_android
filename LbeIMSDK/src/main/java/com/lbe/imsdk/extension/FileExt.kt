@@ -1,10 +1,10 @@
 package com.lbe.imsdk.extension
 
+import com.lbe.imsdk.service.file.CompatUriFile
 import okio.buffer
 import okio.sink
 import okio.source
 import java.io.File
-import kotlin.math.min
 
 /**
  *
@@ -14,8 +14,12 @@ import kotlin.math.min
 
 const val BIG_FILE_THRESHOLD = 1024 * 1024 * 5L
 
+fun CompatUriFile.needChunk(): Boolean {
+    return this.size >= BIG_FILE_THRESHOLD
+}
+
 fun File.needChunk(): Boolean {
-    return length()>=BIG_FILE_THRESHOLD
+    return length() >= BIG_FILE_THRESHOLD
 }
 
 // 文件分片读取 写到 缓存目录

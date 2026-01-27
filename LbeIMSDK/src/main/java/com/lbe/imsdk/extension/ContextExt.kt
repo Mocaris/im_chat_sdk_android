@@ -1,26 +1,14 @@
 package com.lbe.imsdk.extension
 
-import android.app.Application
-import android.content.*
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.snapshots.Snapshot.Companion.global
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
-import com.lbe.imsdk.provider.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
+import com.lbe.imsdk.provider.ContextProvider
+import kotlinx.coroutines.*
 
 /**
  *

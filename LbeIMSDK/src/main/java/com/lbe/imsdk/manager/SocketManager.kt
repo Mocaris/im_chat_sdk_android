@@ -1,10 +1,7 @@
 package com.lbe.imsdk.manager
 
 import android.util.Log
-import coil3.util.Logger
 import com.lbe.imsdk.extension.appContext
-import com.lbe.imsdk.extension.launchAsync
-import com.lbe.imsdk.extension.launchMain
 import com.lbe.imsdk.repository.db.entry.*
 import com.lbe.imsdk.repository.local.LbeImDataRepository
 import com.lbe.imsdk.repository.local.insert
@@ -12,14 +9,9 @@ import com.lbe.imsdk.repository.model.proto.*
 import com.lbe.imsdk.repository.remote.model.*
 import com.lbe.imsdk.service.NetworkMonitor
 import com.lbe.imsdk.service.http.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import java.io.*
-import java.security.Identity
 
 /**
  * socket manager
@@ -27,7 +19,6 @@ import java.security.Identity
  */
 class SocketManager(
     private val hostUrl: String,
-    session: CreateSessionResModel.SessionData
 ) : Closeable, SocketClient.SocketCallback {
     private val networkMonitor = NetworkMonitor(appContext)
 
@@ -37,14 +28,7 @@ class SocketManager(
 
     private val socketEventCallbacks = mutableListOf<SocketEventCallback>()
 
-    private val socket by lazy {
-        SocketClient.create(
-            hostUrl = hostUrl,
-            lbeToken = session.token,
-            lbeSession = session.sessionId,
-            callback = this@SocketManager
-        )
-    }
+    private var socket: SocketClient? = null
 
     private val pingMsg = IMMsg.MsgEntityToServer.newBuilder().setMsgType(IMMsg.MsgType.TextMsgType)
         .setMsgBody(IMMsg.MsgBody.newBuilder().setMsgBody("ping").build()).build()
@@ -52,8 +36,20 @@ class SocketManager(
     private var listenJob: Job? = null
 
     init {
-        connect()
         networkMonitor.startMonitoring()
+    }
+
+    fun initSessionSocket(
+        session: CreateSessionResModel.SessionData
+    ) {
+        socket?.close()
+        socket = SocketClient.create(
+            hostUrl = hostUrl,
+            lbeToken = session.token,
+            lbeSession = session.sessionId,
+            callback = this@SocketManager
+        )
+        connect()
     }
 
     private fun listenNet() {
@@ -62,9 +58,12 @@ class SocketManager(
         }
         listenJob = scope.launch {
             networkMonitor.isConnected.collect {
+                if (null == socket) {
+                    return@collect
+                }
                 if (it
-                    && connectState.value != SocketClient.ConnectState.OPENED
-                    && socket.connectState() != SocketClient.ConnectState.CONNECTING
+                    && !connectState.value.isConnected
+                    && !connectState.value.isConnecting
                 ) {
                     connect()
                 }
@@ -81,12 +80,13 @@ class SocketManager(
     }
 
     fun connect() {
-        socket.connect()
+        socket?.connect()
         listenNet()
     }
 
     fun disconnect() {
-        socket.disconnect()
+        listenJob?.cancel()
+        socket?.disconnect()
     }
 
     override fun getPingMessage(): ByteArray {
@@ -107,12 +107,12 @@ class SocketManager(
                     IMMsg.MsgType.TextMsgType -> {
                         /// parse to IMMessage, save to database
                         val imMessage = IMMessageEntry.fromProtobuf(msg.msgBody)
+                        imMessage.insert()
                         scope.launch {
                             for (callback in socketEventCallbacks) {
                                 callback.onReceiveMessage(imMessage)
                             }
                         }
-                        imMessage.insert()
                     }
 
                     //客服接入
@@ -126,13 +126,13 @@ class SocketManager(
                     IMMsg.MsgType.HasReadReceiptMsgType -> {
                         val receiptMsg = msg.hasReadReceiptMsg
                         with(receiptMsg) {
+                            val count =
+                                LbeImDataRepository.updateReadStatus(sessionID, hasReadSeqsList)
                             scope.launch {
                                 for (callback in socketEventCallbacks) {
                                     callback.onReadMessage(sessionID, hasReadSeqsList)
                                 }
                             }
-                            val count =
-                                LbeImDataRepository.updateReadStatus(sessionID, hasReadSeqsList)
                             Log.d("SocketManager", "updateReadStatus: $count")
                         }
                     }
@@ -183,8 +183,7 @@ class SocketManager(
     }
 
     override fun close() {
-        listenJob?.cancel()
-        socket.close()
+        disconnect()
         scope.cancel()
     }
 

@@ -59,7 +59,7 @@ fun LbeNavBackStackPage() {
                     is PageRoute.Test -> NavEntry(key = entry) { TestPage() }
                     is PageRoute.Init -> NavEntry(key = entry) { InitSdkPage() }
                     is PageRoute.Conversation -> NavEntry(key = entry) {
-                        ConversationPage(entry.sessionData)
+                        ConversationPage()
                     }
                     else -> NavEntry(key = PageRoute.Unknown) { UnknownPage() }
                 }

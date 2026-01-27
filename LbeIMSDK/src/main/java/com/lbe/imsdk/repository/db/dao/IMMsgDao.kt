@@ -32,7 +32,9 @@ interface IMMsgDao {
     suspend fun findMaxSeq(sessionId: String): Long?
 
     /**
-     * 分页查询 会话消息
+     * 查询最新的 count 条 消息
+     * 时间正序排序，取最后 count 条
+     *
      * 根据 sentime
      */
     @Query("SELECT * FROM (SELECT * FROM  tb_msg WHERE session_id = :sessionId AND (msg_type != ${IMMsgContentType.InvalidContentType}) ORDER BY send_time DESC LIMIT :count) ORDER BY send_time ASC")
@@ -42,10 +44,19 @@ interface IMMsgDao {
      * 根据 seq 查询历史消息
      * 正序
      * @param startSeq 起始 seq 包括
-     * @param endSeq 结束 seq 不包括
+     * @param endSeq 结束 seq 包括
      */
-    @Query("SELECT * FROM (SELECT * FROM  tb_msg WHERE session_id = :sessionId AND msg_seq < :endSeq AND msg_seq >= :startSeq AND (client_msg_id !='' OR server_msg_id !='') ORDER BY send_time DESC ) ORDER BY send_time ASC")
+    @Query("SELECT * FROM (SELECT * FROM  tb_msg WHERE session_id = :sessionId AND msg_seq <= :endSeq AND msg_seq >= :startSeq AND (client_msg_id !='' OR server_msg_id !='') ORDER BY send_time DESC ) ORDER BY send_time ASC")
     suspend fun findBySeq(sessionId: String, startSeq: Long, endSeq: Long): List<IMMessageEntry>
+
+    /**
+     * 根据 seq 查询历史消息
+     * 正序
+     * @param startSeq 起始 seq 包括
+     * @param endSeq 结束 seq 包括
+     */
+    @Query("SELECT * FROM  tb_msg WHERE session_id in (:sessionIds) AND (client_msg_id !='' OR server_msg_id !='') ORDER BY send_time ASC ")
+    suspend fun findBySessionIds(sessionIds: List<String>): List<IMMessageEntry>
 
 
     @Query("SELECT * FROM tb_msg WHERE client_msg_id = :clientMsgId ORDER BY send_time, msg_seq ASC")

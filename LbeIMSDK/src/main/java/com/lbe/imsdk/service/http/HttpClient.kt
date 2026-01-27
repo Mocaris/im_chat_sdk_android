@@ -28,7 +28,7 @@ object HttpClient {
     val contentType_stream = "application/octet-stream".toMediaType()
 
     val logInterceptor = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.HEADERS
+        level = HttpLoggingInterceptor.Level.BODY
     }
 
 

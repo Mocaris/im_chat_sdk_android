@@ -21,7 +21,7 @@ import java.io.*
 // * @Date 2025-07-16
 // */
 class LbeOssApiRepository(private val ossBaseUrl: String) {
-    val apiService by lazy {
+    val apiService: LbeOssApiService by lazy {
         HttpClient.retrofitFactory(ossBaseUrl)
             .create(LbeOssApiService::class.java)
     }
@@ -40,21 +40,21 @@ class LbeOssApiRepository(private val ossBaseUrl: String) {
         return@withContext apiService.singleUpload(
             signType = signType.value,
             file = part
-        ).accept()
+        ).accept()!!
     }
 
     suspend fun initMultiPartUpload(
         size: Long,
         name: String,
         contentType: String = "",
-    ): UploadBigFileResData.FileNodeData? {
+    ): UploadBigFileResData.FileNodeData {
         return apiService.initMultiPartUpload(
             body = mapOf(
                 "size" to size,
                 "name" to name,
                 "contentType" to contentType
             ).asJsonBody
-        ).accept()
+        ).accept()!!
     }
 
     suspend fun uploadBinary(

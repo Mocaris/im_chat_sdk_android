@@ -6,10 +6,8 @@ import com.lbe.imsdk.pages.navigation.*
 import com.lbe.imsdk.repository.model.*
 import com.lbe.imsdk.repository.remote.*
 import com.lbe.imsdk.repository.remote.model.LbeIMConfigModel
-import com.lbe.imsdk.repository.remote.model.SourceUrl
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.serialization.json.Json
 import java.io.*
 
 /**
@@ -17,7 +15,9 @@ import java.io.*
  *
  * @Date 2025-07-16
  */
-object LbeIMSDKManager : Closeable {
+object LbeIMSDKManager  {
+    const val TEXT_CONTENT_LENGTH = 1000
+
     var sdkInitConfig: SDKInitConfig? = null
         private set
     val sdkInitLoading = mutableStateOf(false)
@@ -25,9 +25,6 @@ object LbeIMSDKManager : Closeable {
     val sdkInitException = mutableStateOf<Exception?>(null)
 
     private val scope by lazy { CoroutineScope(Dispatchers.Default) }
-
-    internal var lbeToken: String? = null
-    internal var lbeSession: String? = null
 
     //init job
     private var initJob: Job? = null
@@ -74,70 +71,43 @@ object LbeIMSDKManager : Closeable {
         }
     }
 
+    private var hostData: LbeIMConfigModel.HostData? = null
     private suspend fun realInit() {
-        reset()
-        val sdkInitConfig = sdkInitConfig ?: throw Exception("sdkInitConfig is null")
-        val apiRepository = LbeApiRepository(domain = sdkInitConfig.domain)
-        var hostData = getHostConfig(sdkInitConfig.domain)
-        if (null == hostData || hostData.hasConfigEmpty()) {
-            hostData = apiRepository.initConfig()
-        } else {
-            scope.launchIO {
-                try {
-                    val data = apiRepository.initConfig()
-                    saveHostConfig(sdkInitConfig.domain, data)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    e.catchException()
+        with(sdkInitConfig ?: throw Exception("sdkInitConfig is null")) {
+            val initConfig = this@with
+            val apiRepository = LbeApiRepository(domain = initConfig.domain)
+            hostData = getHostConfig(initConfig.domain)
+            if (null == hostData || hostData!!.hasConfigEmpty()) {
+                hostData = apiRepository.initConfig()
+            } else {
+                scope.launchIO {
+                    try {
+                        val data = apiRepository.initConfig()
+                        saveHostConfig(initConfig.domain, data)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        e.catchException()
+                    }
                 }
             }
+            with(hostData!!.rest) {
+                if (this.isNotEmpty()) {
+                    imApiRepository = LbeImApiRepository(this.first())
+                }
+            }
+            with(hostData!!.oss) {
+                if (this.isNotEmpty()) {
+                    ossApiRepository = LbeOssApiRepository(this.first())
+                }
+            }
+            //init socket manager
+            with(hostData!!.ws) {
+                if (this.isNotEmpty()) {
+                    socketManager = SocketManager(this.first())
+                }
+            }
+            PageRoute.routes.offAll(PageRoute.Conversation)
         }
-        if (hostData.rest.isNotEmpty()) {
-            imApiRepository = LbeImApiRepository(hostData.rest.first())
-        }
-        if (hostData.oss.isNotEmpty()) {
-            ossApiRepository = LbeOssApiRepository(hostData.oss.first())
-        }
-        initSession(sdkInitConfig, hostData)
-    }
-
-    private suspend fun initSession(
-        sdkInitConfig: SDKInitConfig,
-        hostData: LbeIMConfigModel.HostData
-    ) {
-        val session = imApiRepository?.createSession(
-            device = sdkInitConfig.device,
-            email = sdkInitConfig.email,
-            extraInfo = Json.encodeToString(sdkInitConfig.extraInfo.map { it.key to it.value.toString() }
-                .toMap()),
-            groupID = sdkInitConfig.groupID,
-            headIcon = if (sdkInitConfig.parseHeaderIcon is SourceUrl) "" else sdkInitConfig.headerIcon,
-            language = sdkInitConfig.supportLanguage,
-            nickId = sdkInitConfig.nickId,
-            nickName = sdkInitConfig.nickName,
-            phone = sdkInitConfig.phone,
-            source = sdkInitConfig.source,
-            uid = ""
-        )?.also {
-            lbeToken = it.token
-            lbeSession = it.sessionId
-        } ?: return
-        //init socket manager
-        if (hostData.ws.isNotEmpty()) {
-            socketManager = SocketManager(hostData.ws.first(), session)
-        }
-        PageRoute.routes.offAll(PageRoute.Conversation(session))
-    }
-
-    private fun reset() {
-        socketManager?.close()
-        socketManager = null
-    }
-
-    override fun close() {
-        socketManager?.close()
-        socketManager = null
-        scope.cancel()
     }
 
 }

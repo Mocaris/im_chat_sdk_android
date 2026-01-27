@@ -20,12 +20,12 @@ object LbeImDataRepository {
 
     }
 
-    suspend fun insertMsg(msg: IMMessageEntry) = withIOContext {
-        msgDao.insert(msg)
+    suspend fun insertMsg(msg: IMMessageEntry): Long = withIOContext {
+        return@withIOContext msgDao.insert(msg)
     }
 
-    suspend fun upsertMsg(msg: IMMessageEntry) = withIOContext {
-        msgDao.upsert(msg)
+    suspend fun upsertMsg(msg: IMMessageEntry): Long = withIOContext {
+        return@withIOContext msgDao.upsert(msg)
     }
 
     suspend fun findMaxSeq(sessionId: String): Long? = withIOContext {
@@ -41,6 +41,14 @@ object LbeImDataRepository {
      */
     suspend fun findSessionMsgList(sessionId: String, startSeq: Long, endSeq: Long) = withIOContext {
         return@withIOContext msgDao.findBySeq(sessionId, startSeq.coerceAtLeast(0), endSeq)
+    }
+
+    /**
+     * 获取会话消息列表
+     * 用于有多个历史会话列表
+     */
+    suspend fun findSessionMsgList(sessionIds: List<String>) = withIOContext {
+        return@withIOContext msgDao.findBySessionIds(sessionIds)
     }
 
     suspend fun findLastestSessionMsgList(sessionId: String, count: Int) = withIOContext {

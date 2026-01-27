@@ -12,6 +12,12 @@ class SignInterceptor : Interceptor {
 
     private val sdkConfig get() = LbeIMSDKManager.sdkInitConfig
 
+    companion object {
+
+        var lbeToken: String? = null
+        var lbeSession: String? = null
+    }
+
     override fun intercept(chain: Interceptor.Chain): Response {
         var request = chain.request()
         val header = hashMapOf<String, String>()
@@ -21,10 +27,10 @@ class SignInterceptor : Interceptor {
         if (null == request.header("lbeIdentity")) {
             header["lbeIdentity"] = sdkConfig?.lbeIdentity ?: ""
         }
-        LbeIMSDKManager.lbeToken?.let {
+        lbeToken?.let {
             header["lbeToken"] = it
         }
-        LbeIMSDKManager.lbeSession?.let {
+        lbeSession?.let {
             header["lbeSession"] = it
         }
         if (header.isNotEmpty()) {

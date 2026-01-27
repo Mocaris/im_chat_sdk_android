@@ -1,6 +1,8 @@
 package com.lbe.imsdk.repository.db.entry
 
 import androidx.compose.runtime.*
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.room.*
 import com.lbe.imsdk.repository.db.entry.convert.TempLocalSourceCovert
 import com.lbe.imsdk.repository.db.entry.convert.UploadTaskConvert
@@ -190,6 +192,9 @@ data class IMMessageEntry(
         }
 
     }
+
+    @Ignore
+    var layoutCacheSize: Dp = 0.dp
 
 
     val readMutableState by lazy { mutableIntStateOf(this.status) }

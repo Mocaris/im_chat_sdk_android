@@ -27,7 +27,8 @@
     <string name="chat_session_status_14">智能机器人</string>
     <string name="chat_session_status_16">用户 %s</string>
     <string name="chat_session_status_15">游客 %s</string>
-    
+
+    <string name="not_support_msg_type">不支持的消息类型</string>
     <!-- FAQ -->
     <string name="faq_default_greeting">Hi~请简单的描述一下你的问题，我们会尽力协助哦。</string>
     <string name="not_implemented">Not implement yet. --->>> { %d }</string>
@@ -37,4 +38,6 @@
     <string name="content_description_send_fail">发送失败</string>
     <string name="content_description_read">已读</string>
     <string name="content_description_close">关闭</string>
+    <string name="content_expand">展开</string>
+    <string name="content_collapse">收起</string>
 </resources>

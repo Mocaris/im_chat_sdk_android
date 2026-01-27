@@ -3,6 +3,7 @@ package com.lbe.imsdk.extension
 import android.widget.Toast
 import com.lbe.imsdk.R
 import com.lbe.imsdk.service.http.NetException
+import com.lbe.imsdk.service.http.extension.supportMessage
 import okio.IOException
 
 /**
@@ -13,7 +14,7 @@ import okio.IOException
 
 fun Exception.catchException(
     block: (Pair<Int, String>) -> Unit = {
-        this.message?.showToast()
+        it.second.showToast()
     }
 ) {
     block(
@@ -23,7 +24,7 @@ fun Exception.catchException(
             }
 
             is NetException -> {
-                Pair(this.code, this.message)
+                Pair(this.code, this.supportMessage())
             }
 
             else -> {

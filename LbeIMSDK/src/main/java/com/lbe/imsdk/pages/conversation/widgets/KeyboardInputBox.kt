@@ -32,6 +32,7 @@ import com.lbe.imsdk.widgets.*
 @Composable
 fun KeyboardInputBox(
     value: TextFieldValue,
+    maxLength: Int = 500,
     onValueChange: (TextFieldValue) -> Unit,
     enabled: Boolean = true,
     focusRequester: FocusRequester? = null,
@@ -45,7 +46,11 @@ fun KeyboardInputBox(
     val lineCount = remember { mutableIntStateOf(0) }
 
     IMEditText(
-        value,
+        value.let {
+            if (it.text.length > maxLength) {
+                it.copy(text = value.text.take(maxLength))
+            } else it
+        },
         enabled = enabled,
         modifier = Modifier
             .fillMaxWidth()
@@ -53,7 +58,11 @@ fun KeyboardInputBox(
             .focusRequester(focusRequester)
             .onFocusChanged(onFocusChanged),
         onValueChange = { v ->
-            onValueChange(v)
+            if (v.text.length > maxLength) {
+                onValueChange(v.copy(text = v.text.take(maxLength)))
+            } else {
+                onValueChange(v)
+            }
         },
         keyboardOptions = KeyboardOptions(
             imeAction = ImeAction.Unspecified,

@@ -13,7 +13,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.*
 import com.lbe.imsdk.R
 import com.lbe.imsdk.manager.LbeIMSDKManager
-import com.lbe.imsdk.provider.LocalSessionViewModel
+import com.lbe.imsdk.provider.LocalConversationStateViewModel
+import com.lbe.imsdk.provider.LocalCurrentConversationViewModel
 import com.lbe.imsdk.provider.LocalThemeColors
 import com.lbe.imsdk.service.http.SocketClient
 
@@ -23,7 +24,7 @@ import com.lbe.imsdk.service.http.SocketClient
  */
 @Composable
 fun NetWorkStateView() {
-    val netState = LocalSessionViewModel.current.netState.value
+    val netState = LocalCurrentConversationViewModel.current.netState.value
     val socketState = LbeIMSDKManager.socketManager?.connectState?.collectAsState()?.value
     AnimatedVisibility(
         visible = !netState || (socketState != SocketClient.ConnectState.CONNECTING && socketState != SocketClient.ConnectState.OPENED),

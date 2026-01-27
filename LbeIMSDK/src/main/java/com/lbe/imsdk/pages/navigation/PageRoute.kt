@@ -30,10 +30,7 @@ interface PageRoute {
      * conversation page route
      */
 //    @Serializable
-    data class Conversation(
-        val sessionData: CreateSessionResModel.SessionData
-    ) : PageRoute {
-    }
+    data object Conversation : PageRoute
 
     /**
      * init page route

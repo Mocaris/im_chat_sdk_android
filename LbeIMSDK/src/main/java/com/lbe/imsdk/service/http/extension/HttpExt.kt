@@ -1,11 +1,9 @@
 package com.lbe.imsdk.service.http.extension
 
-import com.lbe.imsdk.*
-import com.lbe.imsdk.extension.*
-import com.lbe.imsdk.repository.remote.model.TimeOutConfigModel
-import com.lbe.imsdk.service.http.*
-import com.lbe.imsdk.service.http.model.*
-import retrofit2.*
+import com.lbe.imsdk.R
+import com.lbe.imsdk.extension.appContext
+import com.lbe.imsdk.service.http.NetException
+import com.lbe.imsdk.service.http.model.NetResponseData
 
 /**
  *
@@ -18,4 +16,11 @@ fun <T : NetResponseData<R>, R> T.accept(): R? {
         throw NetException(this.msg, code)
     }
     return this.data
+}
+
+fun NetException.supportMessage(): String {
+    return when (code) {
+        20006 -> appContext.getString(R.string.chat_session_status_28)
+        else -> message
+    }
 }

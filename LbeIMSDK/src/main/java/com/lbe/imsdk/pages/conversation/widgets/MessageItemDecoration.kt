@@ -3,29 +3,23 @@ package com.lbe.imsdk.pages.conversation.widgets
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.lbe.imsdk.R
-import com.lbe.imsdk.provider.LocalSessionViewModel
+import com.lbe.imsdk.provider.LocalCurrentConversationViewModel
 import com.lbe.imsdk.provider.LocalThemeColors
 import com.lbe.imsdk.repository.db.entry.IMMessageEntry
 import com.lbe.imsdk.repository.db.entry.isSelfSender
 import com.lbe.imsdk.repository.model.proto.IMMsg
-import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgSendStatus
 import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgReadStatus
+import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgSendStatus
 
 /**
  * 消息item装饰
@@ -43,6 +37,7 @@ fun MessageItemDecoration(
     val msgType = imMsg.msgType
     val isSelfSender = imMsg.isSelfSender()
     val themeColors = LocalThemeColors.current
+    val density = LocalDensity.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -56,6 +51,14 @@ fun MessageItemDecoration(
         Box(
             modifier = Modifier
                 .wrapContentSize()
+                .then(
+                    if (imMsg.layoutCacheSize > 0.dp)
+                        Modifier.sizeIn(minHeight = imMsg.layoutCacheSize)
+                    else Modifier.onSizeChanged {
+                        imMsg.layoutCacheSize = with(density) {
+                            it.height.toDp()
+                        }
+                    })
                 .then(
                     if (
                         msgType == IMMsg.ContentType.ImgContentType_VALUE ||
@@ -81,7 +84,7 @@ fun MessageStatus(
 ) {
     if (imMsg.isSelfSender()) {
         if (imMsg.sendMutableState.intValue == IMMsgSendStatus.FAILURE) {
-            val conversationVM = LocalSessionViewModel.current
+            val conversationVM = LocalCurrentConversationViewModel.current
             Image(
                 painter = painterResource(R.drawable.ic_send_fail),
                 contentDescription = "发送失败",
