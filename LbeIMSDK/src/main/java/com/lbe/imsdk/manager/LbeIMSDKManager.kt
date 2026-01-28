@@ -28,11 +28,11 @@ object LbeIMSDKManager  {
 
     //init job
     private var initJob: Job? = null
-    var imApiRepository: LbeImApiRepository? = null
+    internal var imApiRepository: LbeImApiRepository? = null
         private set
-    var ossApiRepository: LbeOssApiRepository? = null
+    internal  var ossApiRepository: LbeOssApiRepository? = null
         private set
-    var socketManager: SocketManager? = null
+    internal  var socketManager: SocketManager? = null
         private set
 
     val initSuccessful get() = sdkInitConfig != null && (socketManager != null || ossApiRepository != null || imApiRepository != null)
