@@ -59,6 +59,7 @@ class ConversationSateHolderVM(
     val endSession = mutableStateOf(true)
 
     val scrollToBottomEvent = MutableSharedFlow<Boolean>()
+
     /// ui state
     val textFieldValue = mutableStateOf(TextFieldValue())
     val editFocusRequester = FocusRequester()
@@ -86,8 +87,7 @@ class ConversationSateHolderVM(
                     imApiRepository?.createSession(
                         device = initConfig.device,
                         email = initConfig.email,
-                        extraInfo = Json.encodeToString(initConfig.extraInfo.map { it.key to it.value.toString() }
-                            .toMap()),
+                        extraInfo = initConfig.extraInfo,
                         groupID = initConfig.groupID,
                         headIcon = if (initConfig.parseHeaderIcon is SourceUrl) "" else initConfig.headerIcon,
                         language = initConfig.supportLanguage,

@@ -37,7 +37,7 @@ object LbeIMSDKManager  {
 
     val initSuccessful get() = sdkInitConfig != null && (socketManager != null || ossApiRepository != null || imApiRepository != null)
 
-    fun startInit(sdkInitConfig: SDKInitConfig) {
+    internal fun startInit(sdkInitConfig: SDKInitConfig) {
 //        PageRoute.routes.off(PageRoute.Test)
 //        return
         this.sdkInitConfig = sdkInitConfig

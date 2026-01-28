@@ -18,7 +18,7 @@ data class SDKInitConfig(
     val language: String,
     val device: String,
     val source: String,
-    val extraInfo: MutableMap<String, Any>,
+    val extraInfo: String,
     var groupID: String,
     var domain: String,
 ) : Serializable {

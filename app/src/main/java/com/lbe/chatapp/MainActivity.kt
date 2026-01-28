@@ -152,7 +152,7 @@ class MainActivity : ComponentActivity() {
                                     source = "",
                                     nickId = nickId.value,
                                     nickName = nickName.value,
-                                    extraInfo = mutableMapOf()
+                                    extraInfo = "",
                                 )
                             )
                             finish()
