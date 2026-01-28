@@ -64,10 +64,6 @@ class CurrentConversationVM(
 
     private var sessionListModel: SessionListResModel.SessionListDataModel? = null
 
-    /// ui state
-    val textFieldValue = mutableStateOf(TextFieldValue())
-    val editFocusRequester = FocusRequester()
-    val isRefreshing = mutableStateOf(false)
 
     init {
         initState()
@@ -134,7 +130,8 @@ class CurrentConversationVM(
     private suspend fun loadLostMessage() = withIOContext {
         try {
             val lastestSeq = msgManager.getRemoteLastestSeq()
-            val messageEntry = msgList.filter { it.sessionId==sessionId }.maxByOrNull { it.msgSeq }
+            val messageEntry =
+                msgList.filter { it.sessionId == sessionId }.maxByOrNull { it.msgSeq }
             if (messageEntry == null || lastestSeq <= messageEntry.msgSeq) {
                 return@withIOContext
             }
@@ -249,7 +246,7 @@ class CurrentConversationVM(
     }
 
     override fun onCleared() {
-        editFocusRequester.freeFocus()
+        holderVM.editFocusRequester.freeFocus()
         LbeIMSDKManager.socketManager?.disconnect()
         LbeIMSDKManager.socketManager?.removeSocketEventCallback(this)
         super.onCleared()
@@ -258,9 +255,9 @@ class CurrentConversationVM(
     fun loadHistory() {
         viewModelScope.launchIO {
             try {
-                if (isRefreshing.value) return@launchIO
+                if (holderVM.isRefreshing.value) return@launchIO
                 withMainContext {
-                    isRefreshing.value = true
+                    holderVM.isRefreshing.value = true
                 }
                 suspend fun loadMoreSessionHistory() {
                     with(sessionListModel ?: return) {
@@ -298,18 +295,18 @@ class CurrentConversationVM(
             } finally {
                 delay(300)
                 withMainContext {
-                    isRefreshing.value = false
+                    holderVM.isRefreshing.value = false
                 }
             }
         }
     }
 
     fun sendTxtMessage() = synchronized(this) {
-        val text = textFieldValue.value.text
+        val text = holderVM.textFieldValue.value.text.trim()
         if (text.isEmpty()) {
             return@synchronized
         }
-        textFieldValue.value = TextFieldValue(text = "")
+        holderVM.textFieldValue.value = TextFieldValue(text = "")
         viewModelScope.launchIO {
             val chunked = text.chunked(LbeIMSDKManager.TEXT_CONTENT_LENGTH)
             try {
@@ -335,40 +332,46 @@ class CurrentConversationVM(
         holderVM.scrollToBottom()
     }
 
-    fun sendMediaMessage(picUri: Uri) {
+    fun sendMultipleMediaMessage(picUriList: List<Uri>) {
         viewModelScope.launchIO {
-            try {
-                val uriFile = picUri.toUriFile() ?: throw Exception("uriFile is null")
-                val thumbnail = uriFile.thumbnailImage() ?: throw Exception("thumbnail is null")
-                val sourceFile = uriFile.cacheSourceFile() ?: throw Exception("sourceFile is null")
-                val messageBody = SendMessageBody.createMediaMessage(
-                    MediaMessageContent(
-                        width = uriFile.width,
-                        height = uriFile.height,
-                        thumbnail = SourceUrl(key = "", url = ""),
-                        resource = SourceUrl(key = "", url = ""),
-                    ),
-                    uriFile.isVideo()
-                )
-                val localMsg = createLocalMessage(messageBody).also {
-                    it.localTempSource = MediaMessageContent(
-                        width = uriFile.width,
-                        height = uriFile.height,
-                        thumbnail = SourceUrl(key = "", url = thumbnail.path),
-                        resource = SourceUrl(key = "", url = sourceFile.path),
-                    )
-                    it.uploadTask = IMUploadTask(
-                        width = uriFile.width,
-                        height = uriFile.height,
-                        thumbnail = thumbnail.path,
-                        filePath = sourceFile.path,
-                    )
-                }
-                saveMessageEntry(localMsg)
-                sendMessageInternal(localMsg)
-            } catch (e: Exception) {
-                appContext.getString(R.string.content_description_send_fail).showToast()
+            for (picUri in picUriList) {
+                sendMediaMessage(picUri)
             }
+        }
+    }
+
+    suspend fun sendMediaMessage(picUri: Uri) = withIOContext {
+        try {
+            val uriFile = picUri.toUriFile() ?: throw Exception("uriFile is null")
+            val thumbnail = uriFile.thumbnailImage() ?: throw Exception("thumbnail is null")
+            val sourceFile = uriFile.cacheSourceFile() ?: throw Exception("sourceFile is null")
+            val messageBody = SendMessageBody.createMediaMessage(
+                MediaMessageContent(
+                    width = uriFile.width,
+                    height = uriFile.height,
+                    thumbnail = SourceUrl(key = "", url = ""),
+                    resource = SourceUrl(key = "", url = ""),
+                ),
+                uriFile.isVideo()
+            )
+            val localMsg = createLocalMessage(messageBody).also {
+                it.localTempSource = MediaMessageContent(
+                    width = uriFile.width,
+                    height = uriFile.height,
+                    thumbnail = SourceUrl(key = "", url = thumbnail.path),
+                    resource = SourceUrl(key = "", url = sourceFile.path),
+                )
+                it.uploadTask = IMUploadTask(
+                    width = uriFile.width,
+                    height = uriFile.height,
+                    thumbnail = thumbnail.path,
+                    filePath = sourceFile.path,
+                )
+            }
+            saveMessageEntry(localMsg)
+            sendMessageInternal(localMsg)
+        } catch (e: Exception) {
+            appContext.getString(R.string.content_description_send_fail).showToast()
         }
     }
 

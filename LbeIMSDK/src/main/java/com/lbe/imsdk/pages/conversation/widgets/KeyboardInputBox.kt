@@ -9,6 +9,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.*
 import androidx.compose.ui.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.*
 import androidx.compose.ui.focus.*
 import androidx.compose.ui.graphics.*
@@ -78,13 +80,14 @@ fun KeyboardInputBox(
             InputDecorationBox(
                 enableSend = value.text.isNotEmpty(),
                 lineCount = lineCount.intValue,
-                content = inputBox,
                 onSend = onSend,
                 onPickPhoto = onPickPhoto,
                 onExpanded = {
                     showExpandedEdit.value = true
-                }
-            )
+                },
+            ) {
+                inputBox()
+            }
         }
     )
     if (showExpandedEdit.value) {
@@ -126,7 +129,7 @@ private fun InputDecorationBox(
     onSend: () -> Unit,
     onPickPhoto: () -> Unit,
     onExpanded: () -> Unit = {},
-    content: @Composable () -> Unit
+    content: @Composable BoxScope.() -> Unit
 ) {
     val layoutHeight = remember { mutableStateOf<Int?>(null) }
     Row(
@@ -139,7 +142,8 @@ private fun InputDecorationBox(
         Box(
             modifier = Modifier
                 .wrapContentHeight()
-                .then(if (layoutHeight.value != null) Modifier.defaultMinSize(minHeight = layoutHeight.value!!.px2Dp()) else Modifier),
+                .then(layoutHeight.value?.let { Modifier.defaultMinSize(minHeight = layoutHeight.value!!.px2Dp()) }
+                    ?: Modifier),
         ) {
             InputBoxActionWidget(
                 painterResource(R.drawable.ic_open_file),
@@ -152,9 +156,7 @@ private fun InputDecorationBox(
                 modifier = Modifier.align(Alignment.TopStart),
                 visible = lineCount >= 4
             ) {
-                InputExpandedWidget(
-                    onClick = onExpanded
-                )
+                InputExpandedWidget(onClick = onExpanded)
             }
         }
         Row(
@@ -162,16 +164,20 @@ private fun InputDecorationBox(
                 .weight(1f)
                 .clip(RoundedCornerShape(corner = CornerSize(12.dp)))
                 .background(Color.White)
-                .onGloballyPositioned {
-                    layoutHeight.value = it.size.height
+                .onSizeChanged {
+                    if (it.height > 0) {
+                        layoutHeight.value = it.height
+                    }
                 },
         ) {
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .wrapContentHeight()
-                    .padding(10.dp),
-                contentAlignment = Alignment.CenterStart, content = { content() }
+                    .padding(10.dp)
+                    .align(Alignment.CenterVertically),
+                contentAlignment = Alignment.CenterStart,
+                content = content
             )
             InputBoxActionWidget(
                 painterResource(R.drawable.ic_send),

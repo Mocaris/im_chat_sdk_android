@@ -1,9 +1,11 @@
 package com.lbe.imsdk.widgets
 
+import androidx.annotation.FloatRange
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.*
 import androidx.compose.ui.layout.*
 import androidx.compose.ui.platform.*
@@ -19,6 +21,7 @@ import coil3.network.httpHeaders
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import coil3.request.ImageRequest
 import coil3.request.Options
+import coil3.request.crossfade
 import com.lbe.imsdk.R
 import com.lbe.imsdk.extension.coilDiskCache
 import com.lbe.imsdk.extension.md5Str
@@ -31,6 +34,7 @@ import kotlinx.coroutines.*
 import okhttp3.*
 import okio.buffer
 import okio.source
+import org.jetbrains.annotations.Range
 import java.io.ByteArrayInputStream
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
@@ -47,6 +51,9 @@ fun IMImageView(
     modifier: Modifier = Modifier,
     key: String? = null,
     url: String,
+    // 是否加载缩率图
+    @FloatRange(from = 0.0, to = 1.0)
+    thumbnail: Float = 1f,
     placeholder: Painter? = null,
     error: Painter? = null,
     contentScale: ContentScale = ContentScale.Crop,
@@ -58,7 +65,8 @@ fun IMImageView(
 ) {
     val progress = remember { mutableIntStateOf(0) }
     val context = LocalContext.current
-    Box(
+    val density = LocalDensity.current
+    BoxWithConstraints(
         modifier = Modifier.wrapContentSize(),
         contentAlignment = Alignment.Center
     ) {
@@ -81,6 +89,14 @@ fun IMImageView(
             model =
                 ImageRequest.Builder(context)
                     .data(url)
+                    .also { r ->
+                        if (thumbnail > 0 && thumbnail < 1) {
+                            with(density) {
+                                r.size(maxWidth.times(thumbnail).roundToPx())
+                            }
+                        }
+                    }
+                    .crossfade(true)
                     .listener(listener)
                     .httpHeaders(
                         NetworkHeaders.Builder()

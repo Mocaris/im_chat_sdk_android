@@ -65,10 +65,7 @@ private fun FaqItem(item: FaqMessageContent.KnowledgeList) {
             .sizeIn(maxWidth = 150.dp)
             .aspectRatio(0.9f)
             .clip(RoundedCornerShape(5.dp))
-            .background(
-                color = MaterialTheme.colorScheme.background,
-
-                )
+            .background(color = MaterialTheme.colorScheme.background)
             .clickable(onClick = {
                 conversationVM.getFaq(FaqType.KNOWLEDGE_POINT, id = item.id)
             })

@@ -194,8 +194,7 @@ data class IMMessageEntry(
     }
 
     @Ignore
-    var layoutCacheSize: Dp = 0.dp
-
+    var cacheLayoutHeight: Dp? = null
 
     val readMutableState by lazy { mutableIntStateOf(this.status) }
 

@@ -52,8 +52,6 @@ interface IMMsgDao {
     /**
      * 根据 seq 查询历史消息
      * 正序
-     * @param startSeq 起始 seq 包括
-     * @param endSeq 结束 seq 包括
      */
     @Query("SELECT * FROM  tb_msg WHERE session_id in (:sessionIds) AND (client_msg_id !='' OR server_msg_id !='') ORDER BY send_time ASC ")
     suspend fun findBySessionIds(sessionIds: List<String>): List<IMMessageEntry>
