@@ -1,7 +1,10 @@
 package com.lbe.imsdk.manager
 
 import android.util.Log
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import com.lbe.imsdk.extension.appContext
+import com.lbe.imsdk.provider.AppLifecycleObserver
 import com.lbe.imsdk.repository.db.entry.*
 import com.lbe.imsdk.repository.local.LbeImDataRepository
 import com.lbe.imsdk.repository.local.insert
@@ -184,7 +187,6 @@ class SocketManager(
 
     override fun close() {
         disconnect()
-        scope.cancel()
     }
 
 }

@@ -1,6 +1,7 @@
 package com.lbe.imsdk.service.http
 
 import android.os.*
+import com.lbe.imsdk.provider.AppLifecycleObserver
 import com.lbe.imsdk.service.http.HttpClient.logInterceptor
 import okhttp3.*
 import okio.*
@@ -66,6 +67,8 @@ private class SocketClientImpl(
     val callback: SocketClient.SocketCallback
 ) : SocketClient, WebSocketListener() {
     companion object {
+        const val retryInterval = 5 * 1000L
+
         const val PING_WHAT = 0X01
         private const val RETRY_WHAT = 0X02
     }
@@ -94,9 +97,16 @@ private class SocketClientImpl(
                 }
 
                 RETRY_WHAT -> {
-                    if (reTry) {
-                        connect()
+                    if (!reTry) {
+                        return
                     }
+                    ///app 处于后台时候不重连，避免性能消耗
+                    if (AppLifecycleObserver.appBackState.value) {
+                        // 继续发送重连请求
+                        retryHandle()
+                        return
+                    }
+                    connect()
                 }
             }
         }
@@ -117,10 +127,7 @@ private class SocketClientImpl(
         if (state.isConnecting || state.isConnected) {
             return
         }
-        reTry = true
-        if (null != okSocket) {
-            release()
-        }
+        release()
         changeState(SocketClient.ConnectState.CONNECTING)
         okSocket = okHttpClient.newWebSocket(
             request = Request.Builder()
@@ -142,20 +149,18 @@ private class SocketClientImpl(
     private fun retryHandle() {
         handler.removeMessages(RETRY_WHAT)
         if (reTry) {
-            handler.sendEmptyMessageDelayed(RETRY_WHAT, 5000)
+            handler.sendEmptyMessageDelayed(RETRY_WHAT, retryInterval)
         }
+    }
+
+    private fun cancelRetry() {
+        handler.removeMessages(RETRY_WHAT)
     }
 
     private fun release() {
         reTry = false
-        try {
-            okSocket?.also {
-                it.cancel()
-                it.close(-1, "")
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        cancelRetry()
+        okSocket?.cancel()
         handler.removeCallbacksAndMessages(null)
         okSocket = null
     }
@@ -168,6 +173,13 @@ private class SocketClientImpl(
 
     override fun sendMessage(msg: String): Boolean {
         return okSocket?.send(msg) == true
+    }
+
+    override fun onOpen(webSocket: WebSocket, response: Response) {
+        super.onOpen(webSocket, response)
+        cancelRetry()
+        changeState(SocketClient.ConnectState.OPENED)
+        handler.sendEmptyMessage(PING_WHAT)
     }
 
     override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
@@ -186,6 +198,7 @@ private class SocketClientImpl(
         t: Throwable,
         response: Response?
     ) {
+        webSocket.cancel()
         changeState(SocketClient.ConnectState.ERROR)
         retryHandle()
         t.printStackTrace()
@@ -197,13 +210,6 @@ private class SocketClientImpl(
 
     override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
         callback.onReceiveMessage(bytes.toByteArray())
-    }
-
-    override fun onOpen(webSocket: WebSocket, response: Response) {
-        super.onOpen(webSocket, response)
-        changeState(SocketClient.ConnectState.OPENED)
-        handler.removeMessages(RETRY_WHAT)
-        handler.sendEmptyMessage(PING_WHAT)
     }
 
     override fun close() {

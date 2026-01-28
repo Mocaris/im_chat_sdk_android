@@ -7,9 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
 import androidx.navigation3.runtime.NavEntry
-import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
 import com.lbe.imsdk.components.DialogHost
 import com.lbe.imsdk.pages.TestPage
 import com.lbe.imsdk.pages.conversation.ConversationPage
@@ -31,13 +29,6 @@ fun LbeNavBackStackPage() {
         DialogHost {
             NavDisplay(
                 backStack = PageRoute.routes,
-                entryDecorators = listOf(
-                    // Add the default decorators for managing scenes and saving state
-                    rememberSceneSetupNavEntryDecorator(),
-                    rememberSavedStateNavEntryDecorator(),
-                    // Then add the view model store decorator
-                    //                    rememberViewModelStoreNavEntryDecorator()
-                ),
                 transitionSpec = {
                     ContentTransform(
                         slideIn(

@@ -5,6 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.util.UnstableApi
@@ -13,6 +15,7 @@ import com.lbe.imsdk.components.DialogManager
 import com.lbe.imsdk.extension.*
 import com.lbe.imsdk.manager.*
 import com.lbe.imsdk.pages.conversation.preview.MediaMessagePreViewDialog
+import com.lbe.imsdk.provider.AppLifecycleObserver
 import com.lbe.imsdk.repository.db.entry.IMMessageEntry
 import com.lbe.imsdk.repository.db.entry.IMUploadTask
 import com.lbe.imsdk.repository.db.entry.isImageType
@@ -47,7 +50,7 @@ class CurrentConversationVM(
     private val holderVM: ConversationSateHolderVM,
     private val sessionData: CreateSessionResModel.SessionData
 ) :
-    ViewModel(), SocketEventCallback {
+    ViewModel(), SocketEventCallback, DefaultLifecycleObserver {
     private val networkMonitor = NetworkMonitor(appContext)
 
     val sessionId: String get() = sessionData.sessionId
@@ -66,6 +69,7 @@ class CurrentConversationVM(
 
 
     init {
+        AppLifecycleObserver.addObserver(this)
         initState()
     }
 
@@ -188,8 +192,8 @@ class CurrentConversationVM(
         viewModelScope.launchIO {
             try {
                 msgManager.markRead(msg.msgSeq)
-//                msg.updateReadStatus(IMMsgReadStatus.READ)
-//                msg.upsert()
+                msg.updateReadStatus(IMMsgReadStatus.READ)
+                msg.upsert()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -245,7 +249,14 @@ class CurrentConversationVM(
         holderVM.onEndSession(sessionId)
     }
 
+    override fun onStart(owner: LifecycleOwner) {
+        if (LbeIMSDKManager.socketManager?.connectState?.value?.isConnected != true) {
+            LbeIMSDKManager.socketManager?.connect()
+        }
+    }
+
     override fun onCleared() {
+        AppLifecycleObserver.removeObserver(this)
         holderVM.editFocusRequester.freeFocus()
         LbeIMSDKManager.socketManager?.disconnect()
         LbeIMSDKManager.socketManager?.removeSocketEventCallback(this)
