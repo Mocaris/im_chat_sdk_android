@@ -1,16 +1,26 @@
 package com.lbe.imsdk.pages.conversation.widgets
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.UiComposable
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.lbe.imsdk.R
 import com.lbe.imsdk.provider.LocalCurrentConversationViewModel
@@ -18,6 +28,7 @@ import com.lbe.imsdk.provider.LocalThemeColors
 import com.lbe.imsdk.repository.db.entry.IMMessageEntry
 import com.lbe.imsdk.repository.db.entry.isSelfSender
 import com.lbe.imsdk.repository.model.proto.IMMsg
+import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgContentType
 import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgReadStatus
 import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgSendStatus
 
@@ -30,78 +41,85 @@ val selfShape = RoundedCornerShape(topStart = 10.dp, bottomStart = 10.dp, bottom
 val toShape = RoundedCornerShape(topEnd = 10.dp, bottomStart = 10.dp, bottomEnd = 10.dp)
 
 @Composable
-fun MessageItemDecoration(
+fun MessageContentDecoration(
     imMsg: IMMessageEntry,
+    // decoration 忽略的 IMMsgContentType
+    excludeMsgType: List<Int>,
     content: @Composable BoxScope.() -> Unit
 ) {
     val msgType = imMsg.msgType
     val isSelfSender = imMsg.isSelfSender()
     val themeColors = LocalThemeColors.current
     val density = LocalDensity.current
-    Row(
+    val contentBgColor = if (isSelfSender)
+        themeColors.conversationSelfBgColor
+    else
+        themeColors.conversationFromBgColor
+    val shape = if (isSelfSender) selfShape else toShape
+    Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight(),
-        horizontalArrangement = if (isSelfSender) Arrangement.spacedBy(5.dp, Alignment.End)
-        else
-            Arrangement.spacedBy(5.dp, Alignment.Start),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        MessageStatus(imMsg)
-        Box(
-            modifier = Modifier
-                .wrapContentSize()
-                .then(
-                    if (imMsg.layoutCacheSize > 0.dp)
-                        Modifier.sizeIn(minHeight = imMsg.layoutCacheSize)
-                    else Modifier.onSizeChanged {
-                        imMsg.layoutCacheSize = with(density) {
-                            it.height.toDp()
-                        }
-                    })
-                .then(
-                    if (
-                        msgType == IMMsg.ContentType.ImgContentType_VALUE ||
-                        msgType == IMMsg.ContentType.VideoContentType_VALUE
-                    ) Modifier else Modifier
-                        .background(
-                            if (isSelfSender)
-                                themeColors.conversationSelfBgColor
-                            else
-                                themeColors.conversationFromBgColor,
-                            shape = if (isSelfSender) selfShape else toShape
-                        )
-                        .padding(10.dp)
-                ),
-            content = content,
-        )
-    }
+            .wrapContentSize()
+            .then(
+                imMsg.cacheLayoutHeight?.let {
+                    Modifier.sizeIn(minHeight = it)
+                } ?: Modifier.onSizeChanged {
+                    imMsg.cacheLayoutHeight = with(density) {
+                        it.height.toDp()
+                    }
+                })
+            .clip(shape)
+            .animateContentSize()
+            .then(
+                if (excludeMsgType.contains(msgType))
+                    Modifier
+                else Modifier
+                    .background(contentBgColor)
+                    .padding(10.dp)
+            ),
+        content = content,
+    )
 }
 
+/**
+ * 布局方向
+ * [constraintsMsgTypes] 限制 IMMsgContentType 布局大小
+ *
+ */
 @Composable
-fun MessageStatus(
+fun MessageItemDirection(
     imMsg: IMMessageEntry,
+    constraintsMsgTypes: List<Int>,
+    content: @Composable @UiComposable RowScope.() -> Unit
 ) {
-    if (imMsg.isSelfSender()) {
-        if (imMsg.sendMutableState.intValue == IMMsgSendStatus.FAILURE) {
-            val conversationVM = LocalCurrentConversationViewModel.current
-            Image(
-                painter = painterResource(R.drawable.ic_send_fail),
-                contentDescription = "发送失败",
-                modifier = Modifier
-                    .size(15.dp)
-                    .clickable(onClick = {
-                        conversationVM.reSendMessage(imMsg)
-                    })
-            )
-        }
+    val isSelfSender = imMsg.isSelfSender()
+    val arrangement = if (isSelfSender) Arrangement.spacedBy(3.dp, Alignment.End)
+    else
+        Arrangement.spacedBy(3.dp, Alignment.Start)
 
-        if (imMsg.readMutableState.intValue == IMMsgReadStatus.READ) {
-            Image(
-                painter = painterResource(R.drawable.ic_readed),
-                contentDescription = "已读",
-                modifier = Modifier.size(15.dp)
-            )
-        }
+    @Composable
+    fun rowContent(maxWidth: Dp? = null) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .then(
+                    maxWidth?.let { Modifier.heightIn(max = maxWidth) }
+                        ?: Modifier.wrapContentHeight()
+                ),
+            horizontalArrangement = arrangement,
+            verticalAlignment = Alignment.CenterVertically,
+            content = content
+        )
     }
+    if (constraintsMsgTypes.isNotEmpty() && constraintsMsgTypes.contains(imMsg.msgType)) {
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            rowContent(maxWidth)
+        }
+    } else {
+        rowContent()
+    }
+
+}
+
+internal data class MessageDirectionScope(val arrangement: Arrangement) {
+
 }

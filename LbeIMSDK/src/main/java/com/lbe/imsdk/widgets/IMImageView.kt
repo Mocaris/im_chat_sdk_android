@@ -1,16 +1,23 @@
 package com.lbe.imsdk.widgets
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.*
-import androidx.compose.ui.graphics.painter.*
-import androidx.compose.ui.layout.*
-import androidx.compose.ui.platform.*
-import androidx.compose.ui.unit.*
+import androidx.annotation.FloatRange
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter.State
+import coil3.decode.BitmapFactoryDecoder
 import coil3.decode.Decoder
 import coil3.decode.ImageSource
 import coil3.fetch.SourceFetchResult
@@ -19,23 +26,20 @@ import coil3.network.httpHeaders
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import coil3.request.ImageRequest
 import coil3.request.Options
-import com.lbe.imsdk.R
+import coil3.request.crossfade
 import com.lbe.imsdk.extension.coilDiskCache
 import com.lbe.imsdk.extension.md5Str
-import com.lbe.imsdk.manager.LbeIMSDKManager
-import com.lbe.imsdk.pages.conversation.vm.ConversationSateHolderVM
-import com.lbe.imsdk.provider.LocalCurrentConversationViewModel
 import com.lbe.imsdk.service.http.interceptor.HttpProgressInterceptor
 import com.lbe.imsdk.service.http.interceptor.SignInterceptor
-import kotlinx.coroutines.*
-import okhttp3.*
+import kotlinx.coroutines.Dispatchers
+import okhttp3.OkHttpClient
 import okio.buffer
 import okio.source
 import java.io.ByteArrayInputStream
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
-import kotlin.io.encoding.*
+import kotlin.io.encoding.Base64
 
 /**
  *
@@ -47,6 +51,9 @@ fun IMImageView(
     modifier: Modifier = Modifier,
     key: String? = null,
     url: String,
+    // 是否加载缩率图
+    @FloatRange(from = 0.0, to = 1.0)
+    thumbnail: Float = 1f,
     placeholder: Painter? = null,
     error: Painter? = null,
     contentScale: ContentScale = ContentScale.Crop,
@@ -58,7 +65,8 @@ fun IMImageView(
 ) {
     val progress = remember { mutableIntStateOf(0) }
     val context = LocalContext.current
-    Box(
+    val density = LocalDensity.current
+    BoxWithConstraints(
         modifier = Modifier.wrapContentSize(),
         contentAlignment = Alignment.Center
     ) {
@@ -81,6 +89,14 @@ fun IMImageView(
             model =
                 ImageRequest.Builder(context)
                     .data(url)
+                    .also { r ->
+                        if (thumbnail > 0 && thumbnail < 1) {
+                            with(density) {
+                                r.size(maxWidth.times(thumbnail).roundToPx())
+                            }
+                        }
+                    }
+                    .crossfade(true)
                     .listener(listener)
                     .httpHeaders(
                         NetworkHeaders.Builder()
@@ -138,7 +154,7 @@ class ImageDecoderFactory(val key: String? = null, val url: String) : Decoder.Fa
         result: SourceFetchResult,
         options: Options,
         imageLoader: ImageLoader
-    ): Decoder? {
+    ): Decoder {
         var newResult = result
         if (!key.isNullOrEmpty()) {
             val source = result.source
@@ -152,12 +168,12 @@ class ImageDecoderFactory(val key: String? = null, val url: String) : Decoder.Fa
             val decodeSource = ImageSource(bufferSource, source.fileSystem, source.metadata)
             newResult = SourceFetchResult(decodeSource, result.mimeType, result.dataSource)
         }
-        return ImageLoader.Builder(options.context).build().components.newDecoder(
-            newResult,
-            options,
-            imageLoader
-        )?.first
-//        return BitmapFactoryDecoder(source = newResult.source, options = options)
+//        return ImageLoader.Builder(options.context).build().components.newDecoder(
+//            newResult,
+//            options,
+//            imageLoader
+//        )?.first
+        return BitmapFactoryDecoder(source = newResult.source, options = options)
     }
 
 }

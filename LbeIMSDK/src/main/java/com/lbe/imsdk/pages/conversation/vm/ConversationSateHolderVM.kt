@@ -5,7 +5,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lbe.imsdk.R
@@ -57,6 +59,10 @@ class ConversationSateHolderVM(
     val endSession = mutableStateOf(true)
 
     val scrollToBottomEvent = MutableSharedFlow<Boolean>()
+    /// ui state
+    val textFieldValue = mutableStateOf(TextFieldValue())
+    val editFocusRequester = FocusRequester()
+    val isRefreshing = mutableStateOf(false)
 
 
     private val lock = Mutex()
@@ -110,7 +116,7 @@ class ConversationSateHolderVM(
 
     fun scrollToBottom(anim: Boolean = true) {
         viewModelScope.launch {
-            delay(100)
+            delay(200)
             scrollToBottomEvent.emit(anim)
         }
     }
@@ -148,9 +154,10 @@ class ConversationSateHolderVM(
     }
 
     override fun onCleared() {
+        editFocusRequester.freeFocus()
         _currentSession.value = null
-        SignInterceptor.lbeToken = null
-        SignInterceptor.lbeSession = null
+//        SignInterceptor.lbeToken = null
+//        SignInterceptor.lbeSession = null
         endSession.value = true
         LbeIMSDKManager.socketManager?.disconnect()
         super.onCleared()

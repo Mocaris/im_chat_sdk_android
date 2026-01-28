@@ -5,6 +5,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.res.*
 import androidx.compose.ui.unit.*
@@ -19,11 +20,31 @@ import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgSendStatus
 import com.lbe.imsdk.widgets.IMImageView
 import com.lbe.imsdk.widgets.IMUploadIndicator
 
+// 限制缩率图 大小
+private fun Modifier.mediaThumbSize(ratio: Float): Modifier {
+    return this
+        .fillMaxWidth(
+            when {
+                ratio < 1 -> 0.5f
+                ratio >= 1 -> 0.85f
+//                        ratio > 3 -> 1f
+//                        ratio > 2 -> 0.8f
+//                        ratio < 0.5 -> 0.4f
+                else -> 0.6f
+            }
+        )
+        .aspectRatio(ratio)
+}
+
 
 ///图片缩略图
 @OptIn(UnstableApi::class)
 @Composable
-fun MessageImageContentView(content: MediaMessageContent, localTemp: MediaMessageContent? = null) {
+fun MessageImageContentView(
+    content: MediaMessageContent,
+    localTemp: MediaMessageContent? = null,
+    centerContent: (@Composable BoxScope.() -> Unit)? = null
+) {
     val ratio = content.width.toFloat() / content.height.toFloat()
     val conversationVM = LocalCurrentConversationViewModel.current
     val iMMessageEntry = LocalIMMessageEntry.current
@@ -33,21 +54,15 @@ fun MessageImageContentView(content: MediaMessageContent, localTemp: MediaMessag
     ) {
         val dialogManager = LocalDialogManager.current
         IMImageView(
-            key = content.thumbnail.key.ifEmpty { localTemp?.thumbnail?.key },
-            url = content.thumbnail.url.ifEmpty { localTemp?.thumbnail?.url ?: "" },
+            key = localTemp?.thumbnail?.key ?: content.thumbnail.key,
+            url = localTemp?.thumbnail?.url ?: content.thumbnail.url,
+            thumbnail = 0.7f,
             modifier = Modifier
-                .fillMaxWidth(
-                    when {
-                        ratio > 3 -> 1f
-                        ratio > 2 -> 0.8f
-                        ratio < 0.5 -> 0.4f
-                        else -> 0.6f
-                    }
-                )
+//                .mediaThumbSize(ratio)
                 .aspectRatio(ratio)
                 .background(Color.Gray.copy(alpha = 0.1f))
                 .clickable(onClick = {
-                    conversationVM.previewMedia(iMMessageEntry,dialogManager)
+                    conversationVM.previewMedia(iMMessageEntry, dialogManager)
                 }),
         )
         iMMessageEntry.let {
@@ -69,17 +84,14 @@ fun MessageImageContentView(content: MediaMessageContent, localTemp: MediaMessag
                 }
             }
         }
+        centerContent?.invoke(this)
     }
 }
 
 ///视频缩略图
 @Composable
 fun MessageVideoContentView(content: MediaMessageContent, localTemp: MediaMessageContent? = null) {
-    Box(
-        modifier = Modifier.wrapContentSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        MessageImageContentView(content, localTemp)
+    MessageImageContentView(content, localTemp) {
         LocalIMMessageEntry.current.let {
             val sendState = it.sendMutableState.intValue
             if (!it.isSelfSender() || sendState == IMMsgSendStatus.SUCCESS) {

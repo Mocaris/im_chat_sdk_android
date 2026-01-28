@@ -7,7 +7,11 @@ import androidx.activity.compose.*
 import androidx.activity.result.*
 import androidx.activity.result.contract.*
 import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -99,12 +103,8 @@ fun ConversationPage(
 private fun ConversationPageBody(conversationVM: CurrentConversationVM, padding: PaddingValues) {
     val holderVM = LocalConversationStateViewModel.current
     val requestPhotoLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = {
-            if (null != it) {
-                conversationVM.sendMediaMessage(it)
-            }
-        },
+        contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems = 9),
+        onResult = conversationVM::sendMultipleMediaMessage,
     )
     val requestPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
@@ -120,36 +120,35 @@ private fun ConversationPageBody(conversationVM: CurrentConversationVM, padding:
         },
     )
 
-    val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
     val userScrolling = remember { mutableStateOf(false) }
     val keyboardState = rememberKeyboardState()
 
-    val firstVisibleItemIndex = remember { mutableIntStateOf(0) }
     val totalItemsCount = remember { mutableIntStateOf(0) }
 
-    fun scrollToBottom() {
-        scope.launch {
-            if (firstVisibleItemIndex.intValue >= totalItemsCount.intValue - 1
-                || !listState.canScrollForward
-                || listState.isScrollInProgress
-            ) {
-                return@launch
-            }
-            val endOffset = listState.layoutInfo.viewportEndOffset
-            if (firstVisibleItemIndex.intValue == 0) {
-                listState.scrollToItem(totalItemsCount.intValue - 1, endOffset);
-            } else {
-                listState.animateScrollToItem(totalItemsCount.intValue - 1, endOffset)
-            }
-//            holderVM.onScrollToBottom()
+//    val visibleItemIndex = remember { mutableStateOf(Pair(0, 0)) }
+//    val firstVisibleItemIndex = visibleItemIndex.value.first
+    val lastVisibleItemIndex = remember { mutableIntStateOf(0) }
+    suspend fun scrollToBottom() {
+        if (!listState.canScrollForward
+            || listState.isScrollInProgress
+        ) {
+            return
         }
+        val firstVisibleItemIndex = listState.firstVisibleItemIndex
+        val endOffset = listState.layoutInfo.viewportEndOffset
+        if (firstVisibleItemIndex == 0) {
+            listState.scrollToItem(totalItemsCount.intValue - 1, endOffset)
+        } else {
+            listState.animateScrollToItem(totalItemsCount.intValue - 1, endOffset)
+        }
+//            holderVM.onScrollToBottom()
     }
     LaunchedEffect(listState) {
         snapshotFlow {
-            listState.firstVisibleItemIndex
+            listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
         }.distinctUntilChanged().collect {
-            firstVisibleItemIndex.intValue = it
+            lastVisibleItemIndex.intValue = it
         }
     }
     LaunchedEffect(listState) {
@@ -220,7 +219,7 @@ private fun ConversationPageBody(conversationVM: CurrentConversationVM, padding:
         ) {
             IMRefresh(
                 modifier = Modifier.fillMaxSize(),
-                refreshing = conversationVM.isRefreshing.value,
+                refreshing = holderVM.isRefreshing.value,
                 onRefresh = conversationVM::loadHistory
             ) {
                 LazyColumn(
@@ -230,7 +229,7 @@ private fun ConversationPageBody(conversationVM: CurrentConversationVM, padding:
                     modifier = Modifier
                         .fillMaxSize()
                         .pointerInput(Unit) {
-                            detectVerticalDragGestures(
+                            detectDragGestures(
                                 onDragStart = {
                                     userScrolling.value = true
                                 },
@@ -240,13 +239,13 @@ private fun ConversationPageBody(conversationVM: CurrentConversationVM, padding:
                                 onDragCancel = {
                                     userScrolling.value = false
                                 },
-                                onVerticalDrag = { _, _ -> userScrolling.value = true },
+                                onDrag = { _, _ -> userScrolling.value = true },
                             )
                         },
                 ) {
                     itemsIndexed(
                         items = holderVM.msgList,
-                        key = { _, item -> "${item.serverMsgID}-${item.clientMsgID}" },
+                        key = { _, item -> item.clientMsgID },
                         contentType = { _, item -> item.msgType }
                     ) { index, msg ->
                         val preMsg = if (index > 0) holderVM.msgList[index - 1] else null
@@ -254,7 +253,8 @@ private fun ConversationPageBody(conversationVM: CurrentConversationVM, padding:
                     }
                 }
             }
-            if (firstVisibleItemIndex.intValue < totalItemsCount.intValue - 1 && listState.canScrollForward) {
+
+            if (lastVisibleItemIndex.value < totalItemsCount.intValue - 1 && listState.canScrollForward) {
                 ConversationFloatTip()
             }
         }
@@ -276,10 +276,10 @@ private fun ConversationPageBody(conversationVM: CurrentConversationVM, padding:
         }
         KeyboardInputBox(
             maxLength = LbeIMSDKManager.TEXT_CONTENT_LENGTH,
-            focusRequester = conversationVM.editFocusRequester,
-            value = conversationVM.textFieldValue.value,
+            focusRequester = holderVM.editFocusRequester,
+            value = holderVM.textFieldValue.value,
             onValueChange = { v ->
-                conversationVM.textFieldValue.value = v
+                holderVM.textFieldValue.value = v
             },
             keyboardActions = {
 
@@ -303,11 +303,9 @@ private fun BoxScope.ConversationFloatTip() {
         modifier = Modifier
             .wrapContentSize()
             .clip(RoundedCornerShape(10.dp))
-            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.8f))
+            .background(LocalThemeColors.current.conversationFlotTipColor.copy(alpha = 0.8f))
             .align(BiasAlignment(horizontalBias = 0.9f, verticalBias = 0.7f))
-            .clickable(onClick = {
-                holderVM.scrollToBottom()
-            })
+            .clickable(onClick = holderVM::scrollToBottom)
             .padding(vertical = 10.dp, horizontal = 15.dp),
         horizontalArrangement = Arrangement.spacedBy(
             5.dp, Alignment.CenterHorizontally
