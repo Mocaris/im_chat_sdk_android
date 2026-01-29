@@ -49,6 +49,10 @@ fun <T : PageRoute> NavigationBackStack.navigate(navKey: T, duplicate: Boolean =
     this.add(navKey)
 }
 
+fun NavigationBackStack.canPop(): Boolean {
+    return this.size > 1
+}
+
 /**
  * 弹出 页面
  * @param navKey 待弹出的页面, null 表示弹出栈顶页面

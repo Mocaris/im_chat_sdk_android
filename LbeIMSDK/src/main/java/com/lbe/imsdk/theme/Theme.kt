@@ -17,7 +17,7 @@ private val LightColorScheme = lightColorScheme(
     surfaceTint = Color.Transparent,
     onPrimary = Color.Black,
     onSurface = Color.Black,
-    surface = Color.White,
+    surface = backgroundColor,
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
     surface = Color(0xFFFFFBFE),
@@ -27,7 +27,7 @@ private val LightColorScheme = lightColorScheme(
     onBackground = Color(0xFF1C1B1F),
     onSurface = Color(0xFF1C1B1F),
     */
-)
+).copy()
 private val DarkColorScheme = LightColorScheme.copy()
 
 @Composable
@@ -36,17 +36,19 @@ fun LbeIMTheme(
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
+    val themeColor = remember { mutableStateOf(ThemeColors()) }
     val colorScheme = when {
 //        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
 //            val context = LocalContext.current
 //            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
 //        }
         darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        else -> LightColorScheme.copy(
+            onSurface = themeColor.value.textColor,
+        )
     }
 
     val focusManager = LocalFocusManager.current
-    val themeColor = remember { mutableStateOf(ThemeColors()) }
     Box(
         modifier = Modifier
             .fillMaxSize()

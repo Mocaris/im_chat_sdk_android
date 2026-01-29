@@ -142,11 +142,15 @@ class SocketManager(
 
                     IMMsg.MsgType.KickOffLineMsgType -> {
                         scope.launch {
+                            val kickOffLineMsg = msg.kickOffLineMsg
                             for (callback in socketEventCallbacks) {
                                 callback.onKickOffLine()
                             }
+                            Log.d(
+                                "SocketManager",
+                                "onKickOffLine: ${kickOffLineMsg?.userID}, body: ${msg.msgBody} "
+                            )
                         }
-                        Log.d("SocketManager", "onKickOffLine: ")
                     }
 
                     IMMsg.MsgType.EndSessionMsgType -> {

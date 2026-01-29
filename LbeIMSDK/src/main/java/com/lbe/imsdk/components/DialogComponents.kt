@@ -12,12 +12,15 @@ import com.lbe.imsdk.provider.LocalDialogManager
 
 typealias OnDismissRequest = (dismiss: () -> Unit) -> Unit
 
+typealias DialogContent = @Composable (dismiss: () -> Unit) -> Unit
+
 internal data class DialogComponent(
     val key: String?,
     val onDismissRequest: OnDismissRequest,
     val properties: DialogProperties,
-    val content: @Composable () -> Unit
+    val content: DialogContent
 )
+
 
 class DialogManager {
     internal val dialogQueue = mutableStateListOf<DialogComponent>()
@@ -26,7 +29,7 @@ class DialogManager {
         key: String? = null,
         onDismissRequest: OnDismissRequest,
         properties: DialogProperties = DialogProperties(),
-        content: @Composable () -> Unit
+        content: DialogContent
     ) {
         val dialog = DialogComponent(key, onDismissRequest, properties, content)
         dialogQueue.add(dialog)
@@ -64,12 +67,16 @@ fun DialogHost(hostContent: @Composable () -> Unit) {
     dialogManager.dialogQueue.firstOrNull()?.let {
         Dialog(
             onDismissRequest = {
-                it.onDismissRequest({
+                it.onDismissRequest {
                     dialogManager.dialogQueue.remove(it)
-                })
+                }
             },
             properties = it.properties,
-            content = it.content
+            content = {
+                it.content {
+                    dialogManager.dialogQueue.remove(it)
+                }
+            }
         )
     }
 }

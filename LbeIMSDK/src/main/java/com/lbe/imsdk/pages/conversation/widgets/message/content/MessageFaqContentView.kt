@@ -1,4 +1,4 @@
-package com.lbe.imsdk.pages.conversation.widgets.content
+package com.lbe.imsdk.pages.conversation.widgets.message.content
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,7 +25,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lbe.imsdk.R
-import com.lbe.imsdk.provider.LocalConversationStateViewModel
 import com.lbe.imsdk.provider.LocalCurrentConversationViewModel
 import com.lbe.imsdk.repository.remote.model.FaqMessageContent
 import com.lbe.imsdk.repository.remote.model.enumeration.FaqType

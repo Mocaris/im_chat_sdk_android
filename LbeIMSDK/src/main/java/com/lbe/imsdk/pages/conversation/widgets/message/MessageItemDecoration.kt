@@ -1,36 +1,21 @@
-package com.lbe.imsdk.pages.conversation.widgets
+package com.lbe.imsdk.pages.conversation.widgets.message
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.spring
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.UiComposable
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.lbe.imsdk.R
-import com.lbe.imsdk.provider.LocalCurrentConversationViewModel
 import com.lbe.imsdk.provider.LocalThemeColors
 import com.lbe.imsdk.repository.db.entry.IMMessageEntry
 import com.lbe.imsdk.repository.db.entry.isSelfSender
-import com.lbe.imsdk.repository.model.proto.IMMsg
-import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgContentType
-import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgReadStatus
-import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgSendStatus
 
 /**
  * 消息item装饰

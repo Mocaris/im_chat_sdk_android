@@ -117,6 +117,20 @@ class LbeImApiRepository(private val imBaseUrl: String) {
     }
 
     /**
+     * 结束会话
+     * @param sessionId 会话ID
+     */
+    suspend fun endSession(
+        sessionId: String,
+    ) = withContext(Dispatchers.IO) {
+        apiService.endSession(
+            body = mutableMapOf(
+                "sessionID" to sessionId,
+            ).asJsonBody
+        ).accept()
+    }
+
+    /**
      * 获取受支持的会话列表
      */
 //

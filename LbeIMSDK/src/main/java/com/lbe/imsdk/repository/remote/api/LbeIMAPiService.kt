@@ -87,6 +87,16 @@ interface LbeIMAPiService {
         @Body body: JsonBody
     ): SessionMsgListResModel
 
+    /**
+     * 结束会话
+     * {
+     *   "sessionID": ,
+     * }
+     */
+    @POST("/miner-api/trans/end-session")
+    suspend fun endSession(
+        @Body body: JsonBody
+    ): VoidResponse
 
     /**
      * 发送消息

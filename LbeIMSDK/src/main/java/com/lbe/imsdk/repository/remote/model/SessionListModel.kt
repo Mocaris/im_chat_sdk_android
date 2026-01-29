@@ -44,6 +44,7 @@ data class SupportSessionListResModel(
 @Entity
 data class SessionListModel(
     val createTime: Long = 0,
+    //1-游客 2-非游客
     val customerType: Int = 0,
     val devNo: String = "",
     val extra: String = "",
@@ -54,9 +55,11 @@ data class SessionListModel(
     val nickName: String = "",
     val sessionId: String = "",
     val source: String = "",
-    //0-未读， 1-已读
+    //// 0-等待接入 1-开始 2-结束 3排队中
     val status: Int = 0,
     val uid: String = "",
     val unreadCount: Int = 0,
 
-    )
+    ) {
+    val isCustomService: Boolean get() = status ==1
+}

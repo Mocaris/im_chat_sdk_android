@@ -1,4 +1,4 @@
-package com.lbe.imsdk.pages.conversation.widgets
+package com.lbe.imsdk.pages.conversation.widgets.message
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -18,15 +18,14 @@ import com.lbe.imsdk.*
 import com.lbe.imsdk.R
 import com.lbe.imsdk.extension.*
 import com.lbe.imsdk.manager.LbeIMSDKManager
-import com.lbe.imsdk.pages.conversation.widgets.content.MessageSystemContentView
-import com.lbe.imsdk.pages.conversation.widgets.content.MessageUserAgentContentView
+import com.lbe.imsdk.pages.conversation.widgets.message.content.MessageSystemContentView
+import com.lbe.imsdk.pages.conversation.widgets.message.content.MessageUserAgentContentView
 import com.lbe.imsdk.provider.*
 import com.lbe.imsdk.repository.db.entry.*
 import com.lbe.imsdk.repository.remote.model.*
 import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgContentType
 import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgReadStatus
 import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgSendStatus
-import kotlinx.serialization.StringFormat
 import java.util.Date
 
 /**
@@ -136,7 +135,7 @@ private fun RowScope.MessageBodyItem(
 ) {
     val isSelfSend = imMsg.isSelfSender()
     // 标记已读
-    if (!isSelfSend && imMsg.readMutableState.intValue != IMMsgReadStatus.READ) {
+    if (!isSelfSend && imMsg.shouldMarkRead) {
         val conversationVM = LocalCurrentConversationViewModel.current
         LaunchedEffect(imMsg) {
             conversationVM.markRead(imMsg)

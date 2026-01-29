@@ -28,7 +28,10 @@ class ConversationMsgManager(private val sessionId: String) {
     /**
      * 获取本地最新消息
      */
-    suspend fun loadLocalNewest(count: Int): List<IMMessageEntry> =
+    suspend fun loadLocalNewest(
+        count: Int,
+        sessionId: String = this.sessionId
+    ): List<IMMessageEntry> =
         withIOContext {
             return@withIOContext LbeImDataRepository.findLastestSessionMsgList(sessionId, count)
         }
@@ -38,11 +41,15 @@ class ConversationMsgManager(private val sessionId: String) {
      * @param startSeq 本地最新消息序号
      * @param endSeq 服务器最新消息序号
      */
-    suspend fun loadRemoteNewest(startSeq: Long? = null, endSeq: Long? = null) =
+    suspend fun loadRemoteNewest(
+        startSeq: Long? = null,
+        endSeq: Long? = null,
+        sessionId: String = this.sessionId
+    ) =
         withIOContext {
             try {
                 val startSeq = startSeq ?: LbeImDataRepository.findMaxSeq(sessionId) ?: 0
-                val endSeq = endSeq ?: getRemoteLastestSeq()
+                val endSeq = endSeq ?: getRemoteLastestSeq(sessionId)
                 if (startSeq >= endSeq) {
                     return@withIOContext
                 }
@@ -53,7 +60,7 @@ class ConversationMsgManager(private val sessionId: String) {
                     for (page in 0.until(pageSize)) {
                         val start = startSeq + 1 + page * 50
                         val end = (start + 50).coerceAtMost(endSeq)
-                        val list = getRemoteMsgList(start, end)
+                        val list = getRemoteMsgList(start, end, sessionId)
                         if (list.isEmpty()) {
                             continue
                         }
@@ -68,6 +75,7 @@ class ConversationMsgManager(private val sessionId: String) {
     suspend fun localMsgList(
         startSeq: Long,
         endSeq: Long,
+        sessionId: String = this.sessionId
     ): List<IMMessageEntry> = withIOContext {
         return@withIOContext LbeImDataRepository.findSessionMsgList(sessionId, startSeq, endSeq)
     }
@@ -78,7 +86,11 @@ class ConversationMsgManager(private val sessionId: String) {
      * @param endSeq
      * @param count
      */
-    suspend fun loadHistory(endSeq: Long, count: Int): List<IMMessageEntry> =
+    suspend fun loadHistory(
+        endSeq: Long,
+        count: Int,
+        sessionId: String = this.sessionId
+    ): List<IMMessageEntry> =
         withIOContext {
             try {
                 val startSeq = (endSeq - count).coerceAtLeast(1)
@@ -91,7 +103,7 @@ class ConversationMsgManager(private val sessionId: String) {
                     return@withIOContext list
                 }
                 // 获取服务器消息
-                list = getRemoteMsgList(startSeq, endSeq)
+                list = getRemoteMsgList(startSeq, endSeq, sessionId)
                 if (list.isNotEmpty()) {
                     LbeImDataRepository.insertMsgList(list)
                 }
@@ -108,7 +120,7 @@ class ConversationMsgManager(private val sessionId: String) {
     /**
      * 获取远程最新消息序号
      */
-    suspend fun getRemoteLastestSeq(): Long = withIOContext {
+    suspend fun getRemoteLastestSeq(sessionId: String = this.sessionId): Long = withIOContext {
         //获取当前会话最新消息
         val lastMessage =
             imApiRepository?.getSessionList(listOf(sessionId))?.sessionList?.firstOrNull()
@@ -126,6 +138,7 @@ class ConversationMsgManager(private val sessionId: String) {
     private suspend fun getRemoteMsgList(
         startSeq: Long,
         endSeq: Long,
+        sessionId: String = this.sessionId
     ): List<IMMessageEntry> =
         withIOContext {
             return@withIOContext imApiRepository?.getSessionMessage(

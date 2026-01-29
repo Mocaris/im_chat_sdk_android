@@ -1,11 +1,9 @@
-package com.lbe.imsdk.pages.conversation.widgets.content
+package com.lbe.imsdk.pages.conversation.widgets.message.content
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -15,7 +13,6 @@ import androidx.compose.ui.text.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
-import androidx.media3.common.util.UnstableApi
 import com.lbe.imsdk.pages.conversation.preview.MediaPreviewDialog
 import com.lbe.imsdk.pages.conversation.preview.MediaPreviewInfo
 import com.lbe.imsdk.provider.LocalDialogManager

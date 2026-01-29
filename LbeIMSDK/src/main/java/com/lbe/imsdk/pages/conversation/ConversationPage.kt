@@ -3,6 +3,7 @@ package com.lbe.imsdk.pages.conversation
 import android.*
 import android.app.*
 import android.os.*
+import android.widget.Space
 import androidx.activity.compose.*
 import androidx.activity.result.*
 import androidx.activity.result.contract.*
@@ -14,25 +15,25 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.*
 import androidx.compose.ui.res.*
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import androidx.lifecycle.viewmodel.compose.*
 import com.lbe.imsdk.R
 import com.lbe.imsdk.components.DialogManager
-import com.lbe.imsdk.extension.pop
 import com.lbe.imsdk.manager.LbeIMSDKManager
 import com.lbe.imsdk.pages.conversation.vm.ConversationSateHolderVM
 import com.lbe.imsdk.pages.conversation.vm.CurrentConversationVM
-import com.lbe.imsdk.pages.conversation.widgets.ConversationMessageItem
+import com.lbe.imsdk.pages.conversation.widgets.IMAppBar
 import com.lbe.imsdk.pages.conversation.widgets.KeyboardInputBox
 import com.lbe.imsdk.pages.conversation.widgets.NetWorkStateView
-import com.lbe.imsdk.pages.navigation.PageRoute
+import com.lbe.imsdk.pages.conversation.widgets.StartCustomerServiceButton
+import com.lbe.imsdk.pages.conversation.widgets.message.ConversationMessageItem
 import com.lbe.imsdk.provider.*
 import com.lbe.imsdk.repository.model.SDKInitConfig
 import com.lbe.imsdk.widgets.IMRefresh
@@ -183,8 +184,6 @@ private fun ConversationPageBody(conversationVM: CurrentConversationVM, padding:
         }
     }
 
-    val timeoutReply = conversationVM.timeOutReply.value
-
     fun pickPhoto() {
         requestPermissionLauncher.launch(
             mutableStateListOf<String>().apply {
@@ -241,7 +240,7 @@ private fun ConversationPageBody(conversationVM: CurrentConversationVM, padding:
                 ) {
                     itemsIndexed(
                         items = holderVM.msgList,
-                        key = { _, item -> item.clientMsgID },
+                        key = { _, item -> "${item.sessionId}-${item.clientMsgID}" },
                         contentType = { _, item -> item.msgType }
                     ) { index, msg ->
                         val preMsg = if (index > 0) holderVM.msgList[index - 1] else null
@@ -250,26 +249,26 @@ private fun ConversationPageBody(conversationVM: CurrentConversationVM, padding:
                 }
             }
 
-            if (lastVisibleItemIndex.value < totalItemsCount.intValue - 1 && listState.canScrollForward) {
+            if (lastVisibleItemIndex.intValue < totalItemsCount.intValue - 1 && listState.canScrollForward) {
                 ConversationFloatTip()
             }
         }
 
-        if (timeoutReply) {
-            Text(
-                text = stringResource(
-                    R.string.chat_session_status_3, "${conversationVM.timeOutConfig.value?.timeout ?: 5}"
-                ),
-                textAlign = TextAlign.Center,
-                style = TextStyle(
-                    fontSize = 12.sp, color = LocalThemeColors.current.conversationSystemTextColor
-                ),
+
+        if (!conversationVM.isCustomerService.value) {
+            HorizontalDivider()
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .background(LocalThemeColors.current.tipBackgroundColor)
-                    .padding(horizontal = 15.dp, vertical = 14.dp)
-            )
+                    .padding(top = 10.dp)
+                    .padding(horizontal = 15.dp)
+            ) {
+                StartCustomerServiceButton {
+                    conversationVM.serviceSupport()
+                }
+            }
         }
+
+//        TimeoutTipFloat()
         KeyboardInputBox(
             maxLength = LbeIMSDKManager.TEXT_CONTENT_LENGTH,
             focusRequester = holderVM.editFocusRequester,
@@ -322,45 +321,5 @@ private fun BoxScope.ConversationFloatTip() {
     }
 }
 
-
-@Composable
-@OptIn(ExperimentalMaterial3Api::class)
-private fun IMAppBar() {
-    val conversationVM = LocalCurrentConversationViewModel.current
-    CenterAlignedTopAppBar(
-        title = {
-            Text(stringResource(R.string.chat_session_status_1))
-        }, colors = TopAppBarDefaults.centerAlignedTopAppBarColors().copy(
-            containerColor = Color.White,
-            titleContentColor = Color.Black,
-            actionIconContentColor = Color.Black,
-            navigationIconContentColor = Color.Black
-        ), navigationIcon = {
-            val context = LocalContext.current
-            IconButton(onClick = {
-                if (PageRoute.routes.size > 1) {
-                    PageRoute.routes.pop()
-                } else if (context is Activity) {
-                    context.finish()
-                }
-            }) {
-                Image(
-                    painter = painterResource(R.drawable.ic_back),
-                    contentDescription = "返回",
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-        }, actions = {
-            IconButton(onClick = {
-                conversationVM.serviceSupport()
-            }) {
-                Image(
-                    painter = painterResource(R.drawable.ic_cs),
-                    modifier = Modifier.size(24.dp),
-                    contentDescription = "人工客服",
-                )
-            }
-        })
-}
 
 

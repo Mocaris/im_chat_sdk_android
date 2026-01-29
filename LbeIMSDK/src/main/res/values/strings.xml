@@ -4,7 +4,7 @@
     <string name="chat_session_status_13">Copied successfully</string>
     <string name="save_success">Saved successfully</string>
     <string name="chat_session_status_18">Save</string>
-    
+
     <!-- Chat Interface -->
     <string name="chat_session_status_1">Live customer service</string>
     <string name="chat_session_status_9">The network is unavailable, please check your network</string>
@@ -26,11 +26,11 @@
     <string name="chat_session_status_14">Intelligent Robot</string>
     <string name="chat_session_status_16">User %s</string>
     <string name="chat_session_status_15">Visitor %s</string>
-    
+
     <!-- FAQ -->
     <string name="faq_default_greeting">Hi~ Please briefly describe your question, and we\'ll do our best to help</string>
     <string name="not_implemented">Not implement yet. --->>> { %d }</string>
-    
+
     <!-- Image Viewer -->
     <string name="content_description_back">Back</string>
     <string name="content_description_send_fail">Send Failed</string>
@@ -40,4 +40,9 @@
     <string name="not_support_msg_type">Unsupported message types</string>
     <string name="content_expand">Expand</string>
     <string name="content_collapse">Collapse</string>
+    <string name="robotManage_robot_30">Human Customer Service</string>
+    <string name="chat_session_txt_1">Confirm end of service</string>
+    <string name="chat_session_txt_2">Thank you for your consultation, and I hope I can serve you next time</string>
+    <string name="customerServiceManage_customerService_23">Cancel</string>
+    <string name="chat_session_txt_3">End Service</string>
 </resources>

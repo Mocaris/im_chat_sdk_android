@@ -1,11 +1,16 @@
-package com.lbe.imsdk.pages.conversation.widgets
+package com.lbe.imsdk.pages.conversation.widgets.message
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.lbe.imsdk.R
-import com.lbe.imsdk.pages.conversation.widgets.content.*
+import com.lbe.imsdk.pages.conversation.widgets.message.content.MessageAnswerContentView
+import com.lbe.imsdk.pages.conversation.widgets.message.content.MessageFaqContentView
+import com.lbe.imsdk.pages.conversation.widgets.message.content.MessageImageContentView
+import com.lbe.imsdk.pages.conversation.widgets.message.content.MessageKnowledgeContentView
+import com.lbe.imsdk.pages.conversation.widgets.message.content.MessageTextContentView
+import com.lbe.imsdk.pages.conversation.widgets.message.content.MessageVideoContentView
 import com.lbe.imsdk.repository.db.entry.IMMessageEntry
 import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgContentType
 

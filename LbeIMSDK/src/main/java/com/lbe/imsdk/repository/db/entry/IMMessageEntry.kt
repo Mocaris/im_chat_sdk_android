@@ -197,6 +197,16 @@ data class IMMessageEntry(
     @Ignore
     var cacheLayoutHeight: Dp? = null
 
+    val shouldMarkRead: Boolean
+        get() {
+            if (status == IMMsgReadStatus.READ) {
+                return false
+            }
+            return msgType == IMMsgContentType.TEXT_CONTENT_TYPE ||
+                    msgType == IMMsgContentType.IMAGE_CONTENT_TYPE ||
+                    msgType == IMMsgContentType.VIDEO_CONTENT_TYPE
+        }
+
     val readMutableState by lazy { mutableIntStateOf(this.status) }
 
     fun updateReadStatus(@IMMsgReadStatus status: Int) {
@@ -287,6 +297,7 @@ data class IMMessageEntry(
             null
         }
     }
+
     // 14
     val answerTimeoutContent by lazy {
         try {

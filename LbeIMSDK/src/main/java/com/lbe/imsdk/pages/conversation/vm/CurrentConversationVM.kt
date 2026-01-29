@@ -23,21 +23,15 @@ import com.lbe.imsdk.repository.local.LbeImDataRepository
 import com.lbe.imsdk.repository.local.upsert
 import com.lbe.imsdk.repository.remote.api.params.SendMessageBody
 import com.lbe.imsdk.repository.remote.model.*
-import com.lbe.imsdk.repository.remote.model.enumeration.FaqType
-import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgReadStatus
-import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgSendStatus
-import com.lbe.imsdk.repository.remote.model.enumeration.UploadSignType
+import com.lbe.imsdk.repository.remote.model.enumeration.*
 import com.lbe.imsdk.service.NetworkMonitor
 import com.lbe.imsdk.service.upload.BigFileUploadTask
 import com.lbe.imsdk.service.upload.SmallFileUploadTask
 import com.lbe.imsdk.service.upload.UploadResult
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.io.File
-import kotlin.time.DurationUnit
-import kotlin.time.toDuration
+import kotlin.math.max
 
 /**
  *
@@ -55,16 +49,21 @@ class CurrentConversationVM(
     val sessionId: String get() = sessionData.sessionId
     val lbeToken: String get() = sessionData.token
 
-    private val msgList get() = holderVM.msgList
+    val msgList get() = holderVM.msgList
     private val msgManager = ConversationMsgManager(sessionId)
-    val timeOutReply = mutableStateOf(false)
 
-    private var timeOutReplyJob: Job? = null
 
     val netState = mutableStateOf(true)
-    val timeOutConfig = mutableStateOf<TimeOutConfigModel.TimeOutConfigData?>(null)
 
     private var sessionListModel: SessionListResModel.SessionListDataModel? = null
+
+    val endSession = mutableStateOf(false)
+
+    ///是否进入人工客服
+    val isCustomerService = mutableStateOf(false)
+
+    /// 当前加载的历史会话索引
+    private var currentHistoryIndex = 0
 
     init {
         AppLifecycleObserver.addObserver(this)
@@ -96,25 +95,10 @@ class CurrentConversationVM(
 
     private fun onNetChanged(enable: Boolean) {
         netState.value = enable
-        checkConfig()
+//        checkConfig()
+        getHistorySession()
     }
 
-    private fun checkConfig() {
-        if (netState.value) {
-            getTimeoutConfig()
-        }
-    }
-
-    private fun getTimeoutConfig() {
-        viewModelScope.launchIO {
-            if (null != timeOutConfig.value) {
-                return@launchIO
-            }
-            tryCatchCoroutine { holderVM.imApiRepository?.getTimeoutConfig() }?.let {
-                timeOutConfig.value = it
-            }
-        }
-    }
 
     private fun getHistorySession() {
         viewModelScope.launchIO {
@@ -124,6 +108,10 @@ class CurrentConversationVM(
                     size = 1000,
                     sessionType = 2
                 )
+            }?.also {
+                isCustomerService.value =
+                    it.sessionList.firstOrNull { t -> t.sessionId == sessionId }?.isCustomService
+                        ?: false
             }
         }
     }
@@ -198,29 +186,17 @@ class CurrentConversationVM(
         }
     }
 
-    // 开启超时未回复 job
-    fun launchTimeOutJob(msgSeq: Long) {
-        timeOutReplyJob?.cancel()
-        val config = timeOutConfig.value ?: return
-        if (!config.isOpen) {
-            return
-        }
-        timeOutReplyJob = viewModelScope.launch {
-            timeOutReply.value = false
-            delay(config.timeout.toDuration(DurationUnit.MINUTES))
-            msgList.maxByOrNull { it.msgSeq }?.let {
-                if (it.msgSeq <= msgSeq) {
-                    timeOutReply.value = true
-                }
-            }
-        }
-
-    }
-
     override fun onReceiveMessage(message: IMMessageEntry) {
+        if (message.msgType == IMMsgContentType.AGENT_USER_JOIN_SESSION_CONTENT_TYPE) {
+            onCustomService()
+        }
         msgList.add(message)
         holderVM.newMessageCount.intValue += 1
-        launchTimeOutJob(message.msgSeq)
+//        launchTimeOutJob(message.msgSeq)
+    }
+
+    fun onCustomService() {
+        isCustomerService.value = true
     }
 
     override fun onReadMessage(
@@ -244,6 +220,10 @@ class CurrentConversationVM(
     }
 
     override fun onEndSession(sessionId: String) {
+        if (sessionId == this.sessionId) {
+            endSession.value = true
+            isCustomerService.value = false
+        }
         holderVM.onEndSession(sessionId)
     }
 
@@ -256,7 +236,7 @@ class CurrentConversationVM(
     override fun onCleared() {
         AppLifecycleObserver.removeObserver(this)
         holderVM.editFocusRequester.freeFocus()
-        LbeIMSDKManager.socketManager?.disconnect()
+//        LbeIMSDKManager.socketManager?.disconnect()
         LbeIMSDKManager.socketManager?.removeSocketEventCallback(this)
         super.onCleared()
     }
@@ -268,33 +248,20 @@ class CurrentConversationVM(
                 withMainContext {
                     holderVM.isRefreshing.value = true
                 }
-                suspend fun loadMoreSessionHistory() {
-                    with(sessionListModel ?: return) {
-                        val firstMsgSessionId = msgList.firstOrNull()?.sessionId
-                        val sessionIdList = this.sessionList.filter { it.sessionId != sessionId }
-                            .map { it.sessionId }
-                        val loaded = sessionIdList.any { it == firstMsgSessionId }
-                        if (loaded) {
-                            return@with
-                        }
-                        val list = LbeImDataRepository.findSessionMsgList(sessionIdList)
-                        if (list.isEmpty()) {
-                            return@with
-                        }
-                        msgList.addAll(0, list)
-                    }
-                }
-
                 if (msgList.isNotEmpty()) {
-                    val firstSessionId = msgList.first().sessionId
-                    if (firstSessionId != sessionId) {
-                        return@launchIO
-                    }
+//                    val firstSessionId = msgList.first().sessionId
+//                    if (firstSessionId != sessionId) {
+//                        return@launchIO
+//                    }s
                     // 拉取当前 session 最早一条消息，获取该消息之前的 50 条历史消息
                     val first = msgList.firstOrNull { it.msgSeq > 0 } ?: return@launchIO
-                    val list = msgManager.loadHistory(first.msgSeq - 1, 50)
-                    if (list.isNotEmpty()) {
-                        msgList.addAll(0, list)
+                    if (first.sessionId == sessionId) {
+                        val list = msgManager.loadHistory(first.msgSeq - 1, 50)
+                        if (list.isNotEmpty()) {
+                            msgList.addAll(0, list)
+                        } else {
+                            loadMoreSessionHistory()
+                        }
                     } else {
                         loadMoreSessionHistory()
                     }
@@ -307,6 +274,66 @@ class CurrentConversationVM(
                     holderVM.isRefreshing.value = false
                 }
             }
+        }
+    }
+
+    private suspend fun loadMoreSessionHistory() {
+        with(sessionListModel ?: return) {
+            val sessionList =
+                this.sessionList.sortedWith { a, b ->
+                    ((b.latestMsg?.sendTime ?: 0L) - (a.latestMsg?.sendTime ?: 0L)).toInt()
+                }
+                    .filter { it.sessionId != sessionId }
+            if (currentHistoryIndex >= sessionList.size) {
+                return@with
+            }
+            if (sessionList.isEmpty()) {
+                return@with
+            }
+            val historySession =
+                sessionList.getOrNull(currentHistoryIndex) ?: return@with
+            /// 判断是否该拉取 历史记录
+            val firstHistoryMsg = msgList.firstOrNull()
+            val maxSessionSeq = if (firstHistoryMsg?.sessionId != historySession.sessionId) {
+                (historySession.latestMsg?.msgSeq ?: 0) - 1
+            } else {
+                firstHistoryMsg.msgSeq - 1
+            }
+            if (maxSessionSeq < 1) {
+                currentHistoryIndex += 1
+                loadMoreSessionHistory()
+                return@with
+            }
+            val startSeq = maxSessionSeq - 50
+            // 拉取历史 50条
+            msgManager.loadRemoteNewest(
+                startSeq,
+                maxSessionSeq,
+                historySession.sessionId
+            )
+            val findSessionMsgList = LbeImDataRepository.findSessionMsgList(
+                historySession.sessionId,
+                startSeq,
+                maxSessionSeq
+            )
+            if (findSessionMsgList.isEmpty()) {
+                currentHistoryIndex += 1
+                return@with
+            }
+            msgList.addAll(0, findSessionMsgList)
+
+
+//                        val firstMsgSessionId = msgList.firstOrNull()?.sessionId
+//                        val sessionIdList = sessionList.map { it.sessionId }
+//                        val loaded = sessionIdList.any { it == firstMsgSessionId }
+//                        if (loaded) {
+//                            return@with
+//                        }
+//                        val list = LbeImDataRepository.findSessionMsgList(sessionIdList)
+//                        if (list.isEmpty()) {
+//                            return@with
+//                        }
+//                        msgList.addAll(0, list)
         }
     }
 
@@ -354,7 +381,8 @@ class CurrentConversationVM(
             val uriFile = picUri.toCompatUriFile()
             val thumbnail = uriFile.thumbnailImage() ?: throw Exception("thumbnail is null")
             val fileMetadata = uriFile.getFileMetaData()
-            val mediaMetadata = fileMetadata.mediaMetadata?: throw Exception("mediaMetadata is null")
+            val mediaMetadata =
+                fileMetadata.mediaMetadata ?: throw Exception("mediaMetadata is null")
             val messageBody = SendMessageBody.createMediaMessage(
                 MediaMessageContent(
                     width = mediaMetadata.width,

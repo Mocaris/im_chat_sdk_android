@@ -25,9 +25,9 @@ import com.lbe.imsdk.service.http.SocketClient
 @Composable
 fun NetWorkStateView() {
     val netState = LocalCurrentConversationViewModel.current.netState.value
-    val socketState = LbeIMSDKManager.socketManager?.connectState?.collectAsState()?.value
+//    val socketState = LbeIMSDKManager.socketManager?.connectState?.collectAsState()?.value
     AnimatedVisibility(
-        visible = !netState || (socketState != SocketClient.ConnectState.CONNECTING && socketState != SocketClient.ConnectState.OPENED),
+        visible = !netState /*|| socketState.isClosed==true*/,
         enter = slideInVertically(initialOffsetY = { -it }),
         exit = slideOutVertically(targetOffsetY = { -it })
     ) {

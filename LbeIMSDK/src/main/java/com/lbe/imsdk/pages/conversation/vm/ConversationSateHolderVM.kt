@@ -1,6 +1,7 @@
 package com.lbe.imsdk.pages.conversation.vm
 
 import androidx.activity.compose.LocalActivity
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -56,8 +57,6 @@ class ConversationSateHolderVM(
     internal val uid: String? get() = currentSession?.uid
     internal val sessionId: String? get() = currentSession?.sessionId
 
-    val endSession = mutableStateOf(true)
-
     val scrollToBottomEvent = MutableSharedFlow<Boolean>()
 
     /// ui state
@@ -80,9 +79,8 @@ class ConversationSateHolderVM(
     fun initSession() {
         viewModelScope.launchIO {
             lock.withLock(_currentSession) {
-                if (!endSession.value) {
-                    return@withLock
-                }
+                SignInterceptor.lbeToken = ""
+                SignInterceptor.lbeSession = ""
                 _currentSession.value = tryCatchCoroutine {
                     imApiRepository?.createSession(
                         device = initConfig.device,
@@ -100,8 +98,50 @@ class ConversationSateHolderVM(
                 }?.also {
                     SignInterceptor.lbeToken = it.token
                     SignInterceptor.lbeSession = it.sessionId
-                    endSession.value = false
                 }
+            }
+        }
+    }
+
+    fun endSession() {
+        sessionId?.let {
+            fun end() {
+                viewModelScope.launchIO {
+                    tryCatchCoroutine {
+                        LbeIMSDKManager.socketManager?.disconnect()
+                        imApiRepository?.endSession(it)
+                        initSession()
+                    }
+                }
+            }
+            dialogManager.show(onDismissRequest = {
+                it()
+            }) { dismiss ->
+                IMCupertinoDialogContent(
+                    title = {
+                        Text(text = stringResource(R.string.chat_session_txt_1))
+                    },
+                    content = {
+                        Text(text = stringResource(R.string.chat_session_txt_2))
+                    },
+                    actions = listOf(
+                        DialogAction(onClick = {
+                            dismiss()
+                        }) {
+                            Text(text = stringResource(R.string.customerServiceManage_customerService_23))
+                        },
+
+                        DialogAction(onClick = {
+                            end()
+                            dismiss()
+                        }) {
+                            Text(
+                                text = stringResource(R.string.chat_session_txt_3),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    )
+                )
             }
         }
     }
@@ -122,8 +162,9 @@ class ConversationSateHolderVM(
     }
 
     fun onEndSession(sessionId: String) {
-        endSession.value = true
-        initSession()
+        if (this.sessionId == sessionId) {
+            initSession()
+        }
     }
 
     //被踢下线
@@ -158,7 +199,6 @@ class ConversationSateHolderVM(
         _currentSession.value = null
 //        SignInterceptor.lbeToken = null
 //        SignInterceptor.lbeSession = null
-        endSession.value = true
         LbeIMSDKManager.socketManager?.disconnect()
         super.onCleared()
     }

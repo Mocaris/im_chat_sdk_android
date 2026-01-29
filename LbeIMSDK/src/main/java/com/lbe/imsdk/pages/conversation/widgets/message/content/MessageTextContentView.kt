@@ -1,4 +1,4 @@
-package com.lbe.imsdk.pages.conversation.widgets.content
+package com.lbe.imsdk.pages.conversation.widgets.message.content
 
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Text

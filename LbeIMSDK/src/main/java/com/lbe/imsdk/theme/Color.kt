@@ -3,13 +3,19 @@ package com.lbe.imsdk.theme
 import androidx.compose.ui.graphics.Color
 
 
-val primaryColor = Color(0xFF2C3CDA)
-val backgroundColor = Color(0xFFF3F4F6)
+val primaryColor = Color(0xFF5F97E3)
+val backgroundColor = Color(0xFFF3F3F6)
+val appBarColor = Color(0xFFF3F3F6)
 val colorEBEBEB = Color(0xffEBEBEB)
 val colorTip = Color(0xFF979797)
 
 
 class ThemeColors {
+
+    val textColor get() = Color(0xFF1B1B22)
+
+    val customButtonBorder: Color get() = Color(0xFFDFDFDF)
+
     val conversationFlotTipColor: Color get() = Color(0xFFDAE6FF)
     val conversationSelfBgColor: Color get() = Color(0xFFDAE6FF)
     val conversationFromBgColor: Color get() = Color.White

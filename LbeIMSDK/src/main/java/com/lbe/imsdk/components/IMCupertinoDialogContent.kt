@@ -97,5 +97,8 @@ private fun RowScope.DialogsAction(
         onClick = onClick,
         shape = RoundedCornerShape(0.dp),
         content = content,
+        colors = ButtonDefaults.textButtonColors(
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
     )
 }
