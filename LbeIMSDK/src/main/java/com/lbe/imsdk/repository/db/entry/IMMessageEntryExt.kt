@@ -2,8 +2,6 @@ package com.lbe.imsdk.repository.db.entry
 
 import androidx.compose.runtime.Composable
 import com.lbe.imsdk.provider.LocalSession
-import com.lbe.imsdk.repository.db.IMDataBase
-import com.lbe.imsdk.repository.local.insert
 import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgContentType
 
 /**
@@ -17,9 +15,9 @@ fun IMMessageEntry.isSelfSender(): Boolean {
 }
 
 fun IMMessageEntry.isImageType(): Boolean {
-    return msgType == IMMsgContentType.ImgContentType
+    return msgType == IMMsgContentType.IMAGE_CONTENT_TYPE
 }
 
 fun IMMessageEntry.isVideoType(): Boolean {
-    return msgType == IMMsgContentType.VideoContentType
+    return msgType == IMMsgContentType.VIDEO_CONTENT_TYPE
 }

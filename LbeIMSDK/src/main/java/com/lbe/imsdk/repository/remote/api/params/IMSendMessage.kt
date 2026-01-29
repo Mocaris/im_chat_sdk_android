@@ -1,7 +1,6 @@
 package com.lbe.imsdk.repository.remote.api.params
 
 import com.lbe.imsdk.repository.db.entry.IMMessageEntry
-import com.lbe.imsdk.repository.model.proto.*
 import com.lbe.imsdk.repository.remote.model.*
 import com.lbe.imsdk.repository.remote.model.enumeration.*
 import kotlinx.serialization.Serializable
@@ -41,7 +40,7 @@ class SendMessageBody private constructor(
             return SendMessageBody(
                 clientMsgID = UUID.randomUUID().toString(),
                 msgBody = text,
-                msgType = IMMsgContentType.TextContentType,
+                msgType = IMMsgContentType.TEXT_CONTENT_TYPE,
                 sendTime = System.currentTimeMillis().toString(),
                 source = ReqSource.APP
             )
@@ -51,7 +50,7 @@ class SendMessageBody private constructor(
             return SendMessageBody(
                 clientMsgID = UUID.randomUUID().toString(),
                 msgBody = Json.encodeToString(mediaBody),
-                msgType = if (isVideo) IMMsgContentType.VideoContentType else IMMsgContentType.ImgContentType,
+                msgType = if (isVideo) IMMsgContentType.VIDEO_CONTENT_TYPE else IMMsgContentType.IMAGE_CONTENT_TYPE,
                 sendTime = System.currentTimeMillis().toString(),
                 source = ReqSource.APP
             )
@@ -65,7 +64,7 @@ class SendMessageBody private constructor(
             return SendMessageBody(
                 clientMsgID = UUID.randomUUID().toString(),
                 msgBody = Json.encodeToString(mediaBody),
-                msgType = IMMsgContentType.ImgContentType,
+                msgType = IMMsgContentType.IMAGE_CONTENT_TYPE,
                 sendTime = System.currentTimeMillis().toString(),
                 source = ReqSource.APP
             )
@@ -79,7 +78,7 @@ class SendMessageBody private constructor(
             return SendMessageBody(
                 clientMsgID = UUID.randomUUID().toString(),
                 msgBody = Json.encodeToString(mediaBody),
-                msgType = IMMsgContentType.VideoContentType,
+                msgType = IMMsgContentType.VIDEO_CONTENT_TYPE,
                 sendTime = System.currentTimeMillis().toString(),
                 source = ReqSource.APP
             )

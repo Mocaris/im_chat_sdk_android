@@ -1,7 +1,7 @@
 package com.lbe.imsdk.service.upload
 
 import androidx.compose.runtime.mutableStateMapOf
-import com.lbe.imsdk.extension.md5
+import com.lbe.imsdk.extension.getMD5
 import com.lbe.imsdk.extension.readCacheChunk
 import com.lbe.imsdk.manager.LbeIMSDKManager
 import com.lbe.imsdk.repository.remote.LbeOssApiRepository
@@ -200,7 +200,7 @@ class BigFileUploadTask(
                     val chunkFile = sourceFile.readCacheChunk(skipSize, blockSize)
                     try {
                         //计算 md5
-                        val md5 = chunkFile.md5()
+                        val md5 = chunkFile.getMD5()
                         apiRepository.uploadBinary(
                             url = uploadUrl,
                             header = node.value.header,

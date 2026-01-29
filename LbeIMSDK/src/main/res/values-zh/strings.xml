@@ -14,7 +14,7 @@
     <string name="chat_session_status_24">图片大小超出限制</string>
     <string name="chat_session_status_25">视频大小超出限制</string>
     <string name="chat_session_status_23">不能发送空白消息</string>
-    <string name="chat_session_status_3">您已超过%d分钟未回复</string>
+    <string name="chat_session_status_3">您已超过%s分钟未回复</string>
     <string name="chat_session_status_28">当前知识点不存在或已被删除</string>
     <string name="chat_session_status_12">请输入你想咨询的问题</string>
     <string name="chat_session_status_10">回到底部</string>

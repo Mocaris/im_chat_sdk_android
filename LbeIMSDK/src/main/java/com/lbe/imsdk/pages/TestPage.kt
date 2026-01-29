@@ -5,18 +5,15 @@ import android.os.*
 import androidx.activity.compose.*
 import androidx.activity.result.*
 import androidx.activity.result.contract.*
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import coil3.compose.rememberAsyncImagePainter
-import com.lbe.imsdk.extension.toUriFile
+import com.lbe.imsdk.extension.toCompatUriFile
 import com.lbe.imsdk.pages.conversation.widgets.*
 import kotlinx.coroutines.launch
 import java.io.File
@@ -37,8 +34,8 @@ fun TestPage() {
         onResult = { it ->
             println("------------------->> $it")
             scope.launch {
-                val uriFile = it?.toUriFile()
-                val file = uriFile?.cacheSourceFile()?.path
+                val uriFile = it?.toCompatUriFile()
+                val file = uriFile?.getFileMetaData()
                 thumbnail.value = uriFile?.thumbnailImage()?.let { File(it.path) }
                 println("------------------->> ${file}")
             }

@@ -9,12 +9,6 @@ import java.io.File
  * @Date 2025-09-05
  */
 
-// 取 md5
-val String.md5Str: String
-    get() = Encrypt.getMD5().digest(this.toByteArray()).joinToString("") {
-        "%02x".format(it)
-    }
-
 val coilDiskCache by lazy {
     DiskCache.Builder()
         .directory(File(coilImageDir))

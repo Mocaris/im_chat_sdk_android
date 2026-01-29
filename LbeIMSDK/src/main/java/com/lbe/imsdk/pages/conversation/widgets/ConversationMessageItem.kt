@@ -26,6 +26,7 @@ import com.lbe.imsdk.repository.remote.model.*
 import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgContentType
 import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgReadStatus
 import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgSendStatus
+import kotlinx.serialization.StringFormat
 import java.util.Date
 
 /**
@@ -34,8 +35,8 @@ import java.util.Date
  */
 
 val excludeDecorationMsgType = listOf(
-    IMMsgContentType.ImgContentType,
-    IMMsgContentType.VideoContentType,
+    IMMsgContentType.IMAGE_CONTENT_TYPE,
+    IMMsgContentType.VIDEO_CONTENT_TYPE,
 )
 
 @Composable
@@ -58,16 +59,26 @@ fun ConversationMessageItem(preMsg: IMMessageEntry?, imMsg: IMMessageEntry) {
                 }
             }
             when (imMsg.msgType) {
-                IMMsgContentType.AgentUserJoinSessionContentType -> {
+                IMMsgContentType.AGENT_USER_JOIN_SESSION_CONTENT_TYPE -> {
                     val content = imMsg.userArentContent
                     MessageUserAgentContentView(content)
                 }
 
-                IMMsgContentType.EndSessionContentType -> {
+                IMMsgContentType.END_SESSION_CONTENT_TYPE -> {
                     MessageSystemContentView(stringResource(R.string.chat_session_status_6))
                 }
 
-                IMMsgContentType.RankingContentType -> {
+                IMMsgContentType.ANWSER_TIMEOUT_CONTENT_TYPE -> {
+                    val content = imMsg.answerTimeoutContent
+                    MessageSystemContentView(
+                        stringResource(
+                            R.string.chat_session_status_3,
+                            content?.getTimeoutMinutesText() ?: "2"
+                        )
+                    )
+                }
+
+                IMMsgContentType.RANKING_CONTENT_TYPE -> {
                     val content = imMsg.rankingBodyContent
                     MessageSystemContentView(
                         stringResource(
@@ -77,11 +88,11 @@ fun ConversationMessageItem(preMsg: IMMessageEntry?, imMsg: IMMessageEntry) {
                     )
                 }
 
-                IMMsgContentType.TransferContentType -> {
+                IMMsgContentType.TRANSFER_CONTENT_TYPE -> {
                     MessageSystemContentView(stringResource(R.string.chat_session_status_5))
                 }
 
-                IMMsgContentType.UnsupportedContentType -> {
+                IMMsgContentType.UNSUPPORTED_CONTENT_TYPE -> {
                     MessageSystemContentView(stringResource(R.string.chat_session_status_7))
                 }
 

@@ -2,13 +2,13 @@ package com.lbe.imsdk.repository.db.entry
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.room.*
 import com.lbe.imsdk.repository.db.entry.convert.TempLocalSourceCovert
 import com.lbe.imsdk.repository.db.entry.convert.UploadTaskConvert
 import com.lbe.imsdk.repository.model.proto.IMMsg
 import com.lbe.imsdk.repository.remote.api.params.SendMessageBody
 import com.lbe.imsdk.repository.remote.model.AgentUser
+import com.lbe.imsdk.repository.remote.model.AnswerTimeoutMessageContent
 import com.lbe.imsdk.repository.remote.model.FaqAnswerMessageContent
 import com.lbe.imsdk.repository.remote.model.FaqMessageContent
 import com.lbe.imsdk.repository.remote.model.IMMsgModel
@@ -20,6 +20,7 @@ import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgContentType
 import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgReadStatus
 import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgSendStatus
 import kotlinx.serialization.json.*
+import java.nio.ByteBuffer
 import java.util.*
 
 /**
@@ -69,7 +70,7 @@ data class IMMessageEntry(
      */
     @ColumnInfo(
         name = "msg_type", typeAffinity = ColumnInfo.INTEGER
-    ) val msgType: Int = IMMsgContentType.InvalidContentType,
+    ) val msgType: Int = IMMsgContentType.INVALID_CONTENT_TYPE,
     /**
      * 接收者ID
      */
@@ -282,6 +283,14 @@ data class IMMessageEntry(
     val rankingBodyContent by lazy {
         try {
             RankingMessageContent.fromJson(msgBody)
+        } catch (e: Exception) {
+            null
+        }
+    }
+    // 14
+    val answerTimeoutContent by lazy {
+        try {
+            AnswerTimeoutMessageContent.fromJson(msgBody)
         } catch (e: Exception) {
             null
         }

@@ -336,6 +336,14 @@ public final class IMMsg {
      * <code>UnsupportedContentType = 13;</code>
      */
     UnsupportedContentType(13),
+    /**
+     * <pre>
+     * C端超时未回复消息
+     * </pre>
+     *
+     * <code>AnswerMsgTimeoutContentType = 14;</code>
+     */
+    AnswerMsgTimeoutContentType(14),
     UNRECOGNIZED(-1),
     ;
 
@@ -459,6 +467,14 @@ public final class IMMsg {
      * <code>UnsupportedContentType = 13;</code>
      */
     public static final int UnsupportedContentType_VALUE = 13;
+    /**
+     * <pre>
+     * C端超时未回复消息
+     * </pre>
+     *
+     * <code>AnswerMsgTimeoutContentType = 14;</code>
+     */
+    public static final int AnswerMsgTimeoutContentType_VALUE = 14;
 
 
     public final int getNumber() {
@@ -499,6 +515,7 @@ public final class IMMsg {
         case 11: return TransferContentType;
         case 12: return SystemContentType;
         case 13: return UnsupportedContentType;
+        case 14: return AnswerMsgTimeoutContentType;
         default: return null;
       }
     }
@@ -2187,6 +2204,21 @@ public final class IMMsg {
      * <code>.com.lbe.imsdk.repository.model.proto.EndSessionMsg endSessionMsg = 7;</code>
      */
     com.lbe.imsdk.repository.model.proto.IMMsg.EndSessionMsgOrBuilder getEndSessionMsgOrBuilder();
+
+    /**
+     * <code>.com.lbe.imsdk.repository.model.proto.KickOffLineMsg kickOffLineMsg = 8;</code>
+     * @return Whether the kickOffLineMsg field is set.
+     */
+    boolean hasKickOffLineMsg();
+    /**
+     * <code>.com.lbe.imsdk.repository.model.proto.KickOffLineMsg kickOffLineMsg = 8;</code>
+     * @return The kickOffLineMsg.
+     */
+    com.lbe.imsdk.repository.model.proto.IMMsg.KickOffLineMsg getKickOffLineMsg();
+    /**
+     * <code>.com.lbe.imsdk.repository.model.proto.KickOffLineMsg kickOffLineMsg = 8;</code>
+     */
+    com.lbe.imsdk.repository.model.proto.IMMsg.KickOffLineMsgOrBuilder getKickOffLineMsgOrBuilder();
   }
   /**
    * Protobuf type {@code com.lbe.imsdk.repository.model.proto.MsgEntityToFrontEnd}
@@ -2401,6 +2433,32 @@ public final class IMMsg {
       return endSessionMsg_ == null ? com.lbe.imsdk.repository.model.proto.IMMsg.EndSessionMsg.getDefaultInstance() : endSessionMsg_;
     }
 
+    public static final int KICKOFFLINEMSG_FIELD_NUMBER = 8;
+    private com.lbe.imsdk.repository.model.proto.IMMsg.KickOffLineMsg kickOffLineMsg_;
+    /**
+     * <code>.com.lbe.imsdk.repository.model.proto.KickOffLineMsg kickOffLineMsg = 8;</code>
+     * @return Whether the kickOffLineMsg field is set.
+     */
+    @java.lang.Override
+    public boolean hasKickOffLineMsg() {
+      return ((bitField0_ & 0x00000040) != 0);
+    }
+    /**
+     * <code>.com.lbe.imsdk.repository.model.proto.KickOffLineMsg kickOffLineMsg = 8;</code>
+     * @return The kickOffLineMsg.
+     */
+    @java.lang.Override
+    public com.lbe.imsdk.repository.model.proto.IMMsg.KickOffLineMsg getKickOffLineMsg() {
+      return kickOffLineMsg_ == null ? com.lbe.imsdk.repository.model.proto.IMMsg.KickOffLineMsg.getDefaultInstance() : kickOffLineMsg_;
+    }
+    /**
+     * <code>.com.lbe.imsdk.repository.model.proto.KickOffLineMsg kickOffLineMsg = 8;</code>
+     */
+    @java.lang.Override
+    public com.lbe.imsdk.repository.model.proto.IMMsg.KickOffLineMsgOrBuilder getKickOffLineMsgOrBuilder() {
+      return kickOffLineMsg_ == null ? com.lbe.imsdk.repository.model.proto.IMMsg.KickOffLineMsg.getDefaultInstance() : kickOffLineMsg_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -2435,6 +2493,9 @@ public final class IMMsg {
       }
       if (((bitField0_ & 0x00000020) != 0)) {
         output.writeMessage(7, getEndSessionMsg());
+      }
+      if (((bitField0_ & 0x00000040) != 0)) {
+        output.writeMessage(8, getKickOffLineMsg());
       }
       getUnknownFields().writeTo(output);
     }
@@ -2472,6 +2533,10 @@ public final class IMMsg {
       if (((bitField0_ & 0x00000020) != 0)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(7, getEndSessionMsg());
+      }
+      if (((bitField0_ & 0x00000040) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(8, getKickOffLineMsg());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -2519,6 +2584,11 @@ public final class IMMsg {
         if (!getEndSessionMsg()
             .equals(other.getEndSessionMsg())) return false;
       }
+      if (hasKickOffLineMsg() != other.hasKickOffLineMsg()) return false;
+      if (hasKickOffLineMsg()) {
+        if (!getKickOffLineMsg()
+            .equals(other.getKickOffLineMsg())) return false;
+      }
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -2555,6 +2625,10 @@ public final class IMMsg {
       if (hasEndSessionMsg()) {
         hash = (37 * hash) + ENDSESSIONMSG_FIELD_NUMBER;
         hash = (53 * hash) + getEndSessionMsg().hashCode();
+      }
+      if (hasKickOffLineMsg()) {
+        hash = (37 * hash) + KICKOFFLINEMSG_FIELD_NUMBER;
+        hash = (53 * hash) + getKickOffLineMsg().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
@@ -2692,6 +2766,7 @@ public final class IMMsg {
           internalGetAgentUserJoinSessionMsgFieldBuilder();
           internalGetHasReadReceiptMsgFieldBuilder();
           internalGetEndSessionMsgFieldBuilder();
+          internalGetKickOffLineMsgFieldBuilder();
         }
       }
       @java.lang.Override
@@ -2728,6 +2803,11 @@ public final class IMMsg {
         if (endSessionMsgBuilder_ != null) {
           endSessionMsgBuilder_.dispose();
           endSessionMsgBuilder_ = null;
+        }
+        kickOffLineMsg_ = null;
+        if (kickOffLineMsgBuilder_ != null) {
+          kickOffLineMsgBuilder_.dispose();
+          kickOffLineMsgBuilder_ = null;
         }
         return this;
       }
@@ -2802,6 +2882,12 @@ public final class IMMsg {
               : endSessionMsgBuilder_.build();
           to_bitField0_ |= 0x00000020;
         }
+        if (((from_bitField0_ & 0x00000080) != 0)) {
+          result.kickOffLineMsg_ = kickOffLineMsgBuilder_ == null
+              ? kickOffLineMsg_
+              : kickOffLineMsgBuilder_.build();
+          to_bitField0_ |= 0x00000040;
+        }
         result.bitField0_ |= to_bitField0_;
       }
 
@@ -2837,6 +2923,9 @@ public final class IMMsg {
         }
         if (other.hasEndSessionMsg()) {
           mergeEndSessionMsg(other.getEndSessionMsg());
+        }
+        if (other.hasKickOffLineMsg()) {
+          mergeKickOffLineMsg(other.getKickOffLineMsg());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
@@ -2911,6 +3000,13 @@ public final class IMMsg {
                 bitField0_ |= 0x00000040;
                 break;
               } // case 58
+              case 66: {
+                input.readMessage(
+                    internalGetKickOffLineMsgFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000080;
+                break;
+              } // case 66
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -3703,6 +3799,127 @@ public final class IMMsg {
           endSessionMsg_ = null;
         }
         return endSessionMsgBuilder_;
+      }
+
+      private com.lbe.imsdk.repository.model.proto.IMMsg.KickOffLineMsg kickOffLineMsg_;
+      private com.google.protobuf.SingleFieldBuilder<
+          com.lbe.imsdk.repository.model.proto.IMMsg.KickOffLineMsg, com.lbe.imsdk.repository.model.proto.IMMsg.KickOffLineMsg.Builder, com.lbe.imsdk.repository.model.proto.IMMsg.KickOffLineMsgOrBuilder> kickOffLineMsgBuilder_;
+      /**
+       * <code>.com.lbe.imsdk.repository.model.proto.KickOffLineMsg kickOffLineMsg = 8;</code>
+       * @return Whether the kickOffLineMsg field is set.
+       */
+      public boolean hasKickOffLineMsg() {
+        return ((bitField0_ & 0x00000080) != 0);
+      }
+      /**
+       * <code>.com.lbe.imsdk.repository.model.proto.KickOffLineMsg kickOffLineMsg = 8;</code>
+       * @return The kickOffLineMsg.
+       */
+      public com.lbe.imsdk.repository.model.proto.IMMsg.KickOffLineMsg getKickOffLineMsg() {
+        if (kickOffLineMsgBuilder_ == null) {
+          return kickOffLineMsg_ == null ? com.lbe.imsdk.repository.model.proto.IMMsg.KickOffLineMsg.getDefaultInstance() : kickOffLineMsg_;
+        } else {
+          return kickOffLineMsgBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.com.lbe.imsdk.repository.model.proto.KickOffLineMsg kickOffLineMsg = 8;</code>
+       */
+      public Builder setKickOffLineMsg(com.lbe.imsdk.repository.model.proto.IMMsg.KickOffLineMsg value) {
+        if (kickOffLineMsgBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          kickOffLineMsg_ = value;
+        } else {
+          kickOffLineMsgBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000080;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.com.lbe.imsdk.repository.model.proto.KickOffLineMsg kickOffLineMsg = 8;</code>
+       */
+      public Builder setKickOffLineMsg(
+          com.lbe.imsdk.repository.model.proto.IMMsg.KickOffLineMsg.Builder builderForValue) {
+        if (kickOffLineMsgBuilder_ == null) {
+          kickOffLineMsg_ = builderForValue.build();
+        } else {
+          kickOffLineMsgBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000080;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.com.lbe.imsdk.repository.model.proto.KickOffLineMsg kickOffLineMsg = 8;</code>
+       */
+      public Builder mergeKickOffLineMsg(com.lbe.imsdk.repository.model.proto.IMMsg.KickOffLineMsg value) {
+        if (kickOffLineMsgBuilder_ == null) {
+          if (((bitField0_ & 0x00000080) != 0) &&
+            kickOffLineMsg_ != null &&
+            kickOffLineMsg_ != com.lbe.imsdk.repository.model.proto.IMMsg.KickOffLineMsg.getDefaultInstance()) {
+            getKickOffLineMsgBuilder().mergeFrom(value);
+          } else {
+            kickOffLineMsg_ = value;
+          }
+        } else {
+          kickOffLineMsgBuilder_.mergeFrom(value);
+        }
+        if (kickOffLineMsg_ != null) {
+          bitField0_ |= 0x00000080;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <code>.com.lbe.imsdk.repository.model.proto.KickOffLineMsg kickOffLineMsg = 8;</code>
+       */
+      public Builder clearKickOffLineMsg() {
+        bitField0_ = (bitField0_ & ~0x00000080);
+        kickOffLineMsg_ = null;
+        if (kickOffLineMsgBuilder_ != null) {
+          kickOffLineMsgBuilder_.dispose();
+          kickOffLineMsgBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.com.lbe.imsdk.repository.model.proto.KickOffLineMsg kickOffLineMsg = 8;</code>
+       */
+      public com.lbe.imsdk.repository.model.proto.IMMsg.KickOffLineMsg.Builder getKickOffLineMsgBuilder() {
+        bitField0_ |= 0x00000080;
+        onChanged();
+        return internalGetKickOffLineMsgFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.com.lbe.imsdk.repository.model.proto.KickOffLineMsg kickOffLineMsg = 8;</code>
+       */
+      public com.lbe.imsdk.repository.model.proto.IMMsg.KickOffLineMsgOrBuilder getKickOffLineMsgOrBuilder() {
+        if (kickOffLineMsgBuilder_ != null) {
+          return kickOffLineMsgBuilder_.getMessageOrBuilder();
+        } else {
+          return kickOffLineMsg_ == null ?
+              com.lbe.imsdk.repository.model.proto.IMMsg.KickOffLineMsg.getDefaultInstance() : kickOffLineMsg_;
+        }
+      }
+      /**
+       * <code>.com.lbe.imsdk.repository.model.proto.KickOffLineMsg kickOffLineMsg = 8;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.lbe.imsdk.repository.model.proto.IMMsg.KickOffLineMsg, com.lbe.imsdk.repository.model.proto.IMMsg.KickOffLineMsg.Builder, com.lbe.imsdk.repository.model.proto.IMMsg.KickOffLineMsgOrBuilder> 
+          internalGetKickOffLineMsgFieldBuilder() {
+        if (kickOffLineMsgBuilder_ == null) {
+          kickOffLineMsgBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.lbe.imsdk.repository.model.proto.IMMsg.KickOffLineMsg, com.lbe.imsdk.repository.model.proto.IMMsg.KickOffLineMsg.Builder, com.lbe.imsdk.repository.model.proto.IMMsg.KickOffLineMsgOrBuilder>(
+                  getKickOffLineMsg(),
+                  getParentForChildren(),
+                  isClean());
+          kickOffLineMsg_ = null;
+        }
+        return kickOffLineMsgBuilder_;
       }
 
       // @@protoc_insertion_point(builder_scope:com.lbe.imsdk.repository.model.proto.MsgEntityToFrontEnd)
@@ -8222,6 +8439,44 @@ public final class IMMsg {
      * <code>.com.lbe.imsdk.repository.model.proto.MsgBody latestMsg = 10;</code>
      */
     com.lbe.imsdk.repository.model.proto.IMMsg.MsgBodyOrBuilder getLatestMsgOrBuilder();
+
+    /**
+     * <pre>
+     * 0-排队 1-开始 2-结束
+     * </pre>
+     *
+     * <code>int32 status = 11;</code>
+     * @return The status.
+     */
+    int getStatus();
+
+    /**
+     * <pre>
+     * 1-游客 2-非游客
+     * </pre>
+     *
+     * <code>int32 customerType = 12;</code>
+     * @return The customerType.
+     */
+    int getCustomerType();
+
+    /**
+     * <pre>
+     * </pre>
+     *
+     * <code>string nickID = 13;</code>
+     * @return The nickID.
+     */
+    java.lang.String getNickID();
+    /**
+     * <pre>
+     * </pre>
+     *
+     * <code>string nickID = 13;</code>
+     * @return The bytes for nickID.
+     */
+    com.google.protobuf.ByteString
+        getNickIDBytes();
   }
   /**
    * Protobuf type {@code com.lbe.imsdk.repository.model.proto.SessionBasic}
@@ -8253,6 +8508,7 @@ public final class IMMsg {
       devNo_ = "";
       language_ = "";
       extra_ = "";
+      nickID_ = "";
     }
 
     public static final com.google.protobuf.Descriptors.Descriptor
@@ -8698,6 +8954,81 @@ public final class IMMsg {
       return latestMsg_ == null ? com.lbe.imsdk.repository.model.proto.IMMsg.MsgBody.getDefaultInstance() : latestMsg_;
     }
 
+    public static final int STATUS_FIELD_NUMBER = 11;
+    private int status_ = 0;
+    /**
+     * <pre>
+     * 0-排队 1-开始 2-结束
+     * </pre>
+     *
+     * <code>int32 status = 11;</code>
+     * @return The status.
+     */
+    @java.lang.Override
+    public int getStatus() {
+      return status_;
+    }
+
+    public static final int CUSTOMERTYPE_FIELD_NUMBER = 12;
+    private int customerType_ = 0;
+    /**
+     * <pre>
+     * 1-游客 2-非游客
+     * </pre>
+     *
+     * <code>int32 customerType = 12;</code>
+     * @return The customerType.
+     */
+    @java.lang.Override
+    public int getCustomerType() {
+      return customerType_;
+    }
+
+    public static final int NICKID_FIELD_NUMBER = 13;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object nickID_ = "";
+    /**
+     * <pre>
+     * </pre>
+     *
+     * <code>string nickID = 13;</code>
+     * @return The nickID.
+     */
+    @java.lang.Override
+    public java.lang.String getNickID() {
+      java.lang.Object ref = nickID_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        nickID_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * </pre>
+     *
+     * <code>string nickID = 13;</code>
+     * @return The bytes for nickID.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getNickIDBytes() {
+      java.lang.Object ref = nickID_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        nickID_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -8742,6 +9073,15 @@ public final class IMMsg {
       if (((bitField0_ & 0x00000001) != 0)) {
         output.writeMessage(10, getLatestMsg());
       }
+      if (status_ != 0) {
+        output.writeInt32(11, status_);
+      }
+      if (customerType_ != 0) {
+        output.writeInt32(12, customerType_);
+      }
+      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(nickID_)) {
+        com.google.protobuf.GeneratedMessage.writeString(output, 13, nickID_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -8783,6 +9123,17 @@ public final class IMMsg {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(10, getLatestMsg());
       }
+      if (status_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(11, status_);
+      }
+      if (customerType_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(12, customerType_);
+      }
+      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(nickID_)) {
+        size += com.google.protobuf.GeneratedMessage.computeStringSize(13, nickID_);
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
@@ -8821,6 +9172,12 @@ public final class IMMsg {
         if (!getLatestMsg()
             .equals(other.getLatestMsg())) return false;
       }
+      if (getStatus()
+          != other.getStatus()) return false;
+      if (getCustomerType()
+          != other.getCustomerType()) return false;
+      if (!getNickID()
+          .equals(other.getNickID())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -8855,6 +9212,12 @@ public final class IMMsg {
         hash = (37 * hash) + LATESTMSG_FIELD_NUMBER;
         hash = (53 * hash) + getLatestMsg().hashCode();
       }
+      hash = (37 * hash) + STATUS_FIELD_NUMBER;
+      hash = (53 * hash) + getStatus();
+      hash = (37 * hash) + CUSTOMERTYPE_FIELD_NUMBER;
+      hash = (53 * hash) + getCustomerType();
+      hash = (37 * hash) + NICKID_FIELD_NUMBER;
+      hash = (53 * hash) + getNickID().hashCode();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -9006,6 +9369,9 @@ public final class IMMsg {
           latestMsgBuilder_.dispose();
           latestMsgBuilder_ = null;
         }
+        status_ = 0;
+        customerType_ = 0;
+        nickID_ = "";
         return this;
       }
 
@@ -9073,6 +9439,15 @@ public final class IMMsg {
               : latestMsgBuilder_.build();
           to_bitField0_ |= 0x00000001;
         }
+        if (((from_bitField0_ & 0x00000400) != 0)) {
+          result.status_ = status_;
+        }
+        if (((from_bitField0_ & 0x00000800) != 0)) {
+          result.customerType_ = customerType_;
+        }
+        if (((from_bitField0_ & 0x00001000) != 0)) {
+          result.nickID_ = nickID_;
+        }
         result.bitField0_ |= to_bitField0_;
       }
 
@@ -9133,6 +9508,17 @@ public final class IMMsg {
         }
         if (other.hasLatestMsg()) {
           mergeLatestMsg(other.getLatestMsg());
+        }
+        if (other.getStatus() != 0) {
+          setStatus(other.getStatus());
+        }
+        if (other.getCustomerType() != 0) {
+          setCustomerType(other.getCustomerType());
+        }
+        if (!other.getNickID().isEmpty()) {
+          nickID_ = other.nickID_;
+          bitField0_ |= 0x00001000;
+          onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
@@ -9212,6 +9598,21 @@ public final class IMMsg {
                 bitField0_ |= 0x00000200;
                 break;
               } // case 82
+              case 88: {
+                status_ = input.readInt32();
+                bitField0_ |= 0x00000400;
+                break;
+              } // case 88
+              case 96: {
+                customerType_ = input.readInt32();
+                bitField0_ |= 0x00000800;
+                break;
+              } // case 96
+              case 106: {
+                nickID_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00001000;
+                break;
+              } // case 106
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -10164,6 +10565,181 @@ public final class IMMsg {
           latestMsg_ = null;
         }
         return latestMsgBuilder_;
+      }
+
+      private int status_ ;
+      /**
+       * <pre>
+       * 0-排队 1-开始 2-结束
+       * </pre>
+       *
+       * <code>int32 status = 11;</code>
+       * @return The status.
+       */
+      @java.lang.Override
+      public int getStatus() {
+        return status_;
+      }
+      /**
+       * <pre>
+       * 0-排队 1-开始 2-结束
+       * </pre>
+       *
+       * <code>int32 status = 11;</code>
+       * @param value The status to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStatus(int value) {
+
+        status_ = value;
+        bitField0_ |= 0x00000400;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * 0-排队 1-开始 2-结束
+       * </pre>
+       *
+       * <code>int32 status = 11;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearStatus() {
+        bitField0_ = (bitField0_ & ~0x00000400);
+        status_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int customerType_ ;
+      /**
+       * <pre>
+       * 1-游客 2-非游客
+       * </pre>
+       *
+       * <code>int32 customerType = 12;</code>
+       * @return The customerType.
+       */
+      @java.lang.Override
+      public int getCustomerType() {
+        return customerType_;
+      }
+      /**
+       * <pre>
+       * 1-游客 2-非游客
+       * </pre>
+       *
+       * <code>int32 customerType = 12;</code>
+       * @param value The customerType to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCustomerType(int value) {
+
+        customerType_ = value;
+        bitField0_ |= 0x00000800;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * 1-游客 2-非游客
+       * </pre>
+       *
+       * <code>int32 customerType = 12;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCustomerType() {
+        bitField0_ = (bitField0_ & ~0x00000800);
+        customerType_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object nickID_ = "";
+      /**
+       * <pre>
+       * </pre>
+       *
+       * <code>string nickID = 13;</code>
+       * @return The nickID.
+       */
+      public java.lang.String getNickID() {
+        java.lang.Object ref = nickID_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          nickID_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * </pre>
+       *
+       * <code>string nickID = 13;</code>
+       * @return The bytes for nickID.
+       */
+      public com.google.protobuf.ByteString
+          getNickIDBytes() {
+        java.lang.Object ref = nickID_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          nickID_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * </pre>
+       *
+       * <code>string nickID = 13;</code>
+       * @param value The nickID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNickID(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        nickID_ = value;
+        bitField0_ |= 0x00001000;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * </pre>
+       *
+       * <code>string nickID = 13;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearNickID() {
+        nickID_ = getDefaultInstance().getNickID();
+        bitField0_ = (bitField0_ & ~0x00001000);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * </pre>
+       *
+       * <code>string nickID = 13;</code>
+       * @param value The bytes for nickID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNickIDBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        nickID_ = value;
+        bitField0_ |= 0x00001000;
+        onChanged();
+        return this;
       }
 
       // @@protoc_insertion_point(builder_scope:com.lbe.imsdk.repository.model.proto.SessionBasic)
@@ -16200,6 +16776,461 @@ public final class IMMsg {
 
   }
 
+  public interface AnswerMsgTimeoutContentOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:com.lbe.imsdk.repository.model.proto.AnswerMsgTimeoutContent)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * 超时时间(秒)
+     * </pre>
+     *
+     * <code>int64 timeout = 1;</code>
+     * @return The timeout.
+     */
+    long getTimeout();
+  }
+  /**
+   * Protobuf type {@code com.lbe.imsdk.repository.model.proto.AnswerMsgTimeoutContent}
+   */
+  public static final class AnswerMsgTimeoutContent extends
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:com.lbe.imsdk.repository.model.proto.AnswerMsgTimeoutContent)
+      AnswerMsgTimeoutContentOrBuilder {
+  private static final long serialVersionUID = 0L;
+    static {
+      com.google.protobuf.RuntimeVersion.validateProtobufGencodeVersion(
+        com.google.protobuf.RuntimeVersion.RuntimeDomain.PUBLIC,
+        /* major= */ 4,
+        /* minor= */ 32,
+        /* patch= */ 0,
+        /* suffix= */ "",
+        AnswerMsgTimeoutContent.class.getName());
+    }
+    // Use AnswerMsgTimeoutContent.newBuilder() to construct.
+    private AnswerMsgTimeoutContent(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+    }
+    private AnswerMsgTimeoutContent() {
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.lbe.imsdk.repository.model.proto.IMMsg.internal_static_com_lbe_imsdk_repository_model_proto_AnswerMsgTimeoutContent_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.lbe.imsdk.repository.model.proto.IMMsg.internal_static_com_lbe_imsdk_repository_model_proto_AnswerMsgTimeoutContent_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent.class, com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent.Builder.class);
+    }
+
+    public static final int TIMEOUT_FIELD_NUMBER = 1;
+    private long timeout_ = 0L;
+    /**
+     * <pre>
+     * 超时时间(秒)
+     * </pre>
+     *
+     * <code>int64 timeout = 1;</code>
+     * @return The timeout.
+     */
+    @java.lang.Override
+    public long getTimeout() {
+      return timeout_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (timeout_ != 0L) {
+        output.writeInt64(1, timeout_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (timeout_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(1, timeout_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent)) {
+        return super.equals(obj);
+      }
+      com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent other = (com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent) obj;
+
+      if (getTimeout()
+          != other.getTimeout()) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + TIMEOUT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getTimeout());
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code com.lbe.imsdk.repository.model.proto.AnswerMsgTimeoutContent}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:com.lbe.imsdk.repository.model.proto.AnswerMsgTimeoutContent)
+        com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContentOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.lbe.imsdk.repository.model.proto.IMMsg.internal_static_com_lbe_imsdk_repository_model_proto_AnswerMsgTimeoutContent_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.lbe.imsdk.repository.model.proto.IMMsg.internal_static_com_lbe_imsdk_repository_model_proto_AnswerMsgTimeoutContent_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent.class, com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent.Builder.class);
+      }
+
+      // Construct using com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        timeout_ = 0L;
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.lbe.imsdk.repository.model.proto.IMMsg.internal_static_com_lbe_imsdk_repository_model_proto_AnswerMsgTimeoutContent_descriptor;
+      }
+
+      @java.lang.Override
+      public com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent getDefaultInstanceForType() {
+        return com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent build() {
+        com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent buildPartial() {
+        com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent result = new com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.timeout_ = timeout_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent) {
+          return mergeFrom((com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent other) {
+        if (other == com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent.getDefaultInstance()) return this;
+        if (other.getTimeout() != 0L) {
+          setTimeout(other.getTimeout());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                timeout_ = input.readInt64();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 8
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private long timeout_ ;
+      /**
+       * <pre>
+       * 超时时间(秒)
+       * </pre>
+       *
+       * <code>int64 timeout = 1;</code>
+       * @return The timeout.
+       */
+      @java.lang.Override
+      public long getTimeout() {
+        return timeout_;
+      }
+      /**
+       * <pre>
+       * 超时时间(秒)
+       * </pre>
+       *
+       * <code>int64 timeout = 1;</code>
+       * @param value The timeout to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTimeout(long value) {
+
+        timeout_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * 超时时间(秒)
+       * </pre>
+       *
+       * <code>int64 timeout = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearTimeout() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        timeout_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:com.lbe.imsdk.repository.model.proto.AnswerMsgTimeoutContent)
+    }
+
+    // @@protoc_insertion_point(class_scope:com.lbe.imsdk.repository.model.proto.AnswerMsgTimeoutContent)
+    private static final com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent();
+    }
+
+    public static com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<AnswerMsgTimeoutContent>
+        PARSER = new com.google.protobuf.AbstractParser<AnswerMsgTimeoutContent>() {
+      @java.lang.Override
+      public AnswerMsgTimeoutContent parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<AnswerMsgTimeoutContent> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<AnswerMsgTimeoutContent> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.lbe.imsdk.repository.model.proto.IMMsg.AnswerMsgTimeoutContent getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_com_lbe_imsdk_repository_model_proto_State_descriptor;
   private static final 
@@ -16290,6 +17321,11 @@ public final class IMMsg {
   private static final 
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_com_lbe_imsdk_repository_model_proto_UnsupportedContent_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_com_lbe_imsdk_repository_model_proto_AnswerMsgTimeoutContent_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_com_lbe_imsdk_repository_model_proto_AnswerMsgTimeoutContent_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -16306,7 +17342,7 @@ public final class IMMsg {
       "ry.model.proto.MsgType\022\013\n\003seq\030\002 \001(\003\0228\n\004j" +
       "oin\030\003 \001(\0132*.com.lbe.imsdk.repository.mod" +
       "el.proto.Join\022>\n\007msgBody\030\004 \001(\0132-.com.lbe" +
-      ".imsdk.repository.model.proto.MsgBody\"\243\004" +
+      ".imsdk.repository.model.proto.MsgBody\"\361\004" +
       "\n\023MsgEntityToFrontEnd\022>\n\007msgType\030\001 \001(\0162-" +
       ".com.lbe.imsdk.repository.model.proto.Ms" +
       "gType\022:\n\005state\030\002 \001(\0132+.com.lbe.imsdk.rep" +
@@ -16320,52 +17356,58 @@ public final class IMMsg {
       "ceiptMsg\030\006 \001(\01327.com.lbe.imsdk.repositor" +
       "y.model.proto.HasReadReceiptMsg\022J\n\rendSe" +
       "ssionMsg\030\007 \001(\01323.com.lbe.imsdk.repositor" +
-      "y.model.proto.EndSessionMsg\"5\n\004Join\022\013\n\003u" +
-      "id\030\001 \001(\t\022\021\n\tsessionId\030\002 \001(\t\022\r\n\005token\030\003 \001" +
-      "(\t\"/\n\010JoinResp\022\021\n\tsessionId\030\001 \001(\t\022\020\n\010ser" +
-      "verId\030\002 \001(\t\"\327\002\n\007MsgBody\022\021\n\tsenderUid\030\001 \001" +
-      "(\t\022\023\n\013receiverUid\030\002 \001(\t\022B\n\007msgType\030\003 \001(\016" +
-      "21.com.lbe.imsdk.repository.model.proto." +
-      "ContentType\022\016\n\006msgSeq\030\004 \001(\005\022\016\n\006encKey\030\005 " +
-      "\001(\t\022\017\n\007msgBody\030\006 \001(\t\022\016\n\006status\030\007 \001(\005\022\022\n\n" +
-      "createTime\030\010 \001(\003\022\023\n\013clientMsgID\030\t \001(\t\022\021\n" +
-      "\tsessionId\030\n \001(\t\022\020\n\010sendTime\030\013 \001(\t\022\r\n\005ti" +
-      "tle\030\014 \001(\t\022\026\n\016senderNickname\030\r \001(\t\022\025\n\rsen" +
-      "derFaceURL\030\016 \001(\t\022\023\n\013serverMsgID\030\017 \001(\t\"\350\001" +
-      "\n\014SessionBasic\022\021\n\tsessionId\030\001 \001(\t\022\020\n\010hea" +
-      "dIcon\030\002 \001(\t\022\013\n\003uid\030\003 \001(\t\022\016\n\006source\030\004 \001(\t" +
-      "\022\020\n\010nickName\030\005 \001(\t\022\r\n\005devNo\030\006 \001(\t\022\022\n\ncre" +
-      "ateTime\030\007 \001(\003\022\020\n\010language\030\010 \001(\t\022\r\n\005extra" +
-      "\030\t \001(\t\022@\n\tlatestMsg\030\n \001(\0132-.com.lbe.imsd" +
-      "k.repository.model.proto.MsgBody\"\\\n\020Crea" +
-      "teSessionMsg\022H\n\014sessionBasic\030\001 \001(\01322.com" +
-      ".lbe.imsdk.repository.model.proto.Sessio" +
-      "nBasic\"+\n\027AgentUserJoinSessionMsg\022\020\n\010use" +
-      "rname\030\001 \001(\t\";\n\021HasReadReceiptMsg\022\021\n\tsess" +
-      "ionID\030\001 \001(\t\022\023\n\013hasReadSeqs\030\002 \003(\003\"4\n\016Kick" +
-      "OffLineMsg\022\016\n\006userID\030\001 \001(\t\022\022\n\nidentityID" +
-      "\030\002 \001(\t\"\"\n\rEndSessionMsg\022\021\n\tsessionID\030\001 \001" +
-      "(\t\"(\n\024CreateSessionContent\022\020\n\010joinTime\030\001" +
-      " \001(\003\"R\n\033AgentUserJoinSessionContent\022\020\n\010u" +
-      "sername\030\001 \001(\t\022\017\n\007faceUrl\030\002 \001(\t\022\020\n\010joinTi" +
-      "me\030\003 \001(\003\"$\n\021EndSessionContent\022\017\n\007endTime" +
-      "\030\001 \001(\003\" \n\016RankingContent\022\016\n\006number\030\001 \001(\005" +
-      "\"\'\n\017TransferContent\022\024\n\014transferTime\030\001 \001(" +
-      "\003\"\024\n\022UnsupportedContent*\257\001\n\007MsgType\022\016\n\nJ" +
-      "oinServer\020\000\022\017\n\013TextMsgType\020\001\022\030\n\024CreateSe" +
-      "ssionMsgType\020\004\022\037\n\033AgentUserJoinSessionMs" +
-      "gType\020\005\022\031\n\025HasReadReceiptMsgType\020\006\022\026\n\022Ki" +
-      "ckOffLineMsgType\020\007\022\025\n\021EndSessionMsgType\020" +
-      "\010*\371\002\n\013ContentType\022\026\n\022InvalidContentType\020" +
-      "\000\022\023\n\017TextContentType\020\001\022\022\n\016ImgContentType" +
-      "\020\002\022\024\n\020VideoContentType\020\003\022\034\n\030CreateSessio" +
-      "nContentType\020\004\022#\n\037AgentUserJoinSessionCo" +
-      "ntentType\020\005\022\031\n\025EndSessionContentType\020\006\022\026" +
-      "\n\022RankingContentType\020\007\022\022\n\016FaqContentType" +
-      "\020\010\022\035\n\031KnowledgePointContentType\020\t\022\036\n\032Kno" +
-      "wledgeAnswerContentType\020\n\022\027\n\023TransferCon" +
-      "tentType\020\013\022\025\n\021SystemContentType\020\014\022\032\n\026Uns" +
-      "upportedContentType\020\rB\tB\005IMMsgP\000b\006proto3"
+      "y.model.proto.EndSessionMsg\022L\n\016kickOffLi" +
+      "neMsg\030\010 \001(\01324.com.lbe.imsdk.repository.m" +
+      "odel.proto.KickOffLineMsg\"5\n\004Join\022\013\n\003uid" +
+      "\030\001 \001(\t\022\021\n\tsessionId\030\002 \001(\t\022\r\n\005token\030\003 \001(\t" +
+      "\"/\n\010JoinResp\022\021\n\tsessionId\030\001 \001(\t\022\020\n\010serve" +
+      "rId\030\002 \001(\t\"\327\002\n\007MsgBody\022\021\n\tsenderUid\030\001 \001(\t" +
+      "\022\023\n\013receiverUid\030\002 \001(\t\022B\n\007msgType\030\003 \001(\01621" +
+      ".com.lbe.imsdk.repository.model.proto.Co" +
+      "ntentType\022\016\n\006msgSeq\030\004 \001(\005\022\016\n\006encKey\030\005 \001(" +
+      "\t\022\017\n\007msgBody\030\006 \001(\t\022\016\n\006status\030\007 \001(\005\022\022\n\ncr" +
+      "eateTime\030\010 \001(\003\022\023\n\013clientMsgID\030\t \001(\t\022\021\n\ts" +
+      "essionId\030\n \001(\t\022\020\n\010sendTime\030\013 \001(\t\022\r\n\005titl" +
+      "e\030\014 \001(\t\022\026\n\016senderNickname\030\r \001(\t\022\025\n\rsende" +
+      "rFaceURL\030\016 \001(\t\022\023\n\013serverMsgID\030\017 \001(\t\"\236\002\n\014" +
+      "SessionBasic\022\021\n\tsessionId\030\001 \001(\t\022\020\n\010headI" +
+      "con\030\002 \001(\t\022\013\n\003uid\030\003 \001(\t\022\016\n\006source\030\004 \001(\t\022\020" +
+      "\n\010nickName\030\005 \001(\t\022\r\n\005devNo\030\006 \001(\t\022\022\n\ncreat" +
+      "eTime\030\007 \001(\003\022\020\n\010language\030\010 \001(\t\022\r\n\005extra\030\t" +
+      " \001(\t\022@\n\tlatestMsg\030\n \001(\0132-.com.lbe.imsdk." +
+      "repository.model.proto.MsgBody\022\016\n\006status" +
+      "\030\013 \001(\005\022\024\n\014customerType\030\014 \001(\005\022\016\n\006nickID\030\r" +
+      " \001(\t\"\\\n\020CreateSessionMsg\022H\n\014sessionBasic" +
+      "\030\001 \001(\01322.com.lbe.imsdk.repository.model." +
+      "proto.SessionBasic\"+\n\027AgentUserJoinSessi" +
+      "onMsg\022\020\n\010username\030\001 \001(\t\";\n\021HasReadReceip" +
+      "tMsg\022\021\n\tsessionID\030\001 \001(\t\022\023\n\013hasReadSeqs\030\002" +
+      " \003(\003\"4\n\016KickOffLineMsg\022\016\n\006userID\030\001 \001(\t\022\022" +
+      "\n\nidentityID\030\002 \001(\t\"\"\n\rEndSessionMsg\022\021\n\ts" +
+      "essionID\030\001 \001(\t\"(\n\024CreateSessionContent\022\020" +
+      "\n\010joinTime\030\001 \001(\003\"R\n\033AgentUserJoinSession" +
+      "Content\022\020\n\010username\030\001 \001(\t\022\017\n\007faceUrl\030\002 \001" +
+      "(\t\022\020\n\010joinTime\030\003 \001(\003\"$\n\021EndSessionConten" +
+      "t\022\017\n\007endTime\030\001 \001(\003\" \n\016RankingContent\022\016\n\006" +
+      "number\030\001 \001(\005\"\'\n\017TransferContent\022\024\n\014trans" +
+      "ferTime\030\001 \001(\003\"\024\n\022UnsupportedContent\"*\n\027A" +
+      "nswerMsgTimeoutContent\022\017\n\007timeout\030\001 \001(\003*" +
+      "\257\001\n\007MsgType\022\016\n\nJoinServer\020\000\022\017\n\013TextMsgTy" +
+      "pe\020\001\022\030\n\024CreateSessionMsgType\020\004\022\037\n\033AgentU" +
+      "serJoinSessionMsgType\020\005\022\031\n\025HasReadReceip" +
+      "tMsgType\020\006\022\026\n\022KickOffLineMsgType\020\007\022\025\n\021En" +
+      "dSessionMsgType\020\010*\232\003\n\013ContentType\022\026\n\022Inv" +
+      "alidContentType\020\000\022\023\n\017TextContentType\020\001\022\022" +
+      "\n\016ImgContentType\020\002\022\024\n\020VideoContentType\020\003" +
+      "\022\034\n\030CreateSessionContentType\020\004\022#\n\037AgentU" +
+      "serJoinSessionContentType\020\005\022\031\n\025EndSessio" +
+      "nContentType\020\006\022\026\n\022RankingContentType\020\007\022\022" +
+      "\n\016FaqContentType\020\010\022\035\n\031KnowledgePointCont" +
+      "entType\020\t\022\036\n\032KnowledgeAnswerContentType\020" +
+      "\n\022\027\n\023TransferContentType\020\013\022\025\n\021SystemCont" +
+      "entType\020\014\022\032\n\026UnsupportedContentType\020\r\022\037\n" +
+      "\033AnswerMsgTimeoutContentType\020\016B\tB\005IMMsgP" +
+      "\000b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -16388,7 +17430,7 @@ public final class IMMsg {
     internal_static_com_lbe_imsdk_repository_model_proto_MsgEntityToFrontEnd_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_com_lbe_imsdk_repository_model_proto_MsgEntityToFrontEnd_descriptor,
-        new java.lang.String[] { "MsgType", "State", "MsgBody", "CreateSessionMsg", "AgentUserJoinSessionMsg", "HasReadReceiptMsg", "EndSessionMsg", });
+        new java.lang.String[] { "MsgType", "State", "MsgBody", "CreateSessionMsg", "AgentUserJoinSessionMsg", "HasReadReceiptMsg", "EndSessionMsg", "KickOffLineMsg", });
     internal_static_com_lbe_imsdk_repository_model_proto_Join_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_com_lbe_imsdk_repository_model_proto_Join_fieldAccessorTable = new
@@ -16412,7 +17454,7 @@ public final class IMMsg {
     internal_static_com_lbe_imsdk_repository_model_proto_SessionBasic_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_com_lbe_imsdk_repository_model_proto_SessionBasic_descriptor,
-        new java.lang.String[] { "SessionId", "HeadIcon", "Uid", "Source", "NickName", "DevNo", "CreateTime", "Language", "Extra", "LatestMsg", });
+        new java.lang.String[] { "SessionId", "HeadIcon", "Uid", "Source", "NickName", "DevNo", "CreateTime", "Language", "Extra", "LatestMsg", "Status", "CustomerType", "NickID", });
     internal_static_com_lbe_imsdk_repository_model_proto_CreateSessionMsg_descriptor =
       getDescriptor().getMessageTypes().get(7);
     internal_static_com_lbe_imsdk_repository_model_proto_CreateSessionMsg_fieldAccessorTable = new
@@ -16479,6 +17521,12 @@ public final class IMMsg {
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_com_lbe_imsdk_repository_model_proto_UnsupportedContent_descriptor,
         new java.lang.String[] { });
+    internal_static_com_lbe_imsdk_repository_model_proto_AnswerMsgTimeoutContent_descriptor =
+      getDescriptor().getMessageTypes().get(18);
+    internal_static_com_lbe_imsdk_repository_model_proto_AnswerMsgTimeoutContent_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_com_lbe_imsdk_repository_model_proto_AnswerMsgTimeoutContent_descriptor,
+        new java.lang.String[] { "Timeout", });
     descriptor.resolveAllFeaturesImmutable();
   }
 

@@ -1,18 +1,15 @@
 package com.lbe.imsdk.extension
 
-import android.annotation.*
-import android.content.*
-import android.graphics.*
-import android.media.*
-import android.net.*
-import android.os.*
-import android.provider.*
-import android.util.*
-import androidx.activity.result.contract.*
-import androidx.core.database.*
+import android.annotation.SuppressLint
+import android.content.ContentValues
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
+import androidx.core.database.getLongOrNull
 import com.lbe.imsdk.service.file.CompatUriFile
-import okhttp3.*
-import java.io.*
+import java.io.File
 
 /**
  *
@@ -21,57 +18,59 @@ import java.io.*
  */
 
 @SuppressLint("Range")
-suspend fun Uri.toUriFile(): CompatUriFile? {
-//    suspend fun copyToCache(
-//        uri: Uri,
-//        fName: String
-//    ): String = withContext(
-//        Dispatchers.IO
-//    ) {
-//        val inputStream =
-//            appContext.contentResolver.openInputStream(uri)
-//                ?: throw Exception("inputStream is null")
-//        val tempFile = File(appContext.cacheDir, fName)
+//suspend fun Uri.toUriFile(): CompatUriFile? {
+////    suspend fun copyToCache(
+////        uri: Uri,
+////        fName: String
+////    ): String = withContext(
+////        Dispatchers.IO
+////    ) {
+////        val inputStream =
+////            appContext.contentResolver.openInputStream(uri)
+////                ?: throw Exception("inputStream is null")
+////        val tempFile = File(appContext.cacheDir, fName)
+////
+////        tempFile.outputStream().use { output ->
+////            inputStream.copyTo(output)
+////        }
+////        return@withContext tempFile.absolutePath
+////    }
+//    return appContext.contentResolver?.let { resolver ->
+//        resolver.query(this, null, null, null, null)?.use {
+//            if (it.moveToFirst()) {
+//                val name = it.getString(it.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME))
+//                val size = it.getLong(it.getColumnIndex(MediaStore.MediaColumns.SIZE))
+//                val mimeType = it.getString(it.getColumnIndex(MediaStore.MediaColumns.MIME_TYPE))
 //
-//        tempFile.outputStream().use { output ->
-//            inputStream.copyTo(output)
+//                val width = it.getIntOrNull(it.getColumnIndex(MediaStore.MediaColumns.WIDTH))
+//                val height = it.getIntOrNull(it.getColumnIndex(MediaStore.MediaColumns.HEIGHT))
+//                val orientation = it.getIntOrNull(it.getColumnIndex(MediaStore.MediaColumns.ORIENTATION))
+//                val duration =
+//                    it.getLongOrNull(it.getColumnIndex(MediaStore.MediaColumns.DURATION))
+//                val land = orientation == 90 || orientation == 270
+//                if(null==width||null==height){
+//
+//                }
+//
+//                return@use CompatUriFile(
+//                    this,
+////                    path,
+//                    name,
+//                    size,
+//                    (if (land) height else width)?:0,
+//                    (if (land) width else height)?:0,
+//                    mimeType,
+//                    duration
+//                )
+//            }
+//
+//            return@use null
 //        }
-//        return@withContext tempFile.absolutePath
+//
 //    }
-    return appContext.contentResolver?.let { resolver ->
-        resolver.query(this, null, null, null, null)?.use {
-            if (it.moveToFirst()) {
-                val name = it.getString(it.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME))
-                val size = it.getLong(it.getColumnIndex(MediaStore.MediaColumns.SIZE))
-                val width = it.getInt(it.getColumnIndex(MediaStore.MediaColumns.WIDTH))
-                val height = it.getInt(it.getColumnIndex(MediaStore.MediaColumns.HEIGHT))
-                val mimeType = it.getString(it.getColumnIndex(MediaStore.MediaColumns.MIME_TYPE))
-                val orientation = it.getInt(it.getColumnIndex(MediaStore.MediaColumns.ORIENTATION))
-                val duration =
-                    it.getLongOrNull(it.getColumnIndex(MediaStore.MediaColumns.DURATION))
-                val land = orientation == 90 || orientation == 270
+//}
 
-//                val path: String = try {
-//                    it.getString(it.getColumnIndex(MediaStore.MediaColumns.DATA))
-//                } catch (e: Exception) {
-//                    copyToCache(this, name)
-//                } ?: return null
-
-                return@use CompatUriFile(
-                    this,
-//                    path,
-                    name,
-                    size,
-                    if (land) height else width,
-                    if (land) width else height,
-                    mimeType,
-                    duration
-                )
-            }
-            return@use null
-        }
-    }
-}
+fun Uri.toCompatUriFile() = CompatUriFile(this)
 
 fun Uri.exists(): Boolean {
     return try {

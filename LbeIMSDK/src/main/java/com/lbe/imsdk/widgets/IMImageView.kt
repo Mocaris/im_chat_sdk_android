@@ -28,7 +28,7 @@ import coil3.request.ImageRequest
 import coil3.request.Options
 import coil3.request.crossfade
 import com.lbe.imsdk.extension.coilDiskCache
-import com.lbe.imsdk.extension.md5Str
+import com.lbe.imsdk.extension.getMD5
 import com.lbe.imsdk.service.http.interceptor.HttpProgressInterceptor
 import com.lbe.imsdk.service.http.interceptor.SignInterceptor
 import kotlinx.coroutines.Dispatchers
@@ -109,7 +109,7 @@ fun IMImageView(
                         }
                     }
                     .decoderCoroutineContext(Dispatchers.IO)
-                    .diskCacheKey(url.md5Str)
+                    .diskCacheKey(url.getMD5())
                     .build(),
             modifier = modifier,
             error = error,

@@ -13,7 +13,7 @@
     <string name="chat_session_status_24">Image size exceeds the limit</string>
     <string name="chat_session_status_25">Video size exceeds the limit</string>
     <string name="chat_session_status_23">Cannot send a blank message</string>
-    <string name="chat_session_status_3">You have exceeded %d minutes without a reply</string>
+    <string name="chat_session_status_3">You have exceeded %s minutes without a reply</string>
     <string name="chat_session_status_28">The current knowledge point does not exist or has been deleted</string>
     <string name="chat_session_status_12">Please enter the question you want to consult.</string>
     <string name="chat_session_status_10">Bottom</string>

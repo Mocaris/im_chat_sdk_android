@@ -198,6 +198,7 @@ private class SocketClientImpl(
         t: Throwable,
         response: Response?
     ) {
+        reTry = true
         webSocket.cancel()
         changeState(SocketClient.ConnectState.ERROR)
         retryHandle()

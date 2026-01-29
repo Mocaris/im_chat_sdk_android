@@ -51,6 +51,7 @@ class IMPlayerManager(
         .build()
 
     val isPlaying = MutableStateFlow(false)
+    val isBuffering = MutableStateFlow(false)
     val videoSize = MutableStateFlow<VideoSize?>(null)
 
     val duration = MutableStateFlow(0L)
@@ -86,6 +87,26 @@ class IMPlayerManager(
             observePosition()
         } else {
             observerJob?.cancel()
+        }
+    }
+
+    override fun onPlaybackStateChanged(playbackState: Int) {
+        when (playbackState) {
+            Player.STATE_BUFFERING -> {
+                isBuffering.value = true
+            }
+
+            Player.STATE_READY -> {
+                isBuffering.value = false
+            }
+
+            Player.STATE_ENDED -> {
+                isPlaying.value = false
+            }
+
+            Player.STATE_IDLE -> {
+                isPlaying.value = false
+            }
         }
     }
 

@@ -57,12 +57,14 @@ suspend fun File.generateImageThumbnail(
         thumbnail = ThumbnailUtils.extractThumbnail(bitmap, targetWidth, targetHeight)
         val outputStream = FileOutputStream(thumbnailFile)
         thumbnail.compress(
-            when (this@generateImageThumbnail.extension.lowercase()) {
-                "png" -> Bitmap.CompressFormat.PNG
-                "webp" -> Bitmap.CompressFormat.WEBP
-                "jpg" -> Bitmap.CompressFormat.JPEG
-                else -> Bitmap.CompressFormat.JPEG
-            }, 100, outputStream
+            Bitmap.CompressFormat.JPEG,
+//            when (this@generateImageThumbnail.extension.lowercase()) {
+//                "png" -> Bitmap.CompressFormat.PNG
+//                "webp" -> Bitmap.CompressFormat.WEBP
+//                "jpg" -> Bitmap.CompressFormat.JPEG
+//                else -> Bitmap.CompressFormat.JPEG
+//            },
+            100, outputStream
         )
         return@withIOContext ThumbnailInfo(
             targetWidth,

@@ -7,18 +7,13 @@ import androidx.activity.compose.*
 import androidx.activity.result.*
 import androidx.activity.result.contract.*
 import androidx.compose.foundation.*
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -42,7 +37,6 @@ import com.lbe.imsdk.provider.*
 import com.lbe.imsdk.repository.model.SDKInitConfig
 import com.lbe.imsdk.widgets.IMRefresh
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.launch
 
 /**
  * 会话页面
@@ -198,10 +192,12 @@ private fun ConversationPageBody(conversationVM: CurrentConversationVM, padding:
                     add(Manifest.permission.READ_EXTERNAL_STORAGE)
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    plus(Manifest.permission.READ_MEDIA_IMAGES)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                        plus(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)
-                    }
+                    add(Manifest.permission.READ_MEDIA_IMAGES)
+                    add(Manifest.permission.READ_MEDIA_VIDEO)
+                    add(Manifest.permission.READ_MEDIA_AUDIO)
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    add(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)
                 }
             }.toTypedArray(),
         )
@@ -262,7 +258,7 @@ private fun ConversationPageBody(conversationVM: CurrentConversationVM, padding:
         if (timeoutReply) {
             Text(
                 text = stringResource(
-                    R.string.chat_session_status_3, conversationVM.timeOutConfig.value?.timeout ?: 5
+                    R.string.chat_session_status_3, "${conversationVM.timeOutConfig.value?.timeout ?: 5}"
                 ),
                 textAlign = TextAlign.Center,
                 style = TextStyle(

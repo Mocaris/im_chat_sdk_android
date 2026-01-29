@@ -37,7 +37,7 @@ interface IMMsgDao {
      *
      * 根据 sentime
      */
-    @Query("SELECT * FROM (SELECT * FROM  tb_msg WHERE session_id = :sessionId AND (msg_type != ${IMMsgContentType.InvalidContentType}) ORDER BY send_time DESC LIMIT :count) ORDER BY send_time ASC")
+    @Query("SELECT * FROM (SELECT * FROM  tb_msg WHERE session_id = :sessionId AND (msg_type != ${IMMsgContentType.INVALID_CONTENT_TYPE}) ORDER BY send_time DESC LIMIT :count) ORDER BY send_time ASC")
     suspend fun findLastest(sessionId: String, count: Int): List<IMMessageEntry>
 
     /**

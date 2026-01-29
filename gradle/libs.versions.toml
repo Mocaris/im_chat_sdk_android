@@ -24,6 +24,8 @@ kspPlugin = "2.2.0-2.0.2"
 media3 = "1.9.1"
 composeShimmer = "1.3.3"
 koin = "4.1.1"
+documentfileVersion = "1.1.0"
+exifinterface = "1.3.6"
 
 [libraries]
 
@@ -50,6 +52,8 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 androidx-navigation3-runtime = { group = "androidx.navigation3", name = "navigation3-runtime", version.ref = "navigation3" }
 androidx-navigation3-ui = { group = "androidx.navigation3", name = "navigation3-ui", version.ref = "navigation3" }
+androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version.ref = "documentfileVersion" }
+
 protobuf-kotlin = { group = "com.google.protobuf", name = "protobuf-kotlin", version.ref = "protobufKotlin" }
 #protobuf-javalite = { group = "com.google.protobuf", name = "protobuf-java", version.ref = "protobufKotlin" }
 #coil image preview
@@ -84,6 +88,8 @@ koin-bom = { group = "io.insert-koin", name = "koin-bom", version.ref = "koin" }
 koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose" }
 koin-compose-viewmodel = { group = "io.insert-koin", name = "koin-compose-viewmodel" }
 koin-androidx-startup = { group = "io.insert-koin", name = "koin-androidx-startup"}
+androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
+
 
 
 

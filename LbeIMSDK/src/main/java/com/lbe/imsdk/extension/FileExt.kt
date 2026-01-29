@@ -1,6 +1,5 @@
 package com.lbe.imsdk.extension
 
-import com.lbe.imsdk.service.file.CompatUriFile
 import okio.buffer
 import okio.sink
 import okio.source
@@ -14,9 +13,6 @@ import java.io.File
 
 const val BIG_FILE_THRESHOLD = 1024 * 1024 * 5L
 
-fun CompatUriFile.needChunk(): Boolean {
-    return this.size >= BIG_FILE_THRESHOLD
-}
 
 fun File.needChunk(): Boolean {
     return length() >= BIG_FILE_THRESHOLD
@@ -29,21 +25,21 @@ fun File.readCacheChunk(start: Long, size: Long): File {
         chunkFile.delete()
     }
     chunkFile.createNewFile()
-    val bufferedSource = inputStream().source().buffer()
+    val bufferedSource = this.source().buffer()
     val bufferedSink = chunkFile.sink().buffer()
     bufferedSource.use { source ->
-        bufferedSink.use {
+        bufferedSink.use { sink ->
             bufferedSource.skip(start)
             var remaining = size
             while (remaining > 0) {
                 val read = source.read(
-                    bufferedSink.buffer,
+                    sink.buffer,
                     remaining.coerceAtLeast(8192)
                 )
                 if (read == -1L) break // EOF
                 remaining -= read
             }
-            it.flush()
+            sink.flush()
         }
     }
     return chunkFile

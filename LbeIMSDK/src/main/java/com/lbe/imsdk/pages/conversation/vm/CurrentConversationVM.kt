@@ -2,7 +2,6 @@ package com.lbe.imsdk.pages.conversation.vm
 
 import android.net.Uri
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -66,7 +65,6 @@ class CurrentConversationVM(
     val timeOutConfig = mutableStateOf<TimeOutConfigModel.TimeOutConfigData?>(null)
 
     private var sessionListModel: SessionListResModel.SessionListDataModel? = null
-
 
     init {
         AppLifecycleObserver.addObserver(this)
@@ -353,35 +351,37 @@ class CurrentConversationVM(
 
     suspend fun sendMediaMessage(picUri: Uri) = withIOContext {
         try {
-            val uriFile = picUri.toUriFile() ?: throw Exception("uriFile is null")
+            val uriFile = picUri.toCompatUriFile()
             val thumbnail = uriFile.thumbnailImage() ?: throw Exception("thumbnail is null")
-            val sourceFile = uriFile.cacheSourceFile() ?: throw Exception("sourceFile is null")
+            val fileMetadata = uriFile.getFileMetaData()
+            val mediaMetadata = fileMetadata.mediaMetadata?: throw Exception("mediaMetadata is null")
             val messageBody = SendMessageBody.createMediaMessage(
                 MediaMessageContent(
-                    width = uriFile.width,
-                    height = uriFile.height,
+                    width = mediaMetadata.width,
+                    height = mediaMetadata.height,
                     thumbnail = SourceUrl(key = "", url = ""),
                     resource = SourceUrl(key = "", url = ""),
                 ),
-                uriFile.isVideo()
+                fileMetadata.isVideo()
             )
             val localMsg = createLocalMessage(messageBody).also {
                 it.localTempSource = MediaMessageContent(
-                    width = uriFile.width,
-                    height = uriFile.height,
+                    width = mediaMetadata.width,
+                    height = mediaMetadata.height,
                     thumbnail = SourceUrl(key = "", url = thumbnail.path),
-                    resource = SourceUrl(key = "", url = sourceFile.path),
+                    resource = SourceUrl(key = "", url = fileMetadata.absolutePath),
                 )
                 it.uploadTask = IMUploadTask(
-                    width = uriFile.width,
-                    height = uriFile.height,
+                    width = mediaMetadata.width,
+                    height = mediaMetadata.height,
                     thumbnail = thumbnail.path,
-                    filePath = sourceFile.path,
+                    filePath = fileMetadata.absolutePath,
                 )
             }
             saveMessageEntry(localMsg)
             sendMessageInternal(localMsg)
         } catch (e: Exception) {
+            e.printStackTrace()
             appContext.getString(R.string.content_description_send_fail).showToast()
         }
     }
@@ -389,7 +389,6 @@ class CurrentConversationVM(
     fun reSendMessage(msgEntry: IMMessageEntry) {
         sendMessageInternal(msgEntry)
     }
-
 
     private fun sendMessageInternal(localMsg: IMMessageEntry) {
         viewModelScope.launchIO {

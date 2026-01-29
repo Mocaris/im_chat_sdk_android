@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.paging.compose)
+    implementation(libs.androidx.documentfile)
 
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.retrofit)
@@ -97,6 +98,8 @@ dependencies {
 //    room
     implementation(libs.androidx.room.paging)
     implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.documentfile)
+    implementation(libs.androidx.exifinterface)
     ksp(libs.androidx.room.compiler)
     //koin
 //    implementation(libs.koin.androidx.startup)
