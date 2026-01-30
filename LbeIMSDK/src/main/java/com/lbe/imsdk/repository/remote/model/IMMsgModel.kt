@@ -3,6 +3,7 @@ package com.lbe.imsdk.repository.remote.model
 import com.lbe.imsdk.repository.model.proto.IMMsg
 import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgContentType
 import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgReadStatus
+import com.lbe.imsdk.service.json.StringOrLongSerializer
 import kotlinx.serialization.Serializable
 import java.util.UUID
 
@@ -39,6 +40,7 @@ data class IMMsgModel(
     /**
      * 发送时间
      */
+    @Serializable(StringOrLongSerializer::class)
     val sendTime: Long = 0,
     /**
      * 发送者头像

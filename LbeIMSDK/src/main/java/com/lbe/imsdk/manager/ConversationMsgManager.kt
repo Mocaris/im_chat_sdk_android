@@ -41,7 +41,7 @@ class ConversationMsgManager(private val sessionId: String) {
      * 获取断网后本地 丢失的消息
      */
     suspend fun loadLocalLostMsgList(sessionId: String=this.sessionId): List<IMMessageEntry> = withIOContext {
-        val maxSeq = LbeImDataRepository.findMaxSeq(sessionId) ?: return@withIOContext emptyList()
+        val maxSeq = LbeImDataRepository.findMaxSeq(sessionId)?.coerceAtLeast(1) ?: return@withIOContext emptyList()
         val rMaxSeq = getRemoteLastestSeq(sessionId)
         if (rMaxSeq <= maxSeq) {
             return@withIOContext emptyList()

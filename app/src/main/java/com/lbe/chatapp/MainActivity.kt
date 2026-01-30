@@ -34,7 +34,8 @@ class MainActivity : ComponentActivity() {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(innerPadding),
+                            .padding(innerPadding)
+                            .padding(bottom = 20.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
 

@@ -28,13 +28,13 @@ interface IMMsgDao {
     /**
      * 查询本地 最新消息 seq
      */
-    @Query("SELECT MAX(msg_seq) FROM tb_msg WHERE session_id = :sessionId AND msg_seq>0")
+    @Query("SELECT MAX(msg_seq) FROM tb_msg WHERE session_id = :sessionId AND msg_seq > 0")
     suspend fun findMaxSeq(sessionId: String): Long?
 
     /**
      * 查询本地 第一条消息 seq
      */
-    @Query("SELECT MIN(msg_seq) FROM tb_msg WHERE session_id = :sessionId AND msg_seq>0")
+    @Query("SELECT MIN(msg_seq) FROM tb_msg WHERE session_id = :sessionId AND msg_seq > 0")
     suspend fun findMinSeq(sessionId: String): Long?
 
     /**
