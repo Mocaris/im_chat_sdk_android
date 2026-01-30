@@ -17,5 +17,20 @@ dependencies {
 ```
 2. 初始化  
 ```kotlin
-LbeMainActivity.start(context: Context, args: SDKInitConfig)
+LbeSDK.init(
+    context: Context,
+    lbeSign: String,
+    lbeIdentity: String,
+    nickId: String,
+    nickName: String,
+    phone: String,
+    email: String,
+    headerIcon: String,
+    language: LanguageType,
+    device: String,
+    source: String,
+    extraInfo: String,
+    groupId: String,
+    domain: String,
+) 
 ```
