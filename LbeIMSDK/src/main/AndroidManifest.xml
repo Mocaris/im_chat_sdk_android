@@ -17,7 +17,7 @@
             android:windowSoftInputMode="adjustResize|stateAlwaysHidden" />
         <provider
             android:name=".provider.ContextProvider"
-            android:authorities="com.lbe.imsdk.context.provider"
+            android:authorities="{applicationId}.lbe.imsdk.context.provider"
             android:exported="false" />
     </application>
 
