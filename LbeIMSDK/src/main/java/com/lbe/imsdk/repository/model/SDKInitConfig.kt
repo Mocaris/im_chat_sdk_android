@@ -15,7 +15,7 @@ data class SDKInitConfig(
     val phone: String,
     val email: String,
     val headerIcon: String,
-    val language: String,
+    val language: LanguageType,
     val device: String,
     val source: String,
     val extraInfo: String,
@@ -29,10 +29,18 @@ data class SDKInitConfig(
         headerIcon
     }
 
-    val supportLanguage: String
-        get() = when (language) {
-            "zh" -> "zh"
-            "en" -> "en"
-            else -> "en"
+}
+
+enum class LanguageType(val type: Int, val locale: String) {
+    ZH(0, "zh"), EN(1, "en");
+
+    companion object {
+        fun fromType(type: Int): LanguageType {
+            return when (type) {
+                1 -> EN
+                else -> ZH
+            }
         }
+    }
+
 }

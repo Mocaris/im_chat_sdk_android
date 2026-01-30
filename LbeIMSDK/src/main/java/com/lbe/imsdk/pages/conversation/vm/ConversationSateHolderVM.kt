@@ -40,7 +40,7 @@ class ConversationSateHolderVM(
     val dialogManager: DialogManager
 ) : ViewModel() {
     private val _msgList = mutableStateListOf<IMMessageEntry>()
-     val currentSession = mutableStateOf<CreateSessionResModel.SessionData?>(null)
+    val currentSession = mutableStateOf<CreateSessionResModel.SessionData?>(null)
 
     val imApiRepository get() = LbeIMSDKManager.imApiRepository
 
@@ -82,7 +82,7 @@ class ConversationSateHolderVM(
                         extraInfo = initConfig.extraInfo,
                         groupID = initConfig.groupID,
                         headIcon = if (initConfig.parseHeaderIcon is SourceUrl) "" else initConfig.headerIcon,
-                        language = initConfig.supportLanguage,
+                        language = initConfig.language.locale,
                         nickId = initConfig.nickId,
                         nickName = initConfig.nickName,
                         phone = initConfig.phone,

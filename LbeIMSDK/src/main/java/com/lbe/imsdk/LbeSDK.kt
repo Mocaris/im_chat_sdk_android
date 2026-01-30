@@ -2,6 +2,7 @@ package com.lbe.imsdk
 
 import android.content.Context
 import com.lbe.imsdk.pages.LbeMainActivity
+import com.lbe.imsdk.repository.model.LanguageType
 import com.lbe.imsdk.repository.model.SDKInitConfig
 
 /**
@@ -20,13 +21,13 @@ object LbeSDK {
         phone: String,
         email: String,
         headerIcon: String,
-        language: String,
+        language: LanguageType,
         device: String,
         source: String,
         extraInfo: String,
         groupId: String,
         domain: String,
-    ){
+    ) {
         LbeMainActivity.start(
             context, SDKInitConfig(
                 lbeSign = lbeSign,

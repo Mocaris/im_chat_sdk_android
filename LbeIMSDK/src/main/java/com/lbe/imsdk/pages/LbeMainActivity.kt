@@ -8,13 +8,12 @@ import androidx.activity.*
 import androidx.activity.compose.*
 import androidx.compose.runtime.*
 import androidx.core.view.*
-import com.lbe.imsdk.components.DialogManager
-import com.lbe.imsdk.manager.LbeIMSDKManager
 import com.lbe.imsdk.pages.navigation.LbeNavBackStackPage
 import com.lbe.imsdk.pages.vm.LbeMainViewModel
 import com.lbe.imsdk.provider.LocalDialogManager
 import com.lbe.imsdk.provider.LocalMainViewModel
 import com.lbe.imsdk.provider.LocalSDKInitConfig
+import com.lbe.imsdk.repository.model.LanguageType
 import com.lbe.imsdk.repository.model.SDKInitConfig
 import com.lbe.imsdk.theme.LbeIMTheme
 import java.util.*
@@ -58,7 +57,7 @@ class LbeMainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.enableEdgeToEdge(window)
-        checkUpdateLanguage(this, sdkInitConfig.supportLanguage)
+        checkUpdateLanguage(this, sdkInitConfig.language)
         super.onCreate(savedInstanceState)
         viewModel.initSdk(sdkInitConfig)
         setContent {
@@ -78,8 +77,8 @@ class LbeMainActivity : ComponentActivity() {
     /**
      * update chat language
      */
-    private fun checkUpdateLanguage(context: Context, lang: String): Context? {
-        val locale = if (lang.startsWith("zh") || lang == "0") {
+    private fun checkUpdateLanguage(context: Context, lang: LanguageType): Context? {
+        val locale = if (lang == LanguageType.ZH) {
             Locale.CHINESE
         } else {
             Locale.ENGLISH

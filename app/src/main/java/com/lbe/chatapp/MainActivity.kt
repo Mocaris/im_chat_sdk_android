@@ -22,8 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.lbe.chatapp.ui.theme.IMChatSdkNativeTheme
 import com.lbe.imsdk.LbeSDK
-import com.lbe.imsdk.pages.LbeMainActivity
-import com.lbe.imsdk.repository.model.SDKInitConfig
+import com.lbe.imsdk.repository.model.LanguageType
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -146,7 +145,7 @@ class MainActivity : ComponentActivity() {
                                 lbeIdentity = lbeIdentity.value,
                                 phone = "",
                                 email = "",
-                                language = "zh",
+                                language = LanguageType.ZH,
                                 device = "",
                                 headerIcon = headerIcon.value,
                                 groupId = groupId.value,
