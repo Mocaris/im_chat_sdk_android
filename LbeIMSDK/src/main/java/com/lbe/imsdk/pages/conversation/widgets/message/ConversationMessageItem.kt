@@ -135,10 +135,12 @@ private fun RowScope.MessageBodyItem(
 ) {
     val isSelfSend = imMsg.isSelfSender()
     // 标记已读
-    if (!isSelfSend && imMsg.shouldMarkRead) {
+    if (!isSelfSend) {
         val conversationVM = LocalCurrentConversationViewModel.current
         LaunchedEffect(imMsg) {
-            conversationVM.markRead(imMsg)
+            if (imMsg.shouldMarkRead) {
+                conversationVM.markRead(imMsg)
+            }
         }
     }
     Column(

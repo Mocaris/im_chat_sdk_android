@@ -19,7 +19,6 @@ import com.lbe.imsdk.repository.db.entry.IMMessageEntry
 import com.lbe.imsdk.repository.db.entry.IMUploadTask
 import com.lbe.imsdk.repository.db.entry.isImageType
 import com.lbe.imsdk.repository.db.entry.isVideoType
-import com.lbe.imsdk.repository.local.LbeImDataRepository
 import com.lbe.imsdk.repository.local.upsert
 import com.lbe.imsdk.repository.remote.api.params.SendMessageBody
 import com.lbe.imsdk.repository.remote.model.*
@@ -31,7 +30,6 @@ import com.lbe.imsdk.service.upload.UploadResult
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
 import java.io.File
-import kotlin.math.max
 
 /**
  *
@@ -119,18 +117,12 @@ class CurrentConversationVM(
     // 加载断网后未接收到的消息
     private suspend fun loadLostMessage() = withIOContext {
         try {
-            val lastestSeq = msgManager.getRemoteLastestSeq()
-            val messageEntry =
-                msgList.filter { it.sessionId == sessionId }.maxByOrNull { it.msgSeq }
-            if (messageEntry == null || lastestSeq <= messageEntry.msgSeq) {
+            val list = msgManager.loadLocalLostMsgList()
+            if (list.isEmpty()) {
                 return@withIOContext
             }
-            msgManager.loadRemoteNewest(messageEntry.msgSeq, lastestSeq)
-            val list = msgManager.localMsgList(messageEntry.msgSeq + 1, lastestSeq)
             msgList.addAll(list)
-            if (list.isNotEmpty()) {
-                holderVM.scrollToBottom()
-            }
+            holderVM.scrollToBottom()
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -155,8 +147,7 @@ class CurrentConversationVM(
     private fun loadLocalNewest() {
         viewModelScope.launchIO {
             tryCatchCoroutine {
-                msgManager.loadRemoteNewest()
-                val list = msgManager.loadLocalNewest(50)
+                val list = msgManager.loadNewest(50)
                 msgList.addAll(list)
             }
             holderVM.scrollToBottom()
@@ -175,6 +166,9 @@ class CurrentConversationVM(
 
     //消息已读
     fun markRead(msg: IMMessageEntry) {
+        if (msg.sessionId != sessionId) {
+            return
+        }
         viewModelScope.launchIO {
             try {
                 msgManager.markRead(msg.msgSeq)
@@ -248,26 +242,29 @@ class CurrentConversationVM(
                 withMainContext {
                     holderVM.isRefreshing.value = true
                 }
-                if (msgList.isNotEmpty()) {
-//                    val firstSessionId = msgList.first().sessionId
-//                    if (firstSessionId != sessionId) {
-//                        return@launchIO
-//                    }s
-                    // 拉取当前 session 最早一条消息，获取该消息之前的 50 条历史消息
-                    val first = msgList.firstOrNull { it.msgSeq > 0 } ?: return@launchIO
-                    if (first.sessionId == sessionId) {
-                        val list = msgManager.loadHistory(first.msgSeq - 1, 50)
-                        if (list.isNotEmpty()) {
-                            msgList.addAll(0, list)
-                        } else {
-                            loadMoreSessionHistory()
-                        }
-                    } else {
-                        loadMoreSessionHistory()
-                    }
-                } else {
-                    loadMoreSessionHistory()
+                if (msgList.isEmpty()) {
+                    val list = msgManager.loadNewest(50)
+                    msgList.addAll(list)
+                    return@launchIO
                 }
+                // 拉取当前 session 最早一条消息，获取该消息之前的 50 条历史消息
+                val first = msgList.firstOrNull { it.msgSeq > 0 } ?: return@launchIO
+                if (first.sessionId != sessionId) {
+                    loadMoreSessionHistory()
+                    return@launchIO
+                }
+
+                if (first.msgSeq <= 1) {
+                    loadMoreSessionHistory()
+                    return@launchIO
+                }
+                val endSeq = first.msgSeq - 1
+                val list = msgManager.loadMessageList(endSeq - 50, endSeq)
+                if (list.isEmpty()) {
+                    loadMoreSessionHistory()
+                    return@launchIO
+                }
+                msgList.addAll(0, list)
             } finally {
                 delay(300)
                 withMainContext {
@@ -278,62 +275,40 @@ class CurrentConversationVM(
     }
 
     private suspend fun loadMoreSessionHistory() {
-        with(sessionListModel ?: return) {
-            val sessionList =
-                this.sessionList.sortedWith { a, b ->
-                    ((b.latestMsg?.sendTime ?: 0L) - (a.latestMsg?.sendTime ?: 0L)).toInt()
+        tryCatchCoroutine {
+            with(sessionListModel ?: return@tryCatchCoroutine) {
+                val sessionList =
+                    this.sessionList.filter { it.sessionId != sessionId }
+                if (currentHistoryIndex >= sessionList.size) {
+                    return@with
                 }
-                    .filter { it.sessionId != sessionId }
-            if (currentHistoryIndex >= sessionList.size) {
-                return@with
+                if (sessionList.isEmpty()) {
+                    return@with
+                }
+                val historySession =
+                    sessionList.getOrNull(currentHistoryIndex) ?: return@with
+                /// 判断是否该拉取 历史记录
+                val firstMsg = msgList.firstOrNull()
+                val endSeq = if (firstMsg?.sessionId == historySession.sessionId) {
+                    firstMsg.msgSeq - 1
+                } else {
+                    (historySession.latestMsg?.msgSeq ?: 0) - 1
+                }
+                if (endSeq <= 1) {
+                    currentHistoryIndex += 1
+                    loadMoreSessionHistory()
+                    return@with
+                }
+                val startSeq = (endSeq - 50).coerceAtLeast(1)
+                // 拉取历史 50条 先拉取本地
+                val list =
+                    msgManager.loadMessageList(startSeq, endSeq - 1, historySession.sessionId)
+                if (list.isEmpty()) {
+                    currentHistoryIndex += 1
+                    return@with
+                }
+                msgList.addAll(0, list)
             }
-            if (sessionList.isEmpty()) {
-                return@with
-            }
-            val historySession =
-                sessionList.getOrNull(currentHistoryIndex) ?: return@with
-            /// 判断是否该拉取 历史记录
-            val firstHistoryMsg = msgList.firstOrNull()
-            val maxSessionSeq = if (firstHistoryMsg?.sessionId != historySession.sessionId) {
-                (historySession.latestMsg?.msgSeq ?: 0) - 1
-            } else {
-                firstHistoryMsg.msgSeq - 1
-            }
-            if (maxSessionSeq < 1) {
-                currentHistoryIndex += 1
-                loadMoreSessionHistory()
-                return@with
-            }
-            val startSeq = maxSessionSeq - 50
-            // 拉取历史 50条
-            msgManager.loadRemoteNewest(
-                startSeq,
-                maxSessionSeq,
-                historySession.sessionId
-            )
-            val findSessionMsgList = LbeImDataRepository.findSessionMsgList(
-                historySession.sessionId,
-                startSeq,
-                maxSessionSeq
-            )
-            if (findSessionMsgList.isEmpty()) {
-                currentHistoryIndex += 1
-                return@with
-            }
-            msgList.addAll(0, findSessionMsgList)
-
-
-//                        val firstMsgSessionId = msgList.firstOrNull()?.sessionId
-//                        val sessionIdList = sessionList.map { it.sessionId }
-//                        val loaded = sessionIdList.any { it == firstMsgSessionId }
-//                        if (loaded) {
-//                            return@with
-//                        }
-//                        val list = LbeImDataRepository.findSessionMsgList(sessionIdList)
-//                        if (list.isEmpty()) {
-//                            return@with
-//                        }
-//                        msgList.addAll(0, list)
         }
     }
 

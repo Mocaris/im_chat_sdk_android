@@ -28,8 +28,14 @@ interface IMMsgDao {
     /**
      * 查询本地 最新消息 seq
      */
-    @Query("SELECT MAX(msg_seq) FROM tb_msg WHERE session_id = :sessionId")
+    @Query("SELECT MAX(msg_seq) FROM tb_msg WHERE session_id = :sessionId AND msg_seq>0")
     suspend fun findMaxSeq(sessionId: String): Long?
+
+    /**
+     * 查询本地 第一条消息 seq
+     */
+    @Query("SELECT MIN(msg_seq) FROM tb_msg WHERE session_id = :sessionId AND msg_seq>0")
+    suspend fun findMinSeq(sessionId: String): Long?
 
     /**
      * 查询最新的 count 条 消息
@@ -37,7 +43,7 @@ interface IMMsgDao {
      *
      * 根据 sentime
      */
-    @Query("SELECT * FROM (SELECT * FROM  tb_msg WHERE session_id = :sessionId AND (msg_type != ${IMMsgContentType.INVALID_CONTENT_TYPE}) ORDER BY send_time DESC LIMIT :count) ORDER BY send_time ASC")
+    @Query("SELECT * FROM (SELECT * FROM  tb_msg WHERE session_id = :sessionId AND msg_seq > 0 ORDER BY send_time DESC LIMIT :count) ORDER BY send_time ASC")
     suspend fun findLastest(sessionId: String, count: Int): List<IMMessageEntry>
 
     /**

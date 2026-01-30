@@ -13,13 +13,6 @@ object LbeImDataRepository {
 
     private val msgDao get() = IMDataBase.get().imMsgDao()
 
-    /**
-     * 获取会话列表
-     */
-    suspend fun getSessionList(sessionId: String) = withIOContext {
-
-    }
-
     suspend fun insertMsg(msg: IMMessageEntry): Long = withIOContext {
         return@withIOContext msgDao.insert(msg)
     }
@@ -30,6 +23,10 @@ object LbeImDataRepository {
 
     suspend fun findMaxSeq(sessionId: String): Long? = withIOContext {
         return@withIOContext msgDao.findMaxSeq(sessionId)
+    }
+
+    suspend fun findMinSeq(sessionId: String): Long? = withIOContext {
+        return@withIOContext msgDao.findMinSeq(sessionId)
     }
 
     suspend fun insertMsgList(list: List<IMMessageEntry>) = withIOContext {
