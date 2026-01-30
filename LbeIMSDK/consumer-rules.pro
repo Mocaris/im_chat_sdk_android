@@ -7,3 +7,6 @@
 -keep class com.lbe.imsdk.repository.db.entry.* {
     *;
 }
+-keepclassmembers class ** {
+    @kotlinx.serialization.Serializable *;
+}
