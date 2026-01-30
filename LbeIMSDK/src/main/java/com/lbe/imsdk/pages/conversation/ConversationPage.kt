@@ -61,10 +61,15 @@ fun ConversationPage(
     CompositionLocalProvider(
         LocalConversationStateViewModel provides conversationStateVM,
     ) {
-        val currentSession = conversationStateVM.currentSession
+        val currentSession = conversationStateVM.currentSession.value
         if (null != currentSession) {
             val currentConversationVM = viewModel(key = currentSession.sessionId) {
                 CurrentConversationVM(conversationStateVM, currentSession)
+            }
+            DisposableEffect(currentSession.sessionId) {
+                onDispose {
+
+                }
             }
             CompositionLocalProvider(
                 LocalSession provides currentSession,

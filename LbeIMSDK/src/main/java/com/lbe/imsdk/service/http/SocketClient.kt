@@ -1,6 +1,7 @@
 package com.lbe.imsdk.service.http
 
 import android.os.*
+import android.util.Log
 import com.lbe.imsdk.provider.AppLifecycleObserver
 import com.lbe.imsdk.service.http.HttpClient.logInterceptor
 import okhttp3.*
@@ -100,13 +101,13 @@ private class SocketClientImpl(
                     if (!reTry) {
                         return
                     }
-                    ///app 处于后台时候不重连，避免性能消耗
-                    if (AppLifecycleObserver.appBackState.value) {
-                        // 继续发送重连请求
-                        retryHandle()
-                        return
-                    }
-                    connect()
+//                    ///app 处于后台时候不重连，避免性能消耗
+//                    if (AppLifecycleObserver.appBackState.value) {
+//                        // 继续发送重连请求
+//                        retryHandle()
+//                        return
+//                    }
+                    connectInternal()
                 }
             }
         }
@@ -123,7 +124,13 @@ private class SocketClientImpl(
         return state
     }
 
-    override fun connect() = synchronized(this) {
+    override fun connect() {
+        reTry = true
+        connectInternal()
+    }
+
+    private fun connectInternal() = synchronized(this) {
+        Log.d("SocketClient", "connect: ${state.name}")
         if (state.isConnecting || state.isConnected) {
             return
         }
@@ -141,8 +148,9 @@ private class SocketClientImpl(
         )
     }
 
-
     override fun disconnect() {
+        reTry = false
+        Log.d("SocketClient", "disconnect")
         release()
     }
 
@@ -160,14 +168,16 @@ private class SocketClientImpl(
     private fun release() {
         reTry = false
         cancelRetry()
-        okSocket?.cancel()
         handler.removeCallbacksAndMessages(null)
-        okSocket = null
+        if (null != okSocket) {
+            okSocket?.cancel()
+            okSocket?.close(1000, "releases")
+            okSocket = null
+        }
     }
 
     override fun sendMessage(msg: ByteArray): Boolean {
         val res = okSocket?.send(ByteString.of(*msg)) == true
-        println("send message: $res")
         return res
     }
 
@@ -198,7 +208,6 @@ private class SocketClientImpl(
         t: Throwable,
         response: Response?
     ) {
-        reTry = true
         webSocket.cancel()
         changeState(SocketClient.ConnectState.ERROR)
         retryHandle()

@@ -15,8 +15,6 @@ import com.lbe.imsdk.R
 import com.lbe.imsdk.components.DialogAction
 import com.lbe.imsdk.components.DialogManager
 import com.lbe.imsdk.components.IMCupertinoDialogContent
-import com.lbe.imsdk.extension.appContext
-import com.lbe.imsdk.extension.launchAsync
 import com.lbe.imsdk.extension.launchIO
 import com.lbe.imsdk.extension.tryCatchCoroutine
 import com.lbe.imsdk.manager.LbeIMSDKManager
@@ -24,15 +22,12 @@ import com.lbe.imsdk.repository.db.entry.IMMessageEntry
 import com.lbe.imsdk.repository.model.SDKInitConfig
 import com.lbe.imsdk.repository.remote.model.CreateSessionResModel
 import com.lbe.imsdk.repository.remote.model.SourceUrl
-import com.lbe.imsdk.repository.remote.model.TimeOutConfigModel
-import com.lbe.imsdk.service.NetworkMonitor
 import com.lbe.imsdk.service.http.interceptor.SignInterceptor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.serialization.json.Json
 
 /**
  * 会话状态持有者, 状态管理
@@ -45,17 +40,16 @@ class ConversationSateHolderVM(
     val dialogManager: DialogManager
 ) : ViewModel() {
     private val _msgList = mutableStateListOf<IMMessageEntry>()
-    private val _currentSession = mutableStateOf<CreateSessionResModel.SessionData?>(null)
+     val currentSession = mutableStateOf<CreateSessionResModel.SessionData?>(null)
 
     val imApiRepository get() = LbeIMSDKManager.imApiRepository
 
     val newMessageCount = mutableIntStateOf(0)
 
     val msgList get() = _msgList
-    val currentSession: CreateSessionResModel.SessionData? get() = _currentSession.value
 
-    internal val uid: String? get() = currentSession?.uid
-    internal val sessionId: String? get() = currentSession?.sessionId
+    internal val uid: String? get() = currentSession.value?.uid
+    internal val sessionId: String? get() = currentSession.value?.sessionId
 
     val scrollToBottomEvent = MutableSharedFlow<Boolean>()
 
@@ -78,10 +72,10 @@ class ConversationSateHolderVM(
 
     fun initSession() {
         viewModelScope.launchIO {
-            lock.withLock(_currentSession) {
+            lock.withLock(currentSession) {
                 SignInterceptor.lbeToken = ""
                 SignInterceptor.lbeSession = ""
-                _currentSession.value = tryCatchCoroutine {
+                currentSession.value = tryCatchCoroutine {
                     imApiRepository?.createSession(
                         device = initConfig.device,
                         email = initConfig.email,
@@ -108,7 +102,6 @@ class ConversationSateHolderVM(
             fun end() {
                 viewModelScope.launchIO {
                     tryCatchCoroutine {
-                        LbeIMSDKManager.socketManager?.disconnect()
                         imApiRepository?.endSession(it)
                         initSession()
                     }
@@ -196,10 +189,7 @@ class ConversationSateHolderVM(
 
     override fun onCleared() {
         editFocusRequester.freeFocus()
-        _currentSession.value = null
-//        SignInterceptor.lbeToken = null
-//        SignInterceptor.lbeSession = null
-        LbeIMSDKManager.socketManager?.disconnect()
+        currentSession.value = null
         super.onCleared()
     }
 }

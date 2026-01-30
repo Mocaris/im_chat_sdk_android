@@ -1,20 +1,20 @@
 package com.lbe.imsdk.manager
 
 import android.util.Log
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 import com.lbe.imsdk.extension.appContext
-import com.lbe.imsdk.provider.AppLifecycleObserver
-import com.lbe.imsdk.repository.db.entry.*
+import com.lbe.imsdk.repository.db.entry.IMMessageEntry
 import com.lbe.imsdk.repository.local.LbeImDataRepository
 import com.lbe.imsdk.repository.local.insert
-import com.lbe.imsdk.repository.model.proto.*
-import com.lbe.imsdk.repository.remote.model.*
+import com.lbe.imsdk.repository.model.proto.IMMsg
 import com.lbe.imsdk.service.NetworkMonitor
-import com.lbe.imsdk.service.http.*
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
-import java.io.*
+import com.lbe.imsdk.service.http.SocketClient
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import java.io.Closeable
 
 /**
  * socket manager
@@ -22,6 +22,8 @@ import java.io.*
  */
 class SocketManager(
     private val hostUrl: String,
+    lbeToken: String,
+    sessionId: String,
 ) : Closeable, SocketClient.SocketCallback {
     private val networkMonitor = NetworkMonitor(appContext)
 
@@ -31,7 +33,12 @@ class SocketManager(
 
     private val socketEventCallbacks = mutableListOf<SocketEventCallback>()
 
-    private var socket: SocketClient? = null
+    private var socket: SocketClient = SocketClient.create(
+        hostUrl = hostUrl,
+        lbeToken = lbeToken,
+        lbeSession = sessionId,
+        callback = this@SocketManager
+    )
 
     private val pingMsg = IMMsg.MsgEntityToServer.newBuilder().setMsgType(IMMsg.MsgType.TextMsgType)
         .setMsgBody(IMMsg.MsgBody.newBuilder().setMsgBody("ping").build()).build()
@@ -42,26 +49,13 @@ class SocketManager(
         networkMonitor.startMonitoring()
     }
 
-    fun initSessionSocket(
-        session: CreateSessionResModel.SessionData
-    ) {
-        socket?.close()
-        socket = SocketClient.create(
-            hostUrl = hostUrl,
-            lbeToken = session.token,
-            lbeSession = session.sessionId,
-            callback = this@SocketManager
-        )
-        connect()
-    }
-
     private fun listenNet() {
         if (listenJob?.isActive == true) {
             return
         }
         listenJob = scope.launch {
             networkMonitor.isConnected.collect {
-                if (null == socket) {
+                if (!isActive) {
                     return@collect
                 }
                 if (it
@@ -83,13 +77,13 @@ class SocketManager(
     }
 
     fun connect() {
-        socket?.connect()
+        socket.connect()
         listenNet()
     }
 
     fun disconnect() {
         listenJob?.cancel()
-        socket?.disconnect()
+        socket.disconnect()
     }
 
     override fun getPingMessage(): ByteArray {
@@ -185,7 +179,7 @@ class SocketManager(
     }
 
     override fun onReceiveMessage(text: String) {
-        Log.d("SocketClient", "onReceiveMessage text: $text")
+        Log.d("SocketManager", "onReceiveMessage text: $text")
 //        val msg = IMMsg.MsgEntityToFrontEnd.parseFrom(text.toByteArray())
     }
 

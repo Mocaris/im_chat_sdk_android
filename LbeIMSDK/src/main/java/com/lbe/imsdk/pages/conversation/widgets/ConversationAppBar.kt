@@ -51,7 +51,7 @@ fun IMAppBar() {
     val appBarColors = TopAppBarDefaults.topAppBarColors()
     val view = LocalView.current
     val context = LocalContext.current
-    val socketState = LbeIMSDKManager.socketManager?.connectState?.collectAsState()?.value
+    val socketState = conversationVM.socketManager?.connectState?.collectAsState()?.value
 
     SideEffect {
         if (context is Activity) {

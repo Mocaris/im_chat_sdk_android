@@ -15,7 +15,7 @@ import java.io.*
  *
  * @Date 2025-07-16
  */
-object LbeIMSDKManager  {
+object LbeIMSDKManager {
     const val TEXT_CONTENT_LENGTH = 1000
 
     var sdkInitConfig: SDKInitConfig? = null
@@ -30,12 +30,12 @@ object LbeIMSDKManager  {
     private var initJob: Job? = null
     internal var imApiRepository: LbeImApiRepository? = null
         private set
-    internal  var ossApiRepository: LbeOssApiRepository? = null
+    internal var ossApiRepository: LbeOssApiRepository? = null
         private set
-    internal  var socketManager: SocketManager? = null
+    internal var socketConfigManager: SocketConfigManager? = null
         private set
 
-    val initSuccessful get() = sdkInitConfig != null && (socketManager != null || ossApiRepository != null || imApiRepository != null)
+    val initSuccessful get() = sdkInitConfig != null && (socketConfigManager != null || ossApiRepository != null || imApiRepository != null)
 
     internal fun startInit(sdkInitConfig: SDKInitConfig) {
 //        PageRoute.routes.off(PageRoute.Test)
@@ -103,7 +103,7 @@ object LbeIMSDKManager  {
             //init socket manager
             with(hostData!!.ws) {
                 if (this.isNotEmpty()) {
-                    socketManager = SocketManager(this.first())
+                    socketConfigManager = SocketConfigManager(this.first())
                 }
             }
             PageRoute.routes.offAll(PageRoute.Conversation)

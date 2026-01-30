@@ -41,7 +41,7 @@ class CurrentConversationVM(
     private val holderVM: ConversationSateHolderVM,
     private val sessionData: CreateSessionResModel.SessionData
 ) :
-    ViewModel(), SocketEventCallback, DefaultLifecycleObserver {
+    ViewModel(), SocketEventCallback {
     private val networkMonitor = NetworkMonitor(appContext)
 
     val sessionId: String get() = sessionData.sessionId
@@ -49,6 +49,9 @@ class CurrentConversationVM(
 
     val msgList get() = holderVM.msgList
     private val msgManager = ConversationMsgManager(sessionId)
+
+    var socketManager =
+        LbeIMSDKManager.socketConfigManager?.newSocketManager(lbeToken, sessionId)
 
 
     val netState = mutableStateOf(true)
@@ -64,7 +67,7 @@ class CurrentConversationVM(
     private var currentHistoryIndex = 0
 
     init {
-        AppLifecycleObserver.addObserver(this)
+//        AppLifecycleObserver.addObserver(this)
         initState()
     }
 
@@ -75,7 +78,7 @@ class CurrentConversationVM(
         viewModelScope.launchAsync {
             networkMonitor.isConnected.collect(::onNetChanged)
         }
-        LbeIMSDKManager.socketManager?.let {
+        socketManager?.let {
             it.addSocketEventCallback(this)
             viewModelScope.launchAsync {
                 it.connectState.collect { t ->
@@ -84,7 +87,7 @@ class CurrentConversationVM(
                     }
                 }
             }
-            it.initSessionSocket(sessionData)
+            it.connect()
         }
         loadLocalNewest()
         initFaq()
@@ -221,17 +224,10 @@ class CurrentConversationVM(
         holderVM.onEndSession(sessionId)
     }
 
-    override fun onStart(owner: LifecycleOwner) {
-        if (LbeIMSDKManager.socketManager?.connectState?.value?.isConnected != true) {
-            LbeIMSDKManager.socketManager?.connect()
-        }
-    }
-
     override fun onCleared() {
-        AppLifecycleObserver.removeObserver(this)
-        holderVM.editFocusRequester.freeFocus()
-//        LbeIMSDKManager.socketManager?.disconnect()
-        LbeIMSDKManager.socketManager?.removeSocketEventCallback(this)
+        socketManager?.close()
+        socketManager?.removeSocketEventCallback(this)
+        socketManager = null
         super.onCleared()
     }
 
