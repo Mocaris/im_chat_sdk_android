@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.lbe.chatapp.ui.theme.IMChatSdkNativeTheme
+import com.lbe.imsdk.LbeSDK
 import com.lbe.imsdk.pages.LbeMainActivity
 import com.lbe.imsdk.repository.model.SDKInitConfig
 
@@ -139,23 +140,22 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                         ElevatedButton(onClick = {
-                            LbeMainActivity.start(
-                                this@MainActivity, SDKInitConfig(
-                                    lbeSign = lbeSign.value,
-                                    lbeIdentity = lbeIdentity.value,
-                                    phone = "",
-                                    email = "",
-                                    language = "zh",
-                                    device = "",
-                                    headerIcon = headerIcon.value,
-                                    groupID = groupId.value,
-                                    domain = "https://4jlfe1imqsee.imsz.online",
-                                    source = "",
-                                    nickId = nickId.value,
-                                    nickName = nickName.value,
-                                    extraInfo = "",
+                            LbeSDK.init(
+                                this@MainActivity,
+                                lbeSign = lbeSign.value,
+                                lbeIdentity = lbeIdentity.value,
+                                phone = "",
+                                email = "",
+                                language = "zh",
+                                device = "",
+                                headerIcon = headerIcon.value,
+                                groupId = groupId.value,
+                                domain = "https://4jlfe1imqsee.imsz.online",
+                                source = "",
+                                nickId = nickId.value,
+                                nickName = nickName.value,
+                                extraInfo = "",
                                 )
-                            )
                             finish()
                         }) {
                             Text("Start Chat")
