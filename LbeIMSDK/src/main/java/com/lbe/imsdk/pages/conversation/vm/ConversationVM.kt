@@ -47,7 +47,7 @@ class ConversationVM(
     val sessionData = mutableStateOf<CreateSessionResModel.SessionData?>(null)
     internal val uid: String? get() = sessionData.value?.uid
     internal val sessionId: String? get() = sessionData.value?.sessionId
-    val lbeToken: String? get() = sessionData.value?.token
+//    val lbeToken: String? get() = sessionData.value?.token
 
     private var msgManager: ConversationMsgManager? = null
     private val socketManagerState = mutableStateOf<SocketManager?>(null)
@@ -146,6 +146,43 @@ class ConversationVM(
                 }
     }
 
+    private fun loadLocalNewest() {
+        msgManager?.let {
+            viewModelScope.launchIO {
+                tryCatchCoroutine {
+                    currentHistoryIndex = 0
+                    messageList.clear()
+                    val list = it.loadNewest(50)
+                    addAllMessage(list)
+                }
+                scrollToBottom()
+            }
+        }
+    }
+
+    private fun getHistorySession() {
+        sessionData.value?.let {
+            viewModelScope.launchIO {
+                lock.withLock(sessionListModel) {
+                    if (null != sessionListModel.value) {
+                        return@launchIO
+                    }
+                    sessionListModel.value = tryCatchCoroutine {
+                        imApiRepository?.getHistorySessionList(
+                            page = 1,
+                            size = 1000,
+                            sessionType = 2
+                        )
+                    }?.also {
+                        isCustomerService.value =
+                            it.sessionList.firstOrNull { t -> t.sessionId == sessionId }?.isCustomService
+                                ?: false
+                    }
+                }
+            }
+        }
+    }
+
     private fun endCurrentSession() {
         with(sessionId ?: return) {
             viewModelScope.launchIO {
@@ -184,9 +221,9 @@ class ConversationVM(
         }
         if (message.msgType == IMMsgContentType.END_SESSION_CONTENT_TYPE) {
             onEndSession(message.sessionId)
-            releaseSocket()
+//            releaseSocket()
         }
-        messageList.add(message)
+        addMessage(message)
         newMessageCount.intValue += 1
     }
 
@@ -198,7 +235,11 @@ class ConversationVM(
             return
         }
         viewModelScope.launchIO {
-            for (message in messageList.filter { it.sessionId == sessionId && seqList.contains(it.msgSeq) }) {
+            for (message in messageList.filter {
+                it.sessionId == sessionId && seqList.contains(
+                    it.msgSeq
+                )
+            }) {
                 message.updateReadStatus(IMMsgReadStatus.READ)
             }
         }
@@ -252,28 +293,6 @@ class ConversationVM(
         }
     }
 
-    private fun getHistorySession() {
-        sessionData.value?.let {
-            viewModelScope.launchIO {
-                lock.withLock(sessionListModel) {
-                    if (null != sessionListModel.value) {
-                        return@launchIO
-                    }
-                    sessionListModel.value = tryCatchCoroutine {
-                        imApiRepository?.getHistorySessionList(
-                            page = 1,
-                            size = 1000,
-                            sessionType = 2
-                        )
-                    }?.also {
-                        isCustomerService.value =
-                            it.sessionList.firstOrNull { t -> t.sessionId == sessionId }?.isCustomService
-                                ?: false
-                    }
-                }
-            }
-        }
-    }
 
     // 加载断网后未接收到的消息
     private suspend fun loadLostMessage() = withIOContext {
@@ -282,7 +301,7 @@ class ConversationVM(
             if (list.isEmpty()) {
                 return@withIOContext
             }
-            messageList.addAll(list)
+            addAllMessage(list)
             scrollToBottom()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -308,22 +327,6 @@ class ConversationVM(
         }
     }
 
-    private fun loadLocalNewest(resetMsgList: Boolean = false) {
-        msgManager?.let {
-            viewModelScope.launchIO {
-                tryCatchCoroutine {
-                    val list = it.loadNewest(50)
-//                    if (resetMsgList) {
-//                        messageList.clear()
-//                        currentHistoryIndex = 0
-//                    }
-                    messageList.addAll(list)
-                }
-                scrollToBottom()
-            }
-        }
-    }
-
 
     //转人工
     fun serviceSupport() {
@@ -345,7 +348,7 @@ class ConversationVM(
         with(msgManager ?: return) {
             viewModelScope.launchIO {
                 try {
-                    msgManager?.markRead(msg.msgSeq)
+                    this@with.markRead(msg.msgSeq)
                     msg.updateReadStatus(IMMsgReadStatus.READ)
                     msg.upsert()
                 } catch (e: Exception) {
@@ -397,7 +400,7 @@ class ConversationVM(
                     }
                     if (messageList.isEmpty()) {
                         val list = manager.loadNewest(50)
-                        messageList.addAll(list)
+                        addAllMessage(list)
                         return@launchIO
                     }
                     // 拉取当前 session 最早一条消息，获取该消息之前的 50 条历史消息
@@ -416,7 +419,7 @@ class ConversationVM(
                         loadMoreSessionHistory()
                         return@launchIO
                     }
-                    messageList.addAll(0, list)
+                    insertAllMessage(0, list)
                 }
             } finally {
                 delay(300)
@@ -466,7 +469,7 @@ class ConversationVM(
                         currentHistoryIndex += 1
                         return@with
                     }
-                    messageList.addAll(0, list)
+                    insertAllMessage(0, list)
                 }
             }
         }
@@ -504,6 +507,7 @@ class ConversationVM(
                     }) {
                         Text(
                             text = stringResource(android.R.string.ok),
+                            color = MaterialTheme.colorScheme.primary,
                         )
                     }
                 )

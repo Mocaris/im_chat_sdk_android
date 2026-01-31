@@ -30,9 +30,10 @@ fun InitSdkPage() {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(15.dp)
+                .padding(15.dp),
+            contentAlignment = Alignment.Center
         ) {
-            InitShimmer()
+            CircularProgressIndicator()
         }
         /* Column(
              Modifier
@@ -47,77 +48,3 @@ fun InitSdkPage() {
     }
 }
 
-@Composable
-fun InitShimmer() {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(15.dp)
-    ) {
-        repeat(5) {
-            ShimmerItem(left = it % 2 == 0)
-        }
-    }
-}
-
-@Composable
-fun ShimmerItem(left: Boolean = true) {
-    @Composable
-    fun HeaderShimmer() {
-        Box(modifier = Modifier.shimmer()) {
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .background(Color.LightGray)
-            )
-        }
-    }
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(5.dp)
-    ) {
-        if (left) {
-            HeaderShimmer()
-        }
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .wrapContentHeight(),
-            verticalArrangement = Arrangement.spacedBy(5.dp),
-            horizontalAlignment = if (left) Alignment.Start else Alignment.End
-        ) {
-            Box(Modifier.shimmer()) {
-                Box(
-                    modifier = Modifier
-                        .height(15.dp)
-                        .width(50.dp)
-                        .clip(RoundedCornerShape(3.dp))
-                        .background(Color.LightGray)
-                )
-            }
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth(0.5f)
-                    .wrapContentHeight()
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Color.Gray.copy(alpha = 0.1f))
-                    .padding(10.dp)
-                    .shimmer(),
-                verticalArrangement = Arrangement.spacedBy(5.dp),
-            ) {
-                repeat(3) {
-                    Box(
-                        modifier = Modifier
-                            .height(15.dp)
-                            .fillMaxWidth()
-                            .background(Color.LightGray)
-                            .clip(RoundedCornerShape(3.dp))
-                    )
-                }
-            }
-        }
-        if (!left) {
-            HeaderShimmer()
-        }
-    }
-}

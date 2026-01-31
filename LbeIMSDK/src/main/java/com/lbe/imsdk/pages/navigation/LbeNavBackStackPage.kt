@@ -31,12 +31,14 @@ fun LbeNavBackStackPage() {
                 backStack = PageRoute.routes,
                 transitionSpec = {
                     ContentTransform(
-                        slideIn(
+                        fadeIn(
                             animationSpec = tween(500),
-                            initialOffset = { IntOffset(it.width, 0) }),
-                        slideOut(
+//                            initialOffset = { IntOffset(it.width, 0) },
+                        ),
+                        fadeOut(
                             animationSpec = tween(500),
-                            targetOffset = { IntOffset(-it.width, 0) }),
+//                            targetOffset = { IntOffset(-it.width, 0) },
+                        ),
                     )
                 },
                 popTransitionSpec = {
@@ -52,6 +54,7 @@ fun LbeNavBackStackPage() {
                     is PageRoute.Conversation -> NavEntry(key = entry) {
                         ConversationPage()
                     }
+
                     else -> NavEntry(key = PageRoute.Unknown) { UnknownPage() }
                 }
             }

@@ -3,6 +3,7 @@ package com.lbe.imsdk.pages.conversation.vm
 import android.net.Uri
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.viewModelScope
@@ -38,6 +39,24 @@ abstract class ConversationMessageVM : ConversationStateVM() {
     val messageList = mutableStateListOf<IMMessageEntry>()
     val newMessageCount = mutableIntStateOf(0)
 
+    fun addMessage(messageEntry: IMMessageEntry) {
+        messageList.add(messageEntry)
+        scrollToBottom()
+    }
+
+    fun addAllMessage(list: List<IMMessageEntry>) {
+        messageList.addAll(list)
+        scrollToBottom()
+    }
+
+    fun insertMessage(index: Int, messageEntry: IMMessageEntry) {
+        messageList.add(index, messageEntry)
+    }
+
+    fun insertAllMessage(index: Int, list: List<IMMessageEntry>) {
+        messageList.addAll(index, list)
+    }
+
     internal fun sendTxtMessageInternal(sessionData: CreateSessionResModel.SessionData) =
         synchronized(this) {
             val text = textFieldValue.value.text.trim()
@@ -70,8 +89,7 @@ abstract class ConversationMessageVM : ConversationStateVM() {
         if (insertRowId == 0L) {
             throw Exception("insert message error")
         }
-        messageList.add(messageEntry)
-        scrollToBottom()
+        addMessage(messageEntry)
     }
 
     internal fun sendMultipleMediaMessageInternal(

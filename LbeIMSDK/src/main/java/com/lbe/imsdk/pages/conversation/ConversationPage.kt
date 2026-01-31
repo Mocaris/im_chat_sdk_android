@@ -5,6 +5,7 @@ import android.os.*
 import androidx.activity.compose.*
 import androidx.activity.result.*
 import androidx.activity.result.contract.*
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
@@ -13,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.*
@@ -22,6 +24,7 @@ import com.lbe.imsdk.R
 import com.lbe.imsdk.components.DialogManager
 import com.lbe.imsdk.manager.LbeIMSDKManager
 import com.lbe.imsdk.pages.conversation.vm.ConversationVM
+import com.lbe.imsdk.pages.conversation.widgets.ConversationShimmer
 import com.lbe.imsdk.pages.conversation.widgets.IMAppBar
 import com.lbe.imsdk.pages.conversation.widgets.KeyboardInputBox
 import com.lbe.imsdk.pages.conversation.widgets.NetWorkStateView
@@ -202,52 +205,58 @@ private fun ConversationPageBody(padding: PaddingValues) {
             .padding(padding)
     ) {
         NetWorkStateView()
-        Box(
+        AnimatedContent(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
+                .weight(1f),
+            targetState = conversationVM.messageList.isEmpty()
         ) {
-            IMRefresh(
-                modifier = Modifier.fillMaxSize(),
-                refreshing = conversationVM.isRefreshing.value,
-                onRefresh = conversationVM::loadHistory
-            ) {
-                LazyColumn(
-                    state = listState,
-                    contentPadding = PaddingValues(15.dp),
-                    verticalArrangement = Arrangement.spacedBy(15.dp),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .pointerInput(Unit) {
-                            detectDragGestures(
-                                onDragStart = {
-                                    userScrolling.value = true
+            if (it) {
+                ConversationShimmer()
+            } else {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    IMRefresh(
+                        modifier = Modifier.fillMaxSize(),
+                        refreshing = conversationVM.isRefreshing.value,
+                        onRefresh = conversationVM::loadHistory
+                    ) {
+                        LazyColumn(
+                            state = listState,
+                            contentPadding = PaddingValues(15.dp),
+                            verticalArrangement = Arrangement.spacedBy(15.dp),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .pointerInput(Unit) {
+                                    detectDragGestures(
+                                        onDragStart = {
+                                            userScrolling.value = true
+                                        },
+                                        onDragEnd = {
+                                            userScrolling.value = false
+                                        },
+                                        onDragCancel = {
+                                            userScrolling.value = false
+                                        },
+                                        onDrag = { _, _ -> userScrolling.value = true },
+                                    )
                                 },
-                                onDragEnd = {
-                                    userScrolling.value = false
-                                },
-                                onDragCancel = {
-                                    userScrolling.value = false
-                                },
-                                onDrag = { _, _ -> userScrolling.value = true },
-                            )
-                        },
-                ) {
-                    conversationVM.messageList.let { list ->
-                        itemsIndexed(
-                            items = list,
-                            key = { _, item -> "${item.sessionId}-${item.clientMsgID}" },
-                            contentType = { _, item -> item.msgType }
-                        ) { index, msg ->
-                            val preMsg = list.getOrNull(index - 1)
-                            ConversationMessageItem(preMsg = preMsg, imMsg = msg)
+                        ) {
+                            conversationVM.messageList.distinctBy { it.clientMsgID }.let { list ->
+                                itemsIndexed(
+                                    items = list,
+                                    key = { _, item -> "${item.sessionId}-${item.clientMsgID}" },
+                                    contentType = { _, item -> item.msgType }
+                                ) { index, msg ->
+                                    val preMsg = list.getOrNull(index - 1)
+                                    ConversationMessageItem(preMsg = preMsg, imMsg = msg)
+                                }
+                            }
                         }
                     }
+                    if (lastVisibleItemIndex.intValue < totalItemsCount.intValue - 1 && listState.canScrollForward) {
+                        ConversationFloatTip()
+                    }
                 }
-            }
-
-            if (lastVisibleItemIndex.intValue < totalItemsCount.intValue - 1 && listState.canScrollForward) {
-                ConversationFloatTip()
             }
         }
 

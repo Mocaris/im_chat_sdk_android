@@ -4,10 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.IconButton
@@ -24,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lbe.imsdk.R
 import com.lbe.imsdk.provider.LocalThemeColors
+import com.valentinilk.shimmer.shimmer
 
 /**
  *
@@ -102,5 +100,81 @@ fun CloseCustomerServiceButton(
             contentDescription = "close"
         )
 
+    }
+}
+
+
+@Composable
+fun ConversationShimmer(shimmerCount:Int=5) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(15.dp)
+    ) {
+        repeat(shimmerCount) {
+            ShimmerItem(left = it % 2 == 0)
+        }
+    }
+}
+
+@Composable
+fun ShimmerItem(left: Boolean = true) {
+    @Composable
+    fun HeaderShimmer() {
+        Box(modifier = Modifier.shimmer()) {
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(Color.LightGray)
+            )
+        }
+    }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(5.dp)
+    ) {
+        if (left) {
+            HeaderShimmer()
+        }
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .wrapContentHeight(),
+            verticalArrangement = Arrangement.spacedBy(5.dp),
+            horizontalAlignment = if (left) Alignment.Start else Alignment.End
+        ) {
+            Box(Modifier.shimmer()) {
+                Box(
+                    modifier = Modifier
+                        .height(15.dp)
+                        .width(50.dp)
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(Color.LightGray)
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(0.5f)
+                    .wrapContentHeight()
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Color.Gray.copy(alpha = 0.1f))
+                    .padding(10.dp)
+                    .shimmer(),
+                verticalArrangement = Arrangement.spacedBy(5.dp),
+            ) {
+                repeat(3) {
+                    Box(
+                        modifier = Modifier
+                            .height(15.dp)
+                            .fillMaxWidth()
+                            .background(Color.LightGray)
+                            .clip(RoundedCornerShape(3.dp))
+                    )
+                }
+            }
+        }
+        if (!left) {
+            HeaderShimmer()
+        }
     }
 }

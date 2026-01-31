@@ -63,7 +63,6 @@ class LbeMainActivity : ComponentActivity() {
         setContent {
             LbeIMTheme {
                 CompositionLocalProvider(
-                    LocalActivity provides this@LbeMainActivity,
                     LocalMainViewModel provides viewModel,
                     LocalDialogManager provides viewModel.dialogManager,
                     LocalSDKInitConfig provides sdkInitConfig

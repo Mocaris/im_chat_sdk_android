@@ -161,7 +161,7 @@ class MainActivity : ComponentActivity() {
                                 nickName = nickName.value,
                                 extraInfo = "",
                             )
-                            finish()
+//                            finish()
                         }) {
                             Text("Start Chat")
                         }
