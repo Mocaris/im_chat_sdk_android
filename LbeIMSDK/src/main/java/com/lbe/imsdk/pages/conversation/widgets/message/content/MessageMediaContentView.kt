@@ -11,9 +11,9 @@ import androidx.compose.ui.res.*
 import androidx.compose.ui.unit.*
 import androidx.media3.common.util.*
 import com.lbe.imsdk.R
+import com.lbe.imsdk.provider.LocalConversationVM
 import com.lbe.imsdk.provider.LocalDialogManager
 import com.lbe.imsdk.provider.LocalIMMessageEntry
-import com.lbe.imsdk.provider.LocalCurrentConversationViewModel
 import com.lbe.imsdk.repository.db.entry.isSelfSender
 import com.lbe.imsdk.repository.remote.model.MediaMessageContent
 import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgSendStatus
@@ -46,7 +46,7 @@ fun MessageImageContentView(
     centerContent: (@Composable BoxScope.() -> Unit)? = null
 ) {
     val ratio = content.width.toFloat() / content.height.toFloat()
-    val conversationVM = LocalCurrentConversationViewModel.current
+    val conversationVM = LocalConversationVM.current
     val iMMessageEntry = LocalIMMessageEntry.current
     Box(
         modifier = Modifier.wrapContentSize(),

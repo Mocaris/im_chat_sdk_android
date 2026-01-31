@@ -25,7 +25,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lbe.imsdk.R
-import com.lbe.imsdk.provider.LocalCurrentConversationViewModel
+import com.lbe.imsdk.provider.LocalConversationVM
 import com.lbe.imsdk.repository.remote.model.FaqMessageContent
 import com.lbe.imsdk.repository.remote.model.enumeration.FaqType
 import com.lbe.imsdk.widgets.IMImageView
@@ -57,7 +57,7 @@ fun MessageFaqContentView(content: FaqMessageContent) {
 
 @Composable
 private fun FaqItem(item: FaqMessageContent.KnowledgeList) {
-    val conversationVM = LocalCurrentConversationViewModel.current
+    val conversationVM = LocalConversationVM.current
     Column(
         modifier = Modifier
             .fillMaxWidth(0.3f)

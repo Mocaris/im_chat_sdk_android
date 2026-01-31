@@ -13,17 +13,21 @@ import kotlin.jvm.Throws
  * @Since
  */
 class ConversationMsgManager(private val sessionId: String) {
-    val imApiRepository get() = LbeIMSDKManager.imApiRepository
+
+    companion object {
+        val imApiRepository get() = LbeIMSDKManager.imApiRepository
+
+        /**
+         * 发送消息
+         */
+        suspend fun sendMessage(message: SendMessageBody): Long? {
+            return imApiRepository?.sendMsg(message)?.data?.msgReq
+        }
+
+    }
 
     suspend fun markRead(seq: Long) {
         imApiRepository?.markRead(seq, sessionId)
-    }
-
-    /**
-     * 发送消息
-     */
-    suspend fun sendMessage(message: SendMessageBody): Long? {
-        return imApiRepository?.sendMsg(message)?.data?.msgReq
     }
 
     /**
@@ -40,15 +44,21 @@ class ConversationMsgManager(private val sessionId: String) {
     /**
      * 获取断网后本地 丢失的消息
      */
-    suspend fun loadLocalLostMsgList(sessionId: String=this.sessionId): List<IMMessageEntry> = withIOContext {
-        val maxSeq = LbeImDataRepository.findMaxSeq(sessionId)?.coerceAtLeast(1) ?: return@withIOContext emptyList()
-        val rMaxSeq = getRemoteLastestSeq(sessionId)
-        if (rMaxSeq <= maxSeq) {
-            return@withIOContext emptyList()
+    suspend fun loadLocalLostMsgList(sessionId: String = this.sessionId): List<IMMessageEntry> =
+        withIOContext {
+            val maxSeq = LbeImDataRepository.findMaxSeq(sessionId)?.coerceAtLeast(1)
+                ?: return@withIOContext emptyList()
+            val rMaxSeq = getRemoteLastestSeq(sessionId)
+            if (rMaxSeq <= maxSeq) {
+                return@withIOContext emptyList()
+            }
+            loadAndCacheRemoteMsgList(maxSeq + 1, rMaxSeq, sessionId)
+            return@withIOContext LbeImDataRepository.findSessionMsgList(
+                sessionId,
+                maxSeq + 1,
+                rMaxSeq
+            )
         }
-        loadAndCacheRemoteMsgList(maxSeq + 1, rMaxSeq, sessionId)
-        return@withIOContext LbeImDataRepository.findSessionMsgList(sessionId, maxSeq + 1, rMaxSeq)
-    }
 
 
     /**
@@ -131,7 +141,7 @@ class ConversationMsgManager(private val sessionId: String) {
             /// 每页 50 条
             val pageSize = (newCount / 50).toInt() + 1
             for (page in 0.until(pageSize)) {
-                val start = startSeq + 1 + page * 50
+                val start = startSeq + page * 50
                 val end = (start + 50).coerceAtMost(endSeq)
                 val list = getRemoteMsgList(start, end, sessionId)
                 if (list.isEmpty()) {

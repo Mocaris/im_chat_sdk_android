@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.lbe.imsdk.provider.LocalCurrentConversationViewModel
+import com.lbe.imsdk.provider.LocalConversationVM
 import com.lbe.imsdk.repository.remote.model.KnowledgePointMessageContent
 import com.lbe.imsdk.repository.remote.model.enumeration.FaqType
 
@@ -22,7 +22,7 @@ import com.lbe.imsdk.repository.remote.model.enumeration.FaqType
  */
 @Composable
 fun MessageKnowledgeContentView(title: String, content: List<KnowledgePointMessageContent>) {
-    val conversationVM = LocalCurrentConversationViewModel.current
+    val conversationVM = LocalConversationVM.current
     Column(
         modifier = Modifier.wrapContentSize(),
         verticalArrangement = Arrangement.spacedBy(5.dp)

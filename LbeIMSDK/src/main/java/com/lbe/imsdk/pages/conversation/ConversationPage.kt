@@ -1,9 +1,7 @@
 package com.lbe.imsdk.pages.conversation
 
 import android.*
-import android.app.*
 import android.os.*
-import android.widget.Space
 import androidx.activity.compose.*
 import androidx.activity.result.*
 import androidx.activity.result.contract.*
@@ -15,20 +13,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.modifier.modifierLocalConsumer
-import androidx.compose.ui.platform.*
 import androidx.compose.ui.res.*
 import androidx.compose.ui.unit.*
 import androidx.lifecycle.viewmodel.compose.*
 import com.lbe.imsdk.R
 import com.lbe.imsdk.components.DialogManager
 import com.lbe.imsdk.manager.LbeIMSDKManager
-import com.lbe.imsdk.pages.conversation.vm.ConversationSateHolderVM
-import com.lbe.imsdk.pages.conversation.vm.CurrentConversationVM
+import com.lbe.imsdk.pages.conversation.vm.ConversationVM
 import com.lbe.imsdk.pages.conversation.widgets.IMAppBar
 import com.lbe.imsdk.pages.conversation.widgets.KeyboardInputBox
 import com.lbe.imsdk.pages.conversation.widgets.NetWorkStateView
@@ -53,35 +46,31 @@ fun ConversationPage(
 //        initializer = {
 //            ConversationVM(dialogManager)
 //        }),
-    conversationStateVM: ConversationSateHolderVM = viewModel(
+    conversationVM: ConversationVM = viewModel(
         initializer = {
-            ConversationSateHolderVM(sdkInitConfig, dialogManager)
+            ConversationVM(sdkInitConfig, dialogManager)
         })
 ) {
-    CompositionLocalProvider(
-        LocalConversationStateViewModel provides conversationStateVM,
-    ) {
-        val currentSession = conversationStateVM.currentSession.value
-        if (null != currentSession) {
-            val currentConversationVM = viewModel(key = currentSession.sessionId) {
-                CurrentConversationVM(conversationStateVM, currentSession)
-            }
-            DisposableEffect(currentSession.sessionId) {
-                onDispose {
+    LaunchedEffect(conversationVM) {
+        conversationVM.initSession()
+    }
 
-                }
-            }
+    CompositionLocalProvider(
+        LocalConversationVM provides conversationVM,
+    ) {
+        val sessionData = conversationVM.sessionData.value
+        if (null != sessionData) {
             CompositionLocalProvider(
-                LocalSession provides currentSession,
-                LocalCurrentConversationViewModel provides currentConversationVM,
+                LocalSession provides sessionData,
             ) {
+
                 Scaffold(
                     modifier = Modifier
                         .fillMaxSize()
                         .imePadding(), topBar = {
                         IMAppBar()
                     }) {
-                    ConversationPageBody(currentConversationVM, it)
+                    ConversationPageBody(it)
                 }
             }
         } else {
@@ -100,8 +89,8 @@ fun ConversationPage(
 }
 
 @Composable
-private fun ConversationPageBody(conversationVM: CurrentConversationVM, padding: PaddingValues) {
-    val holderVM = LocalConversationStateViewModel.current
+private fun ConversationPageBody(padding: PaddingValues) {
+    val conversationVM = LocalConversationVM.current
     val requestPhotoLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems = 9),
         onResult = conversationVM::sendMultipleMediaMessage,
@@ -160,7 +149,7 @@ private fun ConversationPageBody(conversationVM: CurrentConversationVM, padding:
     }
 
     LaunchedEffect(listState) {
-        holderVM.scrollToBottomEvent.collect {
+        conversationVM.scrollToBottomEvent.collect {
             scrollToBottom()
         }
     }
@@ -168,23 +157,24 @@ private fun ConversationPageBody(conversationVM: CurrentConversationVM, padding:
     //键盘弹起时
     LaunchedEffect(keyboardState) {
         if (keyboardState.isOpened()) {
-            holderVM.scrollToBottom()
+            conversationVM.scrollToBottom()
         }
     }
     // 有新消息时
-    LaunchedEffect(holderVM.newMessageCount) {
-        snapshotFlow { holderVM.newMessageCount.intValue }.distinctUntilChanged().collect { size ->
-            if (size > 0 && !userScrolling.value) {
-                holderVM.scrollToBottom()
+    LaunchedEffect(conversationVM.newMessageCount) {
+        snapshotFlow { conversationVM.newMessageCount.intValue }.distinctUntilChanged()
+            .collect { size ->
+                if (size > 0 && !userScrolling.value) {
+                    conversationVM.scrollToBottom()
+                }
             }
-        }
     }
     LaunchedEffect(listState) {
         snapshotFlow {
             listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
         }.collect {
             it?.let {
-                holderVM.lastVisibleIndex(it)
+                conversationVM.lastVisibleIndex(it)
             }
         }
     }
@@ -219,7 +209,7 @@ private fun ConversationPageBody(conversationVM: CurrentConversationVM, padding:
         ) {
             IMRefresh(
                 modifier = Modifier.fillMaxSize(),
-                refreshing = holderVM.isRefreshing.value,
+                refreshing = conversationVM.isRefreshing.value,
                 onRefresh = conversationVM::loadHistory
             ) {
                 LazyColumn(
@@ -243,13 +233,15 @@ private fun ConversationPageBody(conversationVM: CurrentConversationVM, padding:
                             )
                         },
                 ) {
-                    itemsIndexed(
-                        items = holderVM.msgList,
-                        key = { _, item -> "${item.sessionId}-${item.clientMsgID}" },
-                        contentType = { _, item -> item.msgType }
-                    ) { index, msg ->
-                        val preMsg = if (index > 0) holderVM.msgList[index - 1] else null
-                        ConversationMessageItem(preMsg = preMsg, imMsg = msg)
+                    conversationVM.messageList.let { list ->
+                        itemsIndexed(
+                            items = list,
+                            key = { _, item -> "${item.sessionId}-${item.clientMsgID}" },
+                            contentType = { _, item -> item.msgType }
+                        ) { index, msg ->
+                            val preMsg = list.getOrNull(index - 1)
+                            ConversationMessageItem(preMsg = preMsg, imMsg = msg)
+                        }
                     }
                 }
             }
@@ -261,7 +253,7 @@ private fun ConversationPageBody(conversationVM: CurrentConversationVM, padding:
 
 
         if (!conversationVM.isCustomerService.value) {
-            HorizontalDivider()
+            HorizontalDivider(thickness = 0.5.dp)
             Box(
                 modifier = Modifier
                     .padding(top = 10.dp)
@@ -276,10 +268,10 @@ private fun ConversationPageBody(conversationVM: CurrentConversationVM, padding:
 //        TimeoutTipFloat()
         KeyboardInputBox(
             maxLength = LbeIMSDKManager.TEXT_CONTENT_LENGTH,
-            focusRequester = holderVM.editFocusRequester,
-            value = holderVM.textFieldValue.value,
+            focusRequester = conversationVM.editFocusRequester,
+            value = conversationVM.textFieldValue.value,
             onValueChange = { v ->
-                holderVM.textFieldValue.value = v
+                conversationVM.textFieldValue.value = v
             },
             keyboardActions = {
 
@@ -297,15 +289,15 @@ private fun ConversationPageBody(conversationVM: CurrentConversationVM, padding:
 
 @Composable
 private fun BoxScope.ConversationFloatTip() {
-    val holderVM = LocalConversationStateViewModel.current
-    val receiveMessageEvent = holderVM.newMessageCount.intValue
+    val conversationVM = LocalConversationVM.current
+    val receiveMessageEvent = conversationVM.newMessageCount.intValue
     Row(
         modifier = Modifier
             .wrapContentSize()
             .clip(RoundedCornerShape(10.dp))
             .background(LocalThemeColors.current.conversationFlotTipColor.copy(alpha = 0.8f))
             .align(BiasAlignment(horizontalBias = 0.9f, verticalBias = 0.7f))
-            .clickable(onClick = holderVM::scrollToBottom)
+            .clickable(onClick = conversationVM::scrollToBottom)
             .padding(vertical = 10.dp, horizontal = 15.dp),
         horizontalArrangement = Arrangement.spacedBy(
             5.dp, Alignment.CenterHorizontally

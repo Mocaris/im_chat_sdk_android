@@ -1,22 +1,25 @@
 package com.lbe.imsdk.pages.conversation.widgets
 
-import androidx.compose.animation.*
-import androidx.compose.foundation.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.*
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.*
-import androidx.compose.ui.res.*
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.*
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.lbe.imsdk.R
-import com.lbe.imsdk.manager.LbeIMSDKManager
-import com.lbe.imsdk.provider.LocalConversationStateViewModel
-import com.lbe.imsdk.provider.LocalCurrentConversationViewModel
+import com.lbe.imsdk.provider.LocalConversationVM
 import com.lbe.imsdk.provider.LocalThemeColors
-import com.lbe.imsdk.service.http.SocketClient
 
 /**
  *  网络状态
@@ -24,7 +27,10 @@ import com.lbe.imsdk.service.http.SocketClient
  */
 @Composable
 fun NetWorkStateView() {
-    val netState = LocalCurrentConversationViewModel.current.netState.value
+    val netState = LocalConversationVM.current
+        .networkMonitor
+        .isConnected
+        .collectAsState().value
 //    val socketState = LbeIMSDKManager.socketManager?.connectState?.collectAsState()?.value
     AnimatedVisibility(
         visible = !netState /*|| socketState.isClosed==true*/,

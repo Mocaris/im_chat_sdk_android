@@ -40,9 +40,9 @@
     <string name="not_support_msg_type">Unsupported message types</string>
     <string name="content_expand">Expand</string>
     <string name="content_collapse">Collapse</string>
-    <string name="robotManage_robot_30">Human Customer Service</string>
-    <string name="chat_session_txt_1">Confirm end of service</string>
-    <string name="chat_session_txt_2">Thank you for your consultation, and I hope I can serve you next time</string>
-    <string name="customerServiceManage_customerService_23">Cancel</string>
-    <string name="chat_session_txt_3">End Service</string>
+    <string name="chat_session_status_34">Human Customer Service</string>
+    <string name="chat_session_status_31">Confirm end of service</string>
+    <string name="chat_session_status_33">Thank you for your consultation, and I hope I can serve you next time</string>
+    <string name="chat_session_status_32">Cancel</string>
+    <string name="chat_session_status_30">End Service</string>
 </resources>

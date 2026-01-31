@@ -6,7 +6,6 @@ import androidx.compose.foundation.shape.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.*
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.layout.*
@@ -14,8 +13,8 @@ import androidx.compose.ui.res.*
 import androidx.compose.ui.text.*
 import androidx.compose.ui.unit.*
 import coil3.compose.*
-import com.lbe.imsdk.*
 import com.lbe.imsdk.R
+import com.lbe.imsdk.*
 import com.lbe.imsdk.extension.*
 import com.lbe.imsdk.manager.LbeIMSDKManager
 import com.lbe.imsdk.pages.conversation.widgets.message.content.MessageSystemContentView
@@ -26,7 +25,7 @@ import com.lbe.imsdk.repository.remote.model.*
 import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgContentType
 import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgReadStatus
 import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgSendStatus
-import java.util.Date
+import java.util.*
 
 /**
  * 消息 item
@@ -136,7 +135,7 @@ private fun RowScope.MessageBodyItem(
     val isSelfSend = imMsg.isSelfSender()
     // 标记已读
     if (!isSelfSend) {
-        val conversationVM = LocalCurrentConversationViewModel.current
+        val conversationVM = LocalConversationVM.current
         LaunchedEffect(imMsg) {
             if (imMsg.shouldMarkRead) {
                 conversationVM.markRead(imMsg)
@@ -188,7 +187,7 @@ fun MessageStatus(
     imMsg: IMMessageEntry,
 ) {
     if (imMsg.sendMutableState.intValue == IMMsgSendStatus.FAILURE) {
-        val conversationVM = LocalCurrentConversationViewModel.current
+        val conversationVM = LocalConversationVM.current
         Image(
             painter = painterResource(R.drawable.ic_send_fail),
             contentDescription = "发送失败",

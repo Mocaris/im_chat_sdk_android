@@ -28,11 +28,11 @@
     <string name="chat_session_status_16">用户 %s</string>
     <string name="chat_session_status_15">游客 %s</string>
 
-    <string name="robotManage_robot_30">人工客服</string>
-    <string name="chat_session_txt_1">确认结束服务</string>
-    <string name="chat_session_txt_2">感谢您的咨询，希望下次还可以为您服务</string>
-    <string name="chat_session_txt_3">结束服务</string>
-    <string name="customerServiceManage_customerService_23">取消</string>
+    <string name="chat_session_status_34">人工客服</string>
+    <string name="chat_session_status_30">结束服务</string>
+    <string name="chat_session_status_31">确认结束服务</string>
+    <string name="chat_session_status_32">取消</string>
+    <string name="chat_session_status_33">感谢您的咨询，希望下次还可以为您服务</string>
 
     <string name="not_support_msg_type">不支持的消息类型</string>
     <!-- FAQ -->

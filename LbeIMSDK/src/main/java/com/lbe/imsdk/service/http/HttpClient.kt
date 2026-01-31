@@ -1,5 +1,6 @@
 package com.lbe.imsdk.service.http
 
+import com.lbe.imsdk.extension.isDebuggable
 import com.lbe.imsdk.service.http.interceptor.*
 import kotlinx.serialization.json.*
 import okhttp3.*
@@ -28,7 +29,8 @@ object HttpClient {
     val contentType_stream = "application/octet-stream".toMediaType()
 
     val logInterceptor = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY
+        level =
+            if (isDebuggable) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
     }
 
 

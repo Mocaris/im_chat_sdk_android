@@ -18,7 +18,7 @@ import kotlin.time.toDuration
  * @Date 2026-01-29
  * @Since
  */
-class ConversationTimeoutState(val viewModel: CurrentConversationVM) {
+class ConversationTimeoutState(val viewModel: ConversationVM) {
     val timeOutReply = mutableStateOf(false)
 
     private var timeOutReplyJob: Job? = null
@@ -46,7 +46,7 @@ class ConversationTimeoutState(val viewModel: CurrentConversationVM) {
             timeOutReplyJob = viewModel.viewModelScope.launch {
                 timeOutReply.value = false
                 delay(config.timeout.toDuration(DurationUnit.MINUTES))
-                viewModel.msgList.maxByOrNull { it.msgSeq }?.let {
+                viewModel.messageList.maxByOrNull { it.msgSeq }?.let {
                     if (it.msgSeq <= msgSeq) {
                         timeOutReply.value = true
                     }

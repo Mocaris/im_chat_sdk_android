@@ -41,9 +41,11 @@ class MainActivity : ComponentActivity() {
 
                         val lbeSign =
                             remember { mutableStateOf("0x49ca5e1d651d4fbff606d0efb2800822699e17ef972708ccaf95f5c41eb4ce1b39d02d467fa3db27bd129dad648cbfe8cc5f34f4cf54fe933b78205d19b0a17a1c") }
+//                            remember { mutableStateOf("0x3d2ab33580544dc70fa287f5984d81fbfe552959f66174ffec3b76e3719e92c3114f3a5abac5fa7feca946b927355738cec36c3d6df6c5f0a6f6916596a7ba7f1b") }
 
                         val lbeIdentity =
                             remember { mutableStateOf("4jlfe1imqsee") }
+//                            remember { mutableStateOf("4ko2uq1s3osm") }
 
                         val headerIcon =
 //                            remember { mutableStateOf("http://10.40.92.203:9910/openimttt/lbe_65f8d397953b979b4be0d098e8d4f5.jpg") }
@@ -60,6 +62,10 @@ class MainActivity : ComponentActivity() {
                         val nickName =
 //                            remember { mutableStateOf("android001") }
                             remember { mutableStateOf("平哥哥") }
+
+                        val domain =
+                            remember { mutableStateOf("https://4jlfe1imqsee.imsz.online") }
+//                            remember { mutableStateOf("https://4ko2uq1s3osm.imsz.online") }
 
                         LazyColumn(
                             modifier = Modifier
@@ -149,12 +155,12 @@ class MainActivity : ComponentActivity() {
                                 device = "",
                                 headerIcon = headerIcon.value,
                                 groupId = groupId.value,
-                                domain = "https://4jlfe1imqsee.imsz.online",
+                                domain = domain.value,
                                 source = "",
                                 nickId = nickId.value,
                                 nickName = nickName.value,
                                 extraInfo = "",
-                                )
+                            )
                             finish()
                         }) {
                             Text("Start Chat")

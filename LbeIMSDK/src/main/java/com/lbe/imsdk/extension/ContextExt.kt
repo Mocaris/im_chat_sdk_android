@@ -1,6 +1,7 @@
 package com.lbe.imsdk.extension
 
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
@@ -17,6 +18,8 @@ import kotlinx.coroutines.*
  */
 
 val appContext: Context get() = ContextProvider.appContext
+
+val isDebuggable = appContext.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
 
 
 val Int.tr: String get() = appContext.getString(this)
