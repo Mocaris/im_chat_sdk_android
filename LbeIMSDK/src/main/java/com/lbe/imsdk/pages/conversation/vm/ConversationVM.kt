@@ -297,7 +297,9 @@ class ConversationVM(
     // 加载断网后未接收到的消息
     private suspend fun loadLostMessage() = withIOContext {
         try {
-            val list = msgManager?.loadLocalLostMsgList() ?: return@withIOContext
+            val list =
+                msgManager?.loadLocalLostMsgList(lastMsgSeq = messageList.lastOrNull()?.msgSeq)
+                    ?: return@withIOContext
             if (list.isEmpty()) {
                 return@withIOContext
             }
@@ -404,7 +406,11 @@ class ConversationVM(
                         return@launchIO
                     }
                     // 拉取当前 session 最早一条消息，获取该消息之前的 50 条历史消息
-                    val first = messageList.firstOrNull { it.msgSeq > 0 } ?: return@launchIO
+                    val first = messageList.firstOrNull { it.msgSeq > 0 }
+                    if (null == first) {
+                        loadMoreSessionHistory()
+                        return@launchIO
+                    }
                     if (first.sessionId != sessionId) {
                         loadMoreSessionHistory()
                         return@launchIO

@@ -84,7 +84,7 @@ fun ConversationPage(
                         .padding(it),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator()
+                    ConversationShimmer()
                 }
             }
         }
@@ -205,61 +205,49 @@ private fun ConversationPageBody(padding: PaddingValues) {
             .padding(padding)
     ) {
         NetWorkStateView()
-        AnimatedContent(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-            targetState = conversationVM.messageList.isEmpty()
-        ) {
-            if (it) {
-                ConversationShimmer()
-            } else {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    IMRefresh(
-                        modifier = Modifier.fillMaxSize(),
-                        refreshing = conversationVM.isRefreshing.value,
-                        onRefresh = conversationVM::loadHistory
-                    ) {
-                        LazyColumn(
-                            state = listState,
-                            contentPadding = PaddingValues(15.dp),
-                            verticalArrangement = Arrangement.spacedBy(15.dp),
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .pointerInput(Unit) {
-                                    detectDragGestures(
-                                        onDragStart = {
-                                            userScrolling.value = true
-                                        },
-                                        onDragEnd = {
-                                            userScrolling.value = false
-                                        },
-                                        onDragCancel = {
-                                            userScrolling.value = false
-                                        },
-                                        onDrag = { _, _ -> userScrolling.value = true },
-                                    )
+        Box(modifier = Modifier.weight(1f)) {
+            IMRefresh(
+                modifier = Modifier.fillMaxSize(),
+                refreshing = conversationVM.isRefreshing.value,
+                onRefresh = conversationVM::loadHistory
+            ) {
+                LazyColumn(
+                    state = listState,
+                    contentPadding = PaddingValues(15.dp),
+                    verticalArrangement = Arrangement.spacedBy(15.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .pointerInput(Unit) {
+                            detectDragGestures(
+                                onDragStart = {
+                                    userScrolling.value = true
                                 },
-                        ) {
-                            conversationVM.messageList.distinctBy { it.clientMsgID }.let { list ->
-                                itemsIndexed(
-                                    items = list,
-                                    key = { _, item -> "${item.sessionId}-${item.clientMsgID}" },
-                                    contentType = { _, item -> item.msgType }
-                                ) { index, msg ->
-                                    val preMsg = list.getOrNull(index - 1)
-                                    ConversationMessageItem(preMsg = preMsg, imMsg = msg)
-                                }
-                            }
+                                onDragEnd = {
+                                    userScrolling.value = false
+                                },
+                                onDragCancel = {
+                                    userScrolling.value = false
+                                },
+                                onDrag = { _, _ -> userScrolling.value = true },
+                            )
+                        },
+                ) {
+                    conversationVM.messageList.distinctBy { it.clientMsgID }.let { list ->
+                        itemsIndexed(
+                            items = list,
+                            key = { _, item -> "${item.sessionId}-${item.clientMsgID}" },
+                            contentType = { _, item -> item.msgType }
+                        ) { index, msg ->
+                            val preMsg = list.getOrNull(index - 1)
+                            ConversationMessageItem(preMsg = preMsg, imMsg = msg)
                         }
-                    }
-                    if (lastVisibleItemIndex.intValue < totalItemsCount.intValue - 1 && listState.canScrollForward) {
-                        ConversationFloatTip()
                     }
                 }
             }
+            if (lastVisibleItemIndex.intValue < totalItemsCount.intValue - 1 && listState.canScrollForward) {
+                ConversationFloatTip()
+            }
         }
-
 
         if (!conversationVM.isCustomerService.value) {
             HorizontalDivider(thickness = 0.5.dp)

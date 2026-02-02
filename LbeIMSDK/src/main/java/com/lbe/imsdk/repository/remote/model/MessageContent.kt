@@ -197,8 +197,8 @@ data class KnowledgePointMessageContent(
  */
 @Serializable
 data class AnswerTimeoutMessageContent(
-    /// 超时时间 秒
-    val timeout: Long,
+    /// 超时时间 分
+    val timeout: Int,
 ) : MessageContent {
     companion object {
         fun fromJson(json: String): AnswerTimeoutMessageContent {
@@ -206,11 +206,11 @@ data class AnswerTimeoutMessageContent(
         }
     }
 
-    fun getTimeoutMinutesText(): String {
-        if (timeout <= 60) {
-            return "1"
-        }
-        return "%.1f".format(timeout / 60f)
-    }
+//    fun getTimeoutMinutesText(): String {
+//        if (timeout <= 60) {
+//            return "1"
+//        }
+//        return "%.1f".format(timeout / 60f)
+//    }
 
 }

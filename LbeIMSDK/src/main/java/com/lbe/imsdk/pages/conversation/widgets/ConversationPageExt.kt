@@ -105,9 +105,11 @@ fun CloseCustomerServiceButton(
 
 
 @Composable
-fun ConversationShimmer(shimmerCount:Int=5) {
+fun ConversationShimmer(shimmerCount: Int = 5) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(15.dp),
         verticalArrangement = Arrangement.spacedBy(15.dp)
     ) {
         repeat(shimmerCount) {

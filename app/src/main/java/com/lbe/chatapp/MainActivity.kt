@@ -40,11 +40,11 @@ class MainActivity : ComponentActivity() {
                     ) {
 
                         val lbeSign =
-                            remember { mutableStateOf("0x49ca5e1d651d4fbff606d0efb2800822699e17ef972708ccaf95f5c41eb4ce1b39d02d467fa3db27bd129dad648cbfe8cc5f34f4cf54fe933b78205d19b0a17a1c") }
+                            remember { mutableStateOf("0xbb48b4f8b551212b9831b975f9d05faf210e0809f68cccf84d6f813354c2c8340e150f539bb38926c1384ec347231d2c761e94d2fadd84853d57cb0aaabea3041b") }
 //                            remember { mutableStateOf("0x3d2ab33580544dc70fa287f5984d81fbfe552959f66174ffec3b76e3719e92c3114f3a5abac5fa7feca946b927355738cec36c3d6df6c5f0a6f6916596a7ba7f1b") }
 
                         val lbeIdentity =
-                            remember { mutableStateOf("4jlfe1imqsee") }
+                            remember { mutableStateOf("4l6li7zz5lr8") }
 //                            remember { mutableStateOf("4ko2uq1s3osm") }
 
                         val headerIcon =
@@ -52,7 +52,7 @@ class MainActivity : ComponentActivity() {
                             remember { mutableStateOf("{\"url\":\"https://abpay-pub.s3.ap-northeast-1.amazonaws.com/1078_1724306513153.png\",\"key\":\"\"}") }
 
                         val groupId =
-                            remember { mutableStateOf("1003") }
+                            remember { mutableStateOf("1008") }
 
                         val nickId =
 //                            remember { mutableStateOf("112233445566778899") }
@@ -64,8 +64,8 @@ class MainActivity : ComponentActivity() {
                             remember { mutableStateOf("平哥哥") }
 
                         val domain =
-                            remember { mutableStateOf("https://4jlfe1imqsee.imsz.online") }
-//                            remember { mutableStateOf("https://4ko2uq1s3osm.imsz.online") }
+//                            remember { mutableStateOf("https://4jlfe1imqsee.imsz.online") }
+                            remember { mutableStateOf("http://4l6li7zz5lr8.imgo.sz") }
 
                         LazyColumn(
                             modifier = Modifier

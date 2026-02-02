@@ -166,8 +166,6 @@ private class SocketClientImpl(
     }
 
     private fun release() {
-        reTry = false
-        cancelRetry()
         handler.removeCallbacksAndMessages(null)
         if (null != okSocket) {
             okSocket?.cancel()
@@ -196,6 +194,7 @@ private class SocketClientImpl(
         super.onClosed(webSocket, code, reason)
         handler.removeCallbacksAndMessages(null)
         changeState(SocketClient.ConnectState.CLOSED)
+        retryHandle()
     }
 
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
@@ -209,6 +208,7 @@ private class SocketClientImpl(
         response: Response?
     ) {
         webSocket.cancel()
+        handler.removeCallbacksAndMessages(null)
         changeState(SocketClient.ConnectState.ERROR)
         retryHandle()
         t.printStackTrace()
@@ -223,7 +223,7 @@ private class SocketClientImpl(
     }
 
     override fun close() {
-        release()
+        disconnect()
     }
 
 

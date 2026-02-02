@@ -71,7 +71,7 @@ fun ConversationMessageItem(preMsg: IMMessageEntry?, imMsg: IMMessageEntry) {
                     MessageSystemContentView(
                         stringResource(
                             R.string.chat_session_status_3,
-                            content?.getTimeoutMinutesText() ?: "2"
+                            content?.timeout ?: "1"
                         )
                     )
                 }
