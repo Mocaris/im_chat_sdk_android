@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import com.lbe.imsdk.provider.LocalThemeColors
 import com.lbe.imsdk.repository.db.entry.IMMessageEntry
 import com.lbe.imsdk.repository.db.entry.isSelfSender
+import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgContentType
 
 /**
  * 消息item装饰
@@ -29,10 +30,9 @@ val toShape = RoundedCornerShape(topEnd = 10.dp, bottomStart = 10.dp, bottomEnd 
 fun MessageContentDecoration(
     imMsg: IMMessageEntry,
     // decoration 忽略的 IMMsgContentType
-    excludeMsgType: List<Int>,
+    excludeMsgType: List<IMMsgContentType>,
     content: @Composable BoxScope.() -> Unit
 ) {
-    val msgType = imMsg.msgType
     val isSelfSender = imMsg.isSelfSender()
     val themeColors = LocalThemeColors.current
     val density = LocalDensity.current
@@ -55,7 +55,7 @@ fun MessageContentDecoration(
             .clip(shape)
             .animateContentSize()
             .then(
-                if (excludeMsgType.contains(msgType))
+                if (excludeMsgType.contains(imMsg.msgContentType))
                     Modifier
                 else Modifier
                     .background(contentBgColor)
@@ -73,7 +73,7 @@ fun MessageContentDecoration(
 @Composable
 fun MessageItemDirection(
     imMsg: IMMessageEntry,
-    constraintsMsgTypes: List<Int>,
+    constraintsMsgTypes: List<IMMsgContentType>,
     content: @Composable @UiComposable RowScope.() -> Unit
 ) {
     val isSelfSender = imMsg.isSelfSender()
@@ -95,7 +95,7 @@ fun MessageItemDirection(
             content = content
         )
     }
-    if (constraintsMsgTypes.isNotEmpty() && constraintsMsgTypes.contains(imMsg.msgType)) {
+    if (constraintsMsgTypes.isNotEmpty() && constraintsMsgTypes.contains(imMsg.msgContentType)) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             rowContent(maxWidth)
         }

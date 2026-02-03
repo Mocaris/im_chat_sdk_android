@@ -70,7 +70,7 @@ data class IMMessageEntry(
      */
     @ColumnInfo(
         name = "msg_type", typeAffinity = ColumnInfo.INTEGER
-    ) val msgType: Int = IMMsgContentType.INVALID_CONTENT_TYPE,
+    ) val msgType: Int = IMMsg.ContentType.InvalidContentType.number,
     /**
      * 接收者ID
      */
@@ -197,14 +197,18 @@ data class IMMessageEntry(
     @Ignore
     var cacheLayoutHeight: Dp? = null
 
+    val msgContentType by lazy {
+        IMMsgContentType.forNumber(msgType) ?: IMMsgContentType.InvalidContentType
+    }
+
     val shouldMarkRead: Boolean
         get() {
             if (status == IMMsgReadStatus.READ) {
                 return false
             }
-            return msgType == IMMsgContentType.TEXT_CONTENT_TYPE ||
-                    msgType == IMMsgContentType.IMAGE_CONTENT_TYPE ||
-                    msgType == IMMsgContentType.VIDEO_CONTENT_TYPE
+            return msgContentType == IMMsgContentType.TextContentType ||
+                    msgContentType == IMMsgContentType.ImgContentType ||
+                    msgContentType == IMMsgContentType.VideoContentType
         }
 
     val readMutableState by lazy { mutableIntStateOf(this.status) }

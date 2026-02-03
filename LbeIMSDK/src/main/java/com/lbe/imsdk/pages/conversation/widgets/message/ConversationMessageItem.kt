@@ -33,8 +33,8 @@ import java.util.*
  */
 
 val excludeDecorationMsgType = listOf(
-    IMMsgContentType.IMAGE_CONTENT_TYPE,
-    IMMsgContentType.VIDEO_CONTENT_TYPE,
+    IMMsgContentType.ImgContentType,
+    IMMsgContentType.VideoContentType,
 )
 
 @Composable
@@ -56,17 +56,17 @@ fun ConversationMessageItem(preMsg: IMMessageEntry?, imMsg: IMMessageEntry) {
                     MessageSystemContentView(tt)
                 }
             }
-            when (imMsg.msgType) {
-                IMMsgContentType.AGENT_USER_JOIN_SESSION_CONTENT_TYPE -> {
+            when (imMsg.msgContentType) {
+                IMMsgContentType.AgentUserJoinSessionContentType -> {
                     val content = imMsg.userArentContent
                     MessageUserAgentContentView(content)
                 }
 
-                IMMsgContentType.END_SESSION_CONTENT_TYPE -> {
+                IMMsgContentType.EndSessionContentType -> {
                     MessageSystemContentView(stringResource(R.string.chat_session_status_6))
                 }
 
-                IMMsgContentType.ANWSER_TIMEOUT_CONTENT_TYPE -> {
+                IMMsgContentType.AnswerMsgTimeoutContentType -> {
                     val content = imMsg.answerTimeoutContent
                     MessageSystemContentView(
                         stringResource(
@@ -76,7 +76,7 @@ fun ConversationMessageItem(preMsg: IMMessageEntry?, imMsg: IMMessageEntry) {
                     )
                 }
 
-                IMMsgContentType.RANKING_CONTENT_TYPE -> {
+                IMMsgContentType.RankingContentType -> {
                     val content = imMsg.rankingBodyContent
                     MessageSystemContentView(
                         stringResource(
@@ -86,11 +86,11 @@ fun ConversationMessageItem(preMsg: IMMessageEntry?, imMsg: IMMessageEntry) {
                     )
                 }
 
-                IMMsgContentType.TRANSFER_CONTENT_TYPE -> {
+                IMMsgContentType.TransferContentType -> {
                     MessageSystemContentView(stringResource(R.string.chat_session_status_5))
                 }
 
-                IMMsgContentType.UNSUPPORTED_CONTENT_TYPE -> {
+                IMMsgContentType.UnsupportedContentType -> {
                     MessageSystemContentView(stringResource(R.string.chat_session_status_7))
                 }
 

@@ -216,10 +216,10 @@ class ConversationVM(
     }
 
     override fun onReceiveMessage(message: IMMessageEntry) {
-        if (message.msgType == IMMsgContentType.AGENT_USER_JOIN_SESSION_CONTENT_TYPE) {
+        if (message.msgContentType == IMMsgContentType.AgentUserJoinSessionContentType) {
             onCustomService()
         }
-        if (message.msgType == IMMsgContentType.END_SESSION_CONTENT_TYPE) {
+        if (message.msgContentType == IMMsgContentType.EndSessionContentType) {
             onEndSession(message.sessionId)
 //            releaseSocket()
         }
@@ -298,7 +298,7 @@ class ConversationVM(
     private suspend fun loadLostMessage() = withIOContext {
         try {
             val list =
-                msgManager?.loadLocalLostMsgList(lastMsgSeq = messageList.lastOrNull()?.msgSeq)
+                msgManager?.loadLocalLostMsgList(lastMsgSeq = messageList.lastOrNull { it.sessionId == sessionId }?.msgSeq)
                     ?: return@withIOContext
             if (list.isEmpty()) {
                 return@withIOContext
@@ -402,7 +402,11 @@ class ConversationVM(
                     }
                     if (messageList.isEmpty()) {
                         val list = manager.loadNewest(50)
-                        addAllMessage(list)
+                        if (list.isNotEmpty()) {
+                            addAllMessage(list)
+                        } else {
+                            loadMoreSessionHistory()
+                        }
                         return@launchIO
                     }
                     // 拉取当前 session 最早一条消息，获取该消息之前的 50 条历史消息

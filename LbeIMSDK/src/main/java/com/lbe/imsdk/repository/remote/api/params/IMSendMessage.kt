@@ -25,7 +25,7 @@ class SendMessageBody private constructor(
     var msgBody: String,
 //    val msgSeq: Long,
 
-    @field:IMMsgContentType val msgType: Int,
+    val msgType: Int,
     val sendTime: String,
     @param:ReqSource
     val source: Int = ReqSource.APP,
@@ -40,7 +40,7 @@ class SendMessageBody private constructor(
             return SendMessageBody(
                 clientMsgID = UUID.randomUUID().toString(),
                 msgBody = text,
-                msgType = IMMsgContentType.TEXT_CONTENT_TYPE,
+                msgType = IMMsgContentType.TextContentType.number,
                 sendTime = System.currentTimeMillis().toString(),
                 source = ReqSource.APP
             )
@@ -50,7 +50,7 @@ class SendMessageBody private constructor(
             return SendMessageBody(
                 clientMsgID = UUID.randomUUID().toString(),
                 msgBody = Json.encodeToString(mediaBody),
-                msgType = if (isVideo) IMMsgContentType.VIDEO_CONTENT_TYPE else IMMsgContentType.IMAGE_CONTENT_TYPE,
+                msgType = if (isVideo) IMMsgContentType.VideoContentType.number else IMMsgContentType.ImgContentType.number,
                 sendTime = System.currentTimeMillis().toString(),
                 source = ReqSource.APP
             )
@@ -64,7 +64,7 @@ class SendMessageBody private constructor(
             return SendMessageBody(
                 clientMsgID = UUID.randomUUID().toString(),
                 msgBody = Json.encodeToString(mediaBody),
-                msgType = IMMsgContentType.IMAGE_CONTENT_TYPE,
+                msgType = IMMsgContentType.ImgContentType.number,
                 sendTime = System.currentTimeMillis().toString(),
                 source = ReqSource.APP
             )
@@ -78,7 +78,7 @@ class SendMessageBody private constructor(
             return SendMessageBody(
                 clientMsgID = UUID.randomUUID().toString(),
                 msgBody = Json.encodeToString(mediaBody),
-                msgType = IMMsgContentType.VIDEO_CONTENT_TYPE,
+                msgType = IMMsgContentType.VideoContentType.number,
                 sendTime = System.currentTimeMillis().toString(),
                 source = ReqSource.APP
             )

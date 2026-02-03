@@ -22,44 +22,43 @@ import com.lbe.imsdk.repository.remote.model.enumeration.IMMsgContentType
 fun MessageTypeContent(imMsg: IMMessageEntry) {
     SelectionContainer() {
         Column {
-            when (imMsg.msgType) {
-                IMMsgContentType.SYSTEM_CONTENT_TYPE,
-                IMMsgContentType.TEXT_CONTENT_TYPE -> {
+            when (imMsg.msgContentType) {
+                IMMsgContentType.SystemContentType, IMMsgContentType.TextContentType -> {
                     MessageTextContentView(imMsg.msgBody)
                 }
 
-                IMMsgContentType.IMAGE_CONTENT_TYPE -> {
+                IMMsgContentType.ImgContentType -> {
                     val content = imMsg.localTempSource ?: imMsg.mediaBodyContent.value
                     if (null != content) {
                         MessageImageContentView(content, imMsg.localTempSource)
                     }
                 }
 
-                IMMsgContentType.VIDEO_CONTENT_TYPE -> {
+                IMMsgContentType.VideoContentType -> {
                     val content = imMsg.localTempSource ?: imMsg.mediaBodyContent.value
                     if (null != content) {
                         MessageVideoContentView(content, imMsg.localTempSource)
                     }
                 }
 
-                IMMsgContentType.FAQ_CONTENT_TYPE -> {
+                IMMsgContentType.FaqContentType -> {
                     val content = imMsg.faqBodyContent
                     if (null != content) {
                         MessageFaqContentView(content)
                     }
                 }
 
-                IMMsgContentType.KNOWLEDGE_POINT_CONTENT_TYPE -> {
+                IMMsgContentType.KnowledgePointContentType -> {
                     val content = imMsg.faqKnowledgePointContent
                     MessageKnowledgeContentView(imMsg.title, content ?: emptyList())
                 }
 
-                IMMsgContentType.KNOWLEDGE_ANSWER_CONTENT_TYPE -> {
+                IMMsgContentType.KnowledgeAnswerContentType -> {
                     val content = imMsg.faqAnswerBodyContent
                     MessageAnswerContentView(content ?: emptyList())
                 }
 
-                IMMsgContentType.INVALID_CONTENT_TYPE -> {
+                IMMsgContentType.InvalidContentType, IMMsgContentType.UNRECOGNIZED -> {
                     MessageTextContentView("[${stringResource(R.string.not_support_msg_type)}]")
                 }
 

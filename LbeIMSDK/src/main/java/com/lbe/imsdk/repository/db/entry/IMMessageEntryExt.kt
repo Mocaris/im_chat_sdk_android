@@ -15,9 +15,9 @@ fun IMMessageEntry.isSelfSender(): Boolean {
 }
 
 fun IMMessageEntry.isImageType(): Boolean {
-    return msgType == IMMsgContentType.IMAGE_CONTENT_TYPE
+    return msgContentType == IMMsgContentType.ImgContentType
 }
 
 fun IMMessageEntry.isVideoType(): Boolean {
-    return msgType == IMMsgContentType.VIDEO_CONTENT_TYPE
+    return msgContentType == IMMsgContentType.VideoContentType
 }
