@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.*
 import com.lbe.imsdk.R
 import com.lbe.imsdk.extension.px2Dp
+import com.lbe.imsdk.provider.LocalThemeColors
 import com.lbe.imsdk.widgets.*
 
 /**
@@ -182,6 +183,7 @@ private fun InputDecorationBox(
             InputBoxActionWidget(
                 painterResource(R.drawable.ic_send),
                 modifier = Modifier.align(Alignment.Bottom),
+                colorFilter = if (!enableSend) ColorFilter.tint(LocalThemeColors.current.disableSendColor) else null,
                 contentDescription = "发送",
                 onClick = if (enableSend) onSend else null
             )
@@ -194,11 +196,13 @@ private fun InputDecorationBox(
 private fun InputBoxActionWidget(
     painter: Painter,
     modifier: Modifier = Modifier,
+    colorFilter: ColorFilter? = null,
     contentDescription: String? = null,
     onClick: (() -> Unit)? = null,
 ) {
     Image(
         painter = painter,
+        colorFilter = colorFilter,
         contentDescription = contentDescription,
         modifier = Modifier
             .then(modifier)

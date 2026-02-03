@@ -13,6 +13,7 @@ val colorTip = Color(0xFF979797)
 class ThemeColors {
 
     val textColor get() = Color(0xFF1B1B22)
+    val disableSendColor get() = Color(0xFF979797)
 
     val customButtonBorder: Color get() = Color(0xFFDFDFDF)
 
