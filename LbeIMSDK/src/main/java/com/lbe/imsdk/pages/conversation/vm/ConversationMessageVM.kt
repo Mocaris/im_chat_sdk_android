@@ -1,11 +1,13 @@
 package com.lbe.imsdk.pages.conversation.vm
 
 import android.net.Uri
+import androidx.collection.mutableScatterSetOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.util.fastDistinctBy
 import androidx.lifecycle.viewModelScope
 import com.lbe.imsdk.R
 import com.lbe.imsdk.extension.*
@@ -36,7 +38,7 @@ import java.io.File
  */
 abstract class ConversationMessageVM : ConversationStateVM() {
     val imApiRepository get() = LbeIMSDKManager.imApiRepository
-    val messageList = mutableStateListOf<IMMessageEntry>()
+    val messageList = mutableStateSetOf<IMMessageEntry>()
     val newMessageCount = mutableIntStateOf(0)
 
     fun addMessage(messageEntry: IMMessageEntry) {
@@ -50,11 +52,17 @@ abstract class ConversationMessageVM : ConversationStateVM() {
     }
 
     fun insertMessage(index: Int, messageEntry: IMMessageEntry) {
-        messageList.add(index, messageEntry)
+        val list = messageList.toMutableList()
+        list.add(index, messageEntry)
+        messageList.clear()
+        messageList.addAll(list)
     }
 
     fun insertAllMessage(index: Int, list: List<IMMessageEntry>) {
-        messageList.addAll(index, list)
+        val mList = messageList.toMutableList()
+        mList.addAll(index, list)
+        messageList.clear()
+        messageList.addAll(mList)
     }
 
     internal fun sendTxtMessageInternal(sessionData: CreateSessionResModel.SessionData) =

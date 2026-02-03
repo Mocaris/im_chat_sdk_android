@@ -107,6 +107,9 @@ class ConversationMsgManager(private val sessionId: String) {
     ): List<IMMessageEntry> = withIOContext {
         val startSeq = startSeq.coerceAtLeast(1)
         val endSeq = endSeq.coerceAtLeast(1)
+        if (startSeq >= endSeq) {
+            return@withIOContext emptyList()
+        }
         val minSeq = LbeImDataRepository.findMinSeq(sessionId)
         val maxSeq = LbeImDataRepository.findMaxSeq(sessionId)
         //本地 没有 消息

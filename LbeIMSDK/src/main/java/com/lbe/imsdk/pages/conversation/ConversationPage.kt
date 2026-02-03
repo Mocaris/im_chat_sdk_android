@@ -232,7 +232,7 @@ private fun ConversationPageBody(padding: PaddingValues) {
                             )
                         },
                 ) {
-                    conversationVM.messageList.distinctBy { it.clientMsgID }.let { list ->
+                    conversationVM.messageList.toList().let { list ->
                         itemsIndexed(
                             items = list,
                             key = { _, item -> "${item.sessionId}-${item.clientMsgID}" },

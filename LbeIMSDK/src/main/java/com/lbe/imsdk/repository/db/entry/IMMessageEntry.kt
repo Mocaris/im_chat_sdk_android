@@ -326,12 +326,13 @@ data class IMMessageEntry(
     }
 
     override fun compareTo(other: IMMessageEntry): Int {
+        return sendTime.compareTo(other.sendTime)
 //        val oTime = sendTime.toLongOrNull()
 //        val nTime = other.sendTime.toLongOrNull()
 //        if (oTime != null && nTime != null) {
 //            return oTime.compareTo(nTime)
 //        }
-        return msgSeq.compareTo(other.msgSeq)
+//        return msgSeq.compareTo(other.msgSeq)
     }
 
 }

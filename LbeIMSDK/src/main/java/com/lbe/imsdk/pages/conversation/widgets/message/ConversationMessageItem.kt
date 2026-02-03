@@ -52,7 +52,7 @@ fun ConversationMessageItem(preMsg: IMMessageEntry?, imMsg: IMMessageEntry) {
             val sendTime = imMsg.sendDate
             if (null != sendTime) {
                 val preSendTime = preMsg?.sendDate
-                checkTime(preSendTime, sendTime)?.let { tt ->
+                getMsgTime(preSendTime, sendTime)?.let { tt ->
                     MessageSystemContentView(tt)
                 }
             }
@@ -107,6 +107,15 @@ fun MessageRawItem(
     imMsg: IMMessageEntry
 ) {
     val isSelfSend = imMsg.isSelfSender()
+    // 标记已读
+    if (!isSelfSend) {
+        val conversationVM = LocalConversationVM.current
+        LaunchedEffect(imMsg) {
+            if (imMsg.shouldMarkRead) {
+                conversationVM.markRead(imMsg)
+            }
+        }
+    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -133,15 +142,6 @@ private fun RowScope.MessageBodyItem(
     imMsg: IMMessageEntry
 ) {
     val isSelfSend = imMsg.isSelfSender()
-    // 标记已读
-    if (!isSelfSend) {
-        val conversationVM = LocalConversationVM.current
-        LaunchedEffect(imMsg) {
-            if (imMsg.shouldMarkRead) {
-                conversationVM.markRead(imMsg)
-            }
-        }
-    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -209,7 +209,7 @@ fun MessageStatus(
 }
 
 
-private fun checkTime(preDate: Date?, date: Date?): String? {
+private fun getMsgTime(preDate: Date?, date: Date?): String? {
     if (preDate == null && date == null) {
         return null
     }
