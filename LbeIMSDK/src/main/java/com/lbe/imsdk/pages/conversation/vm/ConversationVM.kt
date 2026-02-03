@@ -63,73 +63,78 @@ class ConversationVM(
     /// 当前加载的历史会话索引
     private var currentHistoryIndex = 0
 
-    private val lock = Mutex()
-
     suspend fun initSession() = withIOContext {
-        lock.withLock(sessionData) {
-            if (!endSession.value) {
-                return@withLock
-            }
-            releaseSocket()
-            SignInterceptor.lbeToken = ""
-            SignInterceptor.lbeSession = ""
-            sessionData.value = tryCatchCoroutine(
-                catch = {
-                    dialogManager.show(onDismissRequest = {
-                        it()
-                    }) {
-                        val activity = LocalActivity.current
-                        IMCupertinoDialogContent(
-                            content = {
-                                Text(stringResource(R.string.chat_session_status_9))
-                            },
-                            actions = listOf(
-                                DialogAction(
-                                    onClick = {
-                                        endSession()
-                                        activity!!.finish()
-                                    },
-                                    content = {
-                                        Text(
-                                            stringResource(R.string.chat_session_status_30),
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
-                                )
+        if (!endSession.value) {
+            return@withIOContext
+        }
+        releaseSocket()
+        SignInterceptor.lbeToken = ""
+        SignInterceptor.lbeSession = ""
+        currentHistoryIndex = 0
+        newMessageCount.intValue = 0
+        sessionListModel.value = null
+        tryCatchCoroutine(
+            catch = {
+                dialogManager.show(onDismissRequest = {
+                    it()
+                }) {
+                    val activity = LocalActivity.current
+                    IMCupertinoDialogContent(
+                        content = {
+                            Text(stringResource(R.string.chat_session_status_9))
+                        },
+                        actions = listOf(
+                            DialogAction(
+                                onClick = {
+                                    endSession()
+                                    activity!!.finish()
+                                },
+                                content = {
+                                    Text(
+                                        stringResource(R.string.chat_session_status_30),
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
                             )
                         )
-                    }
+                    )
                 }
-            ) {
-                imApiRepository?.createSession(
-                    device = initConfig.device,
-                    email = initConfig.email,
-                    extraInfo = initConfig.extraInfo,
-                    groupID = initConfig.groupID,
-                    headIcon = if (initConfig.parseHeaderIcon is SourceUrl) "" else initConfig.headerIcon,
-                    language = initConfig.language.locale,
-                    nickId = initConfig.nickId,
-                    nickName = initConfig.nickName,
-                    phone = initConfig.phone,
-                    source = initConfig.source,
-                    uid = ""
-                )
-            }?.also {
-                SignInterceptor.lbeToken = it.token
-                SignInterceptor.lbeSession = it.sessionId
             }
-            with(sessionData.value ?: return@withLock) {
-                endSession.value = false
-                initSessionState(this)
-            }
+        ) {
+            imApiRepository?.createSession(
+                device = initConfig.device,
+                email = initConfig.email,
+                extraInfo = initConfig.extraInfo,
+                groupID = initConfig.groupID,
+                headIcon = if (initConfig.parseHeaderIcon is SourceUrl) "" else initConfig.headerIcon,
+                language = initConfig.language.locale,
+                nickId = initConfig.nickId,
+                nickName = initConfig.nickName,
+                phone = initConfig.phone,
+                source = initConfig.source,
+                uid = ""
+            )
+        }?.also {
+            sessionData.value = it
+            SignInterceptor.lbeToken = it.token
+            SignInterceptor.lbeSession = it.sessionId
+            endSession.value = false
+            initSessionState(it)
         }
+
     }
 
-    private fun initSessionState(data: CreateSessionResModel.SessionData) {
-        msgManager = ConversationMsgManager(data.sessionId)
-        newMessageCount.intValue = 0
-        getHistorySession()
-        loadLocalNewest()
+    private suspend fun initSessionState(data: CreateSessionResModel.SessionData) {
+        msgManager = ConversationMsgManager(data.sessionId).also {
+            // 加载最新50条消息
+            tryCatchCoroutine {
+                messageList.clear()
+                return@tryCatchCoroutine it.loadNewest(50)
+            }?.let { list ->
+                addAllMessage(list)
+                scrollToBottom()
+            }
+        }
         socketManagerState.value =
             LbeIMSDKManager.socketConfigManager?.newSocketManager(data.token, data.sessionId)
                 ?.also {
@@ -144,42 +149,20 @@ class ConversationVM(
                     }
                     it.connect()
                 }
+        getHistorySession()
     }
 
-    private fun loadLocalNewest() {
-        msgManager?.let {
-            viewModelScope.launchIO {
-                tryCatchCoroutine {
-                    currentHistoryIndex = 0
-                    messageList.clear()
-                    val list = it.loadNewest(50)
-                    addAllMessage(list)
-                }
-                scrollToBottom()
-            }
-        }
-    }
-
-    private fun getHistorySession() {
-        sessionData.value?.let {
-            viewModelScope.launchIO {
-                lock.withLock(sessionListModel) {
-                    if (null != sessionListModel.value) {
-                        return@launchIO
-                    }
-                    sessionListModel.value = tryCatchCoroutine {
-                        imApiRepository?.getHistorySessionList(
-                            page = 1,
-                            size = 1000,
-                            sessionType = 2
-                        )
-                    }?.also {
-                        isCustomerService.value =
-                            it.sessionList.firstOrNull { t -> t.sessionId == sessionId }?.isCustomService
-                                ?: false
-                    }
-                }
-            }
+    private suspend fun getHistorySession() = withIOContext {
+        sessionListModel.value = tryCatchCoroutine {
+            imApiRepository?.getHistorySessionList(
+                page = 1,
+                size = 1000,
+                sessionType = 2
+            )
+        }?.also {
+            isCustomerService.value =
+                it.sessionList.firstOrNull { t -> t.sessionId == sessionId }?.isCustomService
+                    ?: false
         }
     }
 
