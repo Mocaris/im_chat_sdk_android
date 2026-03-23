@@ -12,6 +12,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.lbe.imsdk.theme.colorEBEBEB
+import com.lbe.imsdk.theme.colorTipContent
+import com.lbe.imsdk.theme.primaryColor
 
 /**
  *
@@ -55,13 +58,13 @@ fun IMCupertinoDialogContent(
             }
             if (null != content) {
                 CompositionLocalProvider(
-                    LocalTextStyle provides MaterialTheme.typography.bodyMedium,
+                    LocalTextStyle provides MaterialTheme.typography.bodyMedium.copy(color = colorTipContent),
                     content
                 )
             }
         }
         if (null != actions) {
-            HorizontalDivider(thickness = 0.5.dp)
+            HorizontalDivider(thickness = 0.5.dp, color = colorEBEBEB)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -76,7 +79,8 @@ fun IMCupertinoDialogContent(
                         if (index < actions.lastIndex) {
                             VerticalDivider(
                                 modifier = Modifier.fillMaxHeight(),
-                                thickness = 0.5.dp
+                                thickness = 0.5.dp,
+                                color = colorEBEBEB
                             )
                         }
                     }

@@ -8,6 +8,7 @@ val backgroundColor = Color(0xFFF3F3F6)
 val appBarColor = Color(0xFFF3F3F6)
 val colorEBEBEB = Color(0xffEBEBEB)
 val colorTip = Color(0xFF979797)
+val colorTipContent = Color(0xFF76767A)
 
 
 class ThemeColors {

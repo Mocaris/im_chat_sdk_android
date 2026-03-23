@@ -214,7 +214,7 @@ private fun ConversationPageBody(padding: PaddingValues) {
                 LazyColumn(
                     state = listState,
                     contentPadding = PaddingValues(15.dp),
-                    verticalArrangement = Arrangement.spacedBy(15.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier
                         .fillMaxSize()
                         .pointerInput(Unit) {

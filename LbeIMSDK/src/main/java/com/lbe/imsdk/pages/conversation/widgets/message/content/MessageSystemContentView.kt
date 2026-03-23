@@ -21,7 +21,7 @@ fun MessageSystemContentView(content: String) {
     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
         Text(
             text = content,
-            style = TextStyle(fontSize = 10.sp, color = themeColors.conversationSystemTextColor)
+            style = TextStyle(fontSize = 12.sp, color = themeColors.conversationSystemTextColor)
         )
     }
 }
