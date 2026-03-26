@@ -20,9 +20,9 @@ object LbeIMSDKManager {
 
     var sdkInitConfig: SDKInitConfig? = null
         private set
-    val sdkInitLoading = mutableStateOf(false)
+    val sdkInitLoading = MutableStateFlow(false)
 
-    val sdkInitException = mutableStateOf<Exception?>(null)
+    val sdkInitException = MutableStateFlow<Exception?>(null)
 
     private val scope by lazy { CoroutineScope(Dispatchers.Default) }
 
@@ -52,10 +52,10 @@ object LbeIMSDKManager {
         sdkInitLoading.value = true
         var initCount = 0
         do {
+            sdkInitException.value = null
             initCount += 1
             try {
                 realInit()
-                sdkInitException.value = null
             } catch (e: Exception) {
                 e.printStackTrace()
                 sdkInitException.value = e
@@ -66,8 +66,9 @@ object LbeIMSDKManager {
             delay(3000)
         } while (!initSuccessful && initCount < 3)
         sdkInitLoading.value = false
-        if (!initSuccessful) {
-            sdkInitException.value?.message?.showToast()
+        if (initSuccessful) {
+            sdkInitException.value = null
+//            sdkInitException.value?.message?.showToast()
         }
     }
 

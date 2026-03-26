@@ -52,7 +52,7 @@ class DialogManager {
     }
 
     fun dismissAll() {
-        for (dialog in dialogQueue) {
+        for (dialog in dialogQueue.toList()) {
             dialog.onDismissRequest {
                 dialogQueue.remove(dialog)
             }
