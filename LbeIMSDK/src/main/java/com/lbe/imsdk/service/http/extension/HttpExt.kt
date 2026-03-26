@@ -21,6 +21,7 @@ fun <T : NetResponseData<R>, R> T.accept(): R? {
 fun NetException.supportMessage(): String {
     return when (code) {
         20006 -> appContext.getString(R.string.chat_session_status_28)
+        20003 -> appContext.getString(R.string.chat_session_status_6)
         else -> message
     }
 }

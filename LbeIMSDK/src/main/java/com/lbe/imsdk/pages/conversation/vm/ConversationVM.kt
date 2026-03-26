@@ -142,6 +142,7 @@ class ConversationVM(
                     viewModelScope.launchAsync {
                         it.connectState.collect { t ->
                             if (t.isConnected) {
+                                getHistorySession()
                                 loadLostMessage()
                                 initFaq()
                             }

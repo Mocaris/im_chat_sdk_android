@@ -40,11 +40,11 @@ class MainActivity : ComponentActivity() {
                     ) {
 
                         val lbeSign =
-                            remember { mutableStateOf("0xbb48b4f8b551212b9831b975f9d05faf210e0809f68cccf84d6f813354c2c8340e150f539bb38926c1384ec347231d2c761e94d2fadd84853d57cb0aaabea3041b") }
+                            remember { mutableStateOf("0x3d2ab33580544dc70fa287f5984d81fbfe552959f66174ffec3b76e3719e92c3114f3a5abac5fa7feca946b927355738cec36c3d6df6c5f0a6f6916596a7ba7f1b") }
 //                            remember { mutableStateOf("0x3d2ab33580544dc70fa287f5984d81fbfe552959f66174ffec3b76e3719e92c3114f3a5abac5fa7feca946b927355738cec36c3d6df6c5f0a6f6916596a7ba7f1b") }
 
                         val lbeIdentity =
-                            remember { mutableStateOf("4l6li7zz5lr8") }
+                            remember { mutableStateOf("4ko2uq1s3osm") }
 //                            remember { mutableStateOf("4ko2uq1s3osm") }
 
                         val headerIcon =
@@ -52,7 +52,7 @@ class MainActivity : ComponentActivity() {
                             remember { mutableStateOf("{\"url\":\"https://abpay-pub.s3.ap-northeast-1.amazonaws.com/1078_1724306513153.png\",\"key\":\"\"}") }
 
                         val groupId =
-                            remember { mutableStateOf("1008") }
+                            remember { mutableStateOf("1009") }
 
                         val nickId =
 //                            remember { mutableStateOf("112233445566778899") }
@@ -65,7 +65,7 @@ class MainActivity : ComponentActivity() {
 
                         val domain =
 //                            remember { mutableStateOf("https://4jlfe1imqsee.imsz.online") }
-                            remember { mutableStateOf("http://4l6li7zz5lr8.imgo.sz") }
+                            remember { mutableStateOf("https://4ko2uq1s3osm.imsz.online") }
 
                         LazyColumn(
                             modifier = Modifier
